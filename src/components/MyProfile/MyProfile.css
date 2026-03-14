@@ -1,0 +1,561 @@
+.profile-dashboard-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-main);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.profile-card-hub {
+  width: 95%;
+  max-width: 850px;
+  /* Increased width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ───────────────────────────────────────────────────────────
+   SCHOLAR IDENTITY CARD (RESIZED & REFINED)
+───────────────────────────────────────────────────────────── */
+.scholar-identity-card {
+  width: 100%;
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--oxford-brown);
+  outline: 1px solid var(--faded-gold);
+  outline-offset: -8px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-ornament {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--faded-gold);
+  opacity: 0.4;
+}
+
+.top-left {
+  top: 15px;
+  left: 15px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.top-right {
+  top: 15px;
+  right: 15px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.bottom-left {
+  bottom: 15px;
+  left: 15px;
+  border-right: none;
+  border-top: none;
+}
+
+.bottom-right {
+  bottom: 15px;
+  right: 15px;
+  border-left: none;
+  border-top: none;
+}
+
+.scholar-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(62, 39, 35, 0.1);
+  padding-bottom: 0.8rem;
+}
+
+.seal-text {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--oxford-brown);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.seal-year {
+  font-size: 0.7rem;
+  color: var(--faded-gold);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.brown-notary-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #3e2723;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  padding: 5px;
+  transform: rotate(8deg);
+  opacity: 0.5;
+  background: rgba(62, 39, 35, 0.03);
+  position: relative;
+}
+
+.brown-notary-seal::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #3e2723;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.brown-notary-seal .seal-icon {
+  font-size: 1.1rem;
+  color: #3e2723;
+  z-index: 1;
+}
+
+.brown-notary-seal .seal-text {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.4rem;
+  color: #3e2723;
+  letter-spacing: 0.5px;
+  text-align: center;
+  z-index: 1;
+  max-width: 50px;
+}
+
+.card-serial {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1rem;
+  color: var(--faded-gold);
+}
+
+.scholar-card-main {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  flex: 1;
+}
+
+/* Portrait Interaction */
+.scholar-portrait-wrap {
+  width: 140px;
+  height: 180px;
+  background: #2c1a16;
+  /* Dark Academia background */
+  border: 4px double var(--faded-gold);
+  padding: 4px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.scholar-portrait-wrap:hover {
+  transform: translateY(-4px) rotate(1deg);
+}
+
+.scholar-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.3) contrast(1.1);
+  opacity: 0.9;
+}
+
+.portrait-hint {
+  position: absolute;
+  bottom: -22px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.55rem;
+  font-family: var(--font-body);
+  color: var(--muted-text);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+/* Details Section */
+.scholar-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.detail-group label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted-text);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.detail-field {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  color: var(--oxford-brown);
+  border-bottom: 1px solid rgba(196, 165, 114, 0.15);
+  padding-bottom: 3px;
+}
+
+.detail-field.cursive {
+  font-family: 'Special Elite', cursive;
+  font-size: 1.2rem;
+}
+
+.stamp-red {
+  color: #8b2525;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.scholar-card-footer {
+  margin-top: 2rem;
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  text-align: left;
+  /* Changed alignment to make room for seal */
+  color: var(--muted-text);
+  letter-spacing: 1px;
+  border-top: 1px solid rgba(62, 39, 35, 0.1);
+  padding-top: 1.5rem;
+  opacity: 0.8;
+  position: relative;
+}
+
+.official-library-seal {
+  position: absolute;
+  right: -10px;
+  bottom: -5px;
+  width: 80px;
+  height: 80px;
+  border: 2px solid #8b2525;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-15deg);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.seal-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #8b2525;
+  font-family: 'Special Elite', cursive;
+  line-height: 1;
+}
+
+.seal-crown {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.seal-dept {
+  font-size: 0.45rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ───────────────────────────────────────────────────────────
+   CONNECTIONS & SECURITY (COMPACT)
+───────────────────────────────────────────────────────────── */
+.connections-ledger,
+.security-vault-form {
+  width: 100%;
+  min-height: 400px;
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--oxford-brown);
+  outline: 1px solid var(--faded-gold);
+  outline-offset: -8px;
+  padding: 2.5rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.ledger-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--oxford-brown);
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.ledger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 1.5rem;
+}
+
+/* Custom Scrollbar */
+.ledger-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ledger-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ledger-list::-webkit-scrollbar-thumb {
+  background: var(--faded-gold);
+  border-radius: 5px;
+}
+
+.ledger-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f7f3ea;
+  /* Parchment shade instead of white */
+  border: 1px solid rgba(62, 39, 35, 0.12);
+  transition: all 0.3s;
+}
+
+.ledger-item:hover {
+  border-color: var(--faded-gold);
+  background: #fdfaf3;
+  transform: translateX(5px);
+}
+
+.ledger-item-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--oxford-brown);
+  color: var(--faded-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ledger-item-info {
+  flex: 1;
+}
+
+.ledger-item-name {
+  display: block;
+  font-weight: 700;
+  color: var(--oxford-brown);
+}
+
+.ledger-item-role {
+  font-size: 0.8rem;
+  color: var(--muted-text);
+  font-style: italic;
+}
+
+.ledger-item-status {
+  font-family: 'Special Elite';
+  font-size: 1rem;
+  color: #762b2b;
+}
+
+.ledger-remove {
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: #762b2b;
+  cursor: pointer;
+  opacity: 0.3;
+}
+
+.ledger-remove:hover {
+  opacity: 1;
+}
+
+/* Vault Form */
+/* Vault Form Split Layout */
+.security-content-split {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+}
+
+.vault-fields {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.security-decoration {
+  flex: 0.8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2rem;
+  padding: 2rem;
+  border-left: 1px dashed rgba(62, 39, 35, 0.15);
+}
+
+.notary-seal-gold {
+  width: 100px;
+  height: 100px;
+  border: 2px solid var(--faded-gold);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 165, 114, 0.05);
+  box-shadow: 0 0 20px rgba(196, 165, 114, 0.1);
+}
+
+.seal-ring {
+  font-size: 1.8rem;
+  color: var(--faded-gold);
+}
+
+.seal-label {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: var(--faded-gold);
+  margin-top: -5px;
+}
+
+.security-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.note-text {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  line-height: 1.6;
+}
+
+.note-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--faded-gold);
+  margin: 0 auto;
+}
+
+.note-meta {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  color: var(--faded-gold);
+  letter-spacing: 1px;
+}
+
+.vault-group label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--oxford-brown);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.vault-group input {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(62, 39, 35, 0.1);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.vault-group input:focus {
+  outline: none;
+  border-color: var(--faded-gold);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.vault-submit {
+  padding: 1.2rem;
+  background: var(--oxford-brown);
+  color: var(--faded-gold);
+  border: none;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 0.5rem;
+}
+
+.vault-submit:hover {
+  background: #2c1a16;
+  transform: translateY(-2px);
+}
+
+/* ───────────────────────────────────────────────────────────
+   ACTION TABS (DASHBOARD STYLE)
+───────────────────────────────────────────────────────────── */
+.profile-action-tabs {
+  display: flex;
+  gap: 0.8rem;
+  background: rgba(62, 39, 35, 0.05);
+  padding: 5px;
+  border-radius: 50px;
+  border: 1px solid rgba(62, 39, 35, 0.1);
+}
+
+.profile-action-tabs button {
+  padding: 0.8rem 1.8rem;
+  background: transparent;
+  border: none;
+  color: var(--muted-text);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 40px;
+}
+
+.profile-action-tabs button:hover {
+  color: var(--oxford-brown);
+}
+
+.profile-action-tabs button.active {
+  background: var(--oxford-brown);
+  color: var(--faded-gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
