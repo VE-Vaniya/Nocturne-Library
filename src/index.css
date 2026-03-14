@@ -92,12 +92,22 @@ a:hover {
 
 @media screen and (max-width: 480px) {
   .auth-title {
-    font-size: 2rem; /* Static size for very small screens to avoid overflow */
+    font-size: 1.8rem;
     letter-spacing: -1px;
+    white-space: normal;
+    padding: 0 1rem;
   }
   .auth-tagline {
-    font-size: 1.1rem;
+    font-size: 1rem;
     white-space: normal;
+    margin-bottom: 1rem;
+  }
+  .auth-est {
+    font-size: 0.75rem;
+    padding: 2px 15px;
+  }
+  .app-main {
+    padding: 3vh 0.5rem;
   }
 }
 

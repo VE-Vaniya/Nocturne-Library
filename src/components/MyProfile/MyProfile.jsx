@@ -60,8 +60,8 @@ const MyProfile = ({ user }) => {
     <div className="profile-dashboard-view">
       <div className="profile-card-hub">
         
-        {/* THE SCHOLAR CARD */}
-        {activeTab === 'card' && (
+        {/* THE SCHOLAR CARD - Always the base on mobile */}
+        {((activeTab === 'card' && window.innerWidth > 768) || (window.innerWidth <= 768 && activeTab === 'card')) && (
           <div className="scholar-identity-card">
             <div className="card-ornament top-left"></div>
             <div className="card-ornament top-right"></div>
@@ -72,10 +72,6 @@ const MyProfile = ({ user }) => {
               <div className="library-seal">
                 <span className="seal-text">NOCTURNE</span>
                 <span className="seal-year">EST. 1892</span>
-              </div>
-              <div className="brown-notary-seal">
-                <span className="seal-icon">🕮</span>
-                <span className="seal-text">CURATORIAL REGISTER</span>
               </div>
               <div className="card-serial">{profile.cardNumber}</div>
             </div>
@@ -106,7 +102,17 @@ const MyProfile = ({ user }) => {
               </div>
             </div>
 
-            <div className="scholar-card-footer">
+            {/* MOBILE ONLY NAVIGATION BUTTONS INSIDE CARD */}
+            <div className="mobile-only-nav-group show-on-mobile">
+              <button className="mobile-nav-item" onClick={() => setActiveTab('connections')}>
+                <span className="nav-label">SCHOLARLY CONNECTIONS</span>
+              </button>
+              <button className="mobile-nav-item" onClick={() => setActiveTab('password')}>
+                <span className="nav-label">SECURITY CREDENTIALS</span>
+              </button>
+            </div>
+
+            <div className="scholar-card-footer hide-on-mobile">
               <p>THIS DOCUMENT CERTIFIES THE HOLDER AS A MEMBER IN GOOD STANDING OF THE NOCTURNE ARCHIVES.</p>
               <div className="official-library-seal">
                 <div className="seal-inner">
@@ -120,8 +126,11 @@ const MyProfile = ({ user }) => {
 
         {/* CONNECTIONS LIST */}
         {activeTab === 'connections' && (
-          <div className="connections-ledger">
-            <h2 className="ledger-title">SCHOLARLY CONNECTIONS</h2>
+          <div className="connections-ledger slide-in">
+            <div className="mobile-back-header show-on-mobile">
+              <button className="back-btn" onClick={() => setActiveTab('card')}>← BACK TO IDENTITY</button>
+            </div>
+            <h2 className="ledger-title">CONNECTIONS</h2>
             <div className="ledger-list">
               {connections.map(c => (
                 <div key={c.id} className="ledger-item">
@@ -130,7 +139,6 @@ const MyProfile = ({ user }) => {
                     <span className="ledger-item-name">{c.name}</span>
                     <span className="ledger-item-role">{c.role}</span>
                   </div>
-                  <div className="ledger-item-status">CONNECTED</div>
                   <button className="ledger-remove" onClick={() => setConnections(connections.filter(conn => conn.id !== c.id))}>&times;</button>
                 </div>
               ))}
@@ -140,44 +148,32 @@ const MyProfile = ({ user }) => {
 
         {/* SECURITY SETTINGS */}
         {activeTab === 'password' && (
-          <div className="security-vault-form">
-            <h2 className="ledger-title">SECURITY CREDENTIALS</h2>
+          <div className="security-vault-form slide-in">
+            <div className="mobile-back-header show-on-mobile">
+              <button className="back-btn" onClick={() => setActiveTab('card')}>← BACK TO IDENTITY</button>
+            </div>
+            <h2 className="ledger-title">SECURITY VAULT</h2>
             
-            <div className="security-content-split">
-              <div className="vault-fields">
-                <div className="vault-group">
-                  <label>CURRENT PASSWORD</label>
-                  <input type="password" name="current" placeholder="••••••••" value={passwordForm.current} onChange={handlePasswordChange} />
-                </div>
-                <div className="vault-group">
-                  <label>NEW PASSWORD</label>
-                  <input type="password" name="new" placeholder="••••••••" value={passwordForm.new} onChange={handlePasswordChange} />
-                </div>
-                <div className="vault-group">
-                  <label>CONFIRM NEW PASSWORD</label>
-                  <input type="password" name="confirm" placeholder="••••••••" value={passwordForm.confirm} onChange={handlePasswordChange} />
-                </div>
-                <button className="vault-submit">UPDATE SECURE KEY</button>
+            <div className="vault-fields">
+              <div className="vault-group">
+                <label>CURRENT PASSWORD</label>
+                <input type="password" name="current" placeholder="••••••••" value={passwordForm.current} onChange={handlePasswordChange} />
               </div>
-
-              <div className="security-decoration">
-                <div className="notary-seal-gold">
-                  <div className="seal-ring">
-                    <span className="seal-icon">❈</span>
-                  </div>
-                  <span className="seal-label">SECRETUM</span>
-                </div>
-                <div className="security-notes">
-                  <p className="note-text">"Knowledge is a vault; the key is your own."</p>
-                  <div className="note-rule"></div>
-                </div>
+              <div className="vault-group">
+                <label>NEW PASSWORD</label>
+                <input type="password" name="new" placeholder="••••••••" value={passwordForm.new} onChange={handlePasswordChange} />
               </div>
+              <div className="vault-group">
+                <label>CONFIRM NEW PASSWORD</label>
+                <input type="password" name="confirm" placeholder="••••••••" value={passwordForm.confirm} onChange={handlePasswordChange} />
+              </div>
+              <button className="vault-submit">UPDATE KEY</button>
             </div>
           </div>
         )}
 
-        {/* BOTTOM DASHBOARD TABS */}
-        <div className="profile-action-tabs">
+        {/* DESKTOP ONLY BOTTOM TABS */}
+        <div className="profile-action-tabs hide-on-mobile">
           <button className={activeTab === 'card' ? 'active' : ''} onClick={() => setActiveTab('card')}>IDENTITY CARD</button>
           <button className={activeTab === 'connections' ? 'active' : ''} onClick={() => setActiveTab('connections')}>CONNECTIONS</button>
           <button className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>SECURITY</button>

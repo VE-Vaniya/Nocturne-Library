@@ -137,6 +137,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
@@ -304,4 +305,27 @@
 .modal-action-btn:hover {
   background: #2c1a16;
   letter-spacing: 3px;
+}
+@media screen and (max-width: 480px) {
+  .notif-panel {
+    width: 100%;
+    right: -100%;
+  }
+  .notif-modal-card {
+    padding: 2rem 1.5rem;
+    width: 95%;
+  }
+  .modal-title {
+    font-size: 1.5rem;
+  }
+  .modal-body {
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+  .notif-item {
+    padding: 1rem;
+  }
+  .notif-title {
+    font-size: 0.9rem;
+  }
 }

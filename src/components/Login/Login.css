@@ -237,19 +237,19 @@
 /* --- Responsive Adjustments --- */
 @media screen and (max-width: 600px) {
     .auth-container {
-        padding: 2.2rem 1.2rem;   /* Tightened internal spacing */
-        max-width: 95%;          /* Wider on narrow screens to fit text */
-        outline-offset: -6px;    /* Decorative frame shrinks */
+        padding: 2rem 1.2rem;
+        max-width: 95%;
+        outline-offset: -6px;
     }
 
     .header-container {
-        margin-bottom: 1.2rem;
+        margin-bottom: 1rem;
     }
 
     .card-header {
         font-size: 0.8rem;
         letter-spacing: 1px;
-        margin-bottom: 1.2rem;
+        margin-bottom: 1rem;
     }
 
     .form-group {
@@ -262,7 +262,7 @@
     }
 
     .form-input {
-        padding: 0.6rem 0.8rem; /* Further thinned for mobile */
+        padding: 0.6rem 0.8rem;
         font-size: 1.05rem;
     }
 
@@ -270,7 +270,7 @@
         padding: 1.1rem;
         font-size: 1.1rem;
         letter-spacing: 2px;
-        margin-top: 1.5rem;
+        margin-top: 1.2rem;
     }
 
     .quote-text {
@@ -280,26 +280,35 @@
 
 @media screen and (max-width: 380px) {
     .auth-container {
-        padding: 1.8rem 1rem;
-        outline: none; /* Removes frame on very narrow screens for space */
+        padding: 1.5rem 1rem;
+        outline: none;
     }
     
     .auth-toggle {
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.6rem;
     }
     
     .toggle-btn {
-        padding: 0.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .form-label {
+        padding: 0.4rem;
         font-size: 0.9rem;
     }
     
+    .form-label {
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+    
     .submit-btn {
-        padding: 1rem;
-        font-size: 1rem;
+        padding: 0.9rem;
+        font-size: 0.95rem;
+        letter-spacing: 1.5px;
+    }
+
+    .card-header {
+        flex-direction: column;
+        gap: 5px;
+        align-items: flex-start;
+        padding-bottom: 8px;
     }
 }
 
