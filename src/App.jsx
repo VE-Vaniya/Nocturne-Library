@@ -6,12 +6,36 @@ import './index.css';
 import backgroundImage from './components/Images/Background.png';
 
 function App() {
-  const [view, setView]         = useState('login');   // 'login' | 'signup' | 'dashboard'
-  const [user, setUser]         = useState(null);
-  const [users, setUsers]       = useState([
-    { email: 'librarian@nocturne.lib', password: 'password123', username: 'HeadLibrarian', fullName: 'Alistair Vane' },
-    { email: 'scholar@nocturne.lib', password: 'password123', username: 'Scholar', fullName: 'Julian Vane' }
-  ]);
+  const [users, setUsers] = useState(() => {
+    const savedUsers = localStorage.getItem('nocturne_users');
+    return savedUsers ? JSON.parse(savedUsers) : [
+      { email: 'librarian@nocturne.lib', password: 'password123', username: 'HeadLibrarian', fullName: 'Alistair Vane' },
+      { email: 'scholar@nocturne.lib', password: 'password123', username: 'Scholar', fullName: 'Julian Vane' }
+    ];
+  });
+
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('nocturne_logged_in_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [view, setView] = useState(() => {
+    const savedUser = localStorage.getItem('nocturne_logged_in_user');
+    return savedUser ? 'dashboard' : 'login';
+  });
+
+  // Persist users and logged-in user to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('nocturne_users', JSON.stringify(users));
+  }, [users]);
+
+  React.useEffect(() => {
+    if (user) {
+      localStorage.setItem('nocturne_logged_in_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('nocturne_logged_in_user');
+    }
+  }, [user]);
 
   const handleLoginSuccess  = (loggedInUser) => {
     setUser(loggedInUser);
@@ -19,7 +43,8 @@ function App() {
   };
   
   const handleSignupSuccess = (newUser) => {
-    setUsers([...users, newUser]);
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
     setUser(newUser);
     setView('dashboard');
   };
