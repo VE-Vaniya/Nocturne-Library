@@ -16,6 +16,16 @@ const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            alert("Please enter a valid correspondence email address.");
+            return;
+        }
+        if (formData.password.length < 6) {
+            alert("Security dictates passphrases must be at least 6 characters.");
+            return;
+        }
+
         const foundUser = users.find(u => u.email === formData.email && u.password === formData.password);
         
         if (foundUser) {

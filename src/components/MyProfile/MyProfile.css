@@ -151,8 +151,9 @@
 
 /* Portrait Interaction */
 .scholar-portrait-wrap {
-  width: 140px;
-  height: 180px;
+  width: 30%;
+  aspect-ratio: 3/4;
+  height: auto;
   background: #2c1a16;
   /* Dark Academia background */
   border: 4px double var(--faded-gold);

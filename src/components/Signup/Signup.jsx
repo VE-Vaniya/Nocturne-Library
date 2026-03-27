@@ -21,6 +21,10 @@ const Signup = ({ onToggle, onSignupSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert("Please enter a valid correspondence email address.");
+      return;
+    }
     if (formData.password.length < 6) {
       alert("Passphrase must be at least 6 characters long.");
       return;

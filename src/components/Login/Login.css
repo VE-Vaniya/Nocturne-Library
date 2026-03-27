@@ -1,5 +1,5 @@
 .auth-container {
-    max-width: 460px; /* Reduced from 550px for a slimmer profile */
+    max-width: 600px; /* Widened login form as requested */
     width: 100%;
     background-color: #f4efdf; /* Aged paper / Parchment */
     /* Weathered grid and paper grain */

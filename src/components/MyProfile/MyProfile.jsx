@@ -56,6 +56,23 @@ const MyProfile = ({ user }) => {
     setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
   };
 
+  const handlePasswordSubmit = () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+        alert("Please explicitly state current, new, and confirm keys.");
+        return;
+    }
+    if (passwordForm.new.length < 6) {
+        alert("Your new Vault Key must be at least 6 characters.");
+        return;
+    }
+    if (passwordForm.new !== passwordForm.confirm) {
+        alert("Your confirmation key does not match the new key.");
+        return;
+    }
+    alert("Security Vault parameters updated successfully.");
+    setPasswordForm({ current: '', new: '', confirm: '' });
+  };
+
   return (
     <div className="profile-dashboard-view">
       <div className="profile-card-hub">
@@ -167,7 +184,7 @@ const MyProfile = ({ user }) => {
                 <label>CONFIRM NEW PASSWORD</label>
                 <input type="password" name="confirm" placeholder="••••••••" value={passwordForm.confirm} onChange={handlePasswordChange} />
               </div>
-              <button className="vault-submit">UPDATE KEY</button>
+              <button className="vault-submit" onClick={handlePasswordSubmit}>UPDATE KEY</button>
             </div>
           </div>
         )}

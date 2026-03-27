@@ -147,7 +147,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const today = "Thu, Mar 12";
+  const today = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 900px)');
@@ -214,23 +214,9 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
 
 
         <div className="sidebar-footer">
-          <div className="sidebar-user-info" onClick={() => setActiveNav('My Profile')}>
-            <div className="user-avatar-mini">
-              {username.charAt(0).toUpperCase()}
-            </div>
-            <div className="user-meta">
-              <span className="user-name">{username}</span>
-              <span className="user-role">Scholar</span>
-            </div>
-          </div>
-          <div className="footer-actions">
-            <button className="edit-btn" onClick={() => setActiveNav('My Profile')} title="Edit Profile">
-              <IconEditPen />
-            </button>
-            <button className="logout-btn" onClick={onLogout} title="Logout">
-              <IconLogout />
-            </button>
-          </div>
+          <button className="cr-action-btn" onClick={onLogout} title="Logout" style={{width: '100%', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '10px'}}>
+            <IconLogout /> SECURE LOGOUT
+          </button>
         </div>
       </aside>
 

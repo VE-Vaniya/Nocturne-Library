@@ -28,6 +28,11 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         
+        if (!formData.title.trim() || !formData.author.trim() || !formData.genre.trim()) {
+           alert("The Archive requires a complete Title, Author, and Genre before shelving.");
+           return;
+        }
+
         const newBook = {
             id: Date.now().toString(),
             title: formData.title,
@@ -35,6 +40,7 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
             genre: formData.genre,
             status: 'to-be-read',
             progress: '0 / 0 pages',
+            coverPreview: preview || null
         };
         
         setBooks([...books, newBook]);
