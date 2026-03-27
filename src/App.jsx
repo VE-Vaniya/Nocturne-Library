@@ -19,6 +19,25 @@ function App() {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  const [books, setBooks] = useState(() => {
+    const saved = localStorage.getItem('nocturne_books');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', title: 'Crime and Punishment', author: 'Fyodor Dostoevsky', genre: 'Classic Fiction', status: 'currently reading', progress: '351 / 551', coverPreview: null }
+    ];
+  });
+
+  const [quotes, setQuotes] = useState(() => {
+    const saved = localStorage.getItem('nocturne_quotes');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [receivedQuotes, setReceivedQuotes] = useState(() => {
+    const saved = localStorage.getItem('nocturne_received_quotes');
+    return saved ? JSON.parse(saved) : [
+      { id: '101', text: "We cast a shadow on something wherever we stand", author: "E.M. Forster", sender: "Arthur Pym", bookTitle: "A Room with a View", pageNumber: "124" }
+    ];
+  });
+
   const [view, setView] = useState(() => {
     const savedUser = localStorage.getItem('nocturne_logged_in_user');
     return savedUser ? 'dashboard' : 'login';
@@ -36,6 +55,10 @@ function App() {
       localStorage.removeItem('nocturne_logged_in_user');
     }
   }, [user]);
+
+  React.useEffect(() => { localStorage.setItem('nocturne_books', JSON.stringify(books)); }, [books]);
+  React.useEffect(() => { localStorage.setItem('nocturne_quotes', JSON.stringify(quotes)); }, [quotes]);
+  React.useEffect(() => { localStorage.setItem('nocturne_received_quotes', JSON.stringify(receivedQuotes)); }, [receivedQuotes]);
 
   const handleLoginSuccess  = (loggedInUser) => {
     setUser(loggedInUser);
@@ -65,7 +88,7 @@ function App() {
   }));
 
   if (view === 'dashboard') {
-    return <Dashboard user={user} onLogout={handleLogout} />;
+    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} />;
   }
 
   return (

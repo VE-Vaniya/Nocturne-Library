@@ -4,6 +4,10 @@ import Search from '../Search/Search';
 import AddBook from '../AddBook/AddBook';
 import Notifications from '../Notifications/Notifications';
 import MyProfile from '../MyProfile/MyProfile';
+import Library from '../Library/Library';
+import QuotesGallery from '../QuotesGallery/QuotesGallery';
+import ReceivedQuotes from '../ReceivedQuotes/ReceivedQuotes';
+import ReadingTimer from '../ReadingTimer/ReadingTimer';
 
 /* ── SVG Icons ────────────────────────────────────── */
 const IconGallery = () => (
@@ -135,7 +139,7 @@ const IconLogout = () => (
 );
 
 /* ── Component ────────────────────────────────────── */
-const Dashboard = ({ user, onLogout }) => {
+const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes }) => {
   const username = user?.username || 'Scholar';
   const [activeNav, setActiveNav] = useState('Library');
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,14 +160,15 @@ const Dashboard = ({ user, onLogout }) => {
   const navItems = [
     { label: 'Dashboard', icon: <IconDashboard /> },
     { label: 'Search', icon: <IconSearch /> },
-    { label: 'Explore', icon: <IconExplore /> },
-    { label: 'Gallery', icon: <IconGallery /> },
+    { label: 'Received Missives', icon: <IconExplore /> },
+    { label: 'Quotes Gallery', icon: <IconGallery /> },
     { label: 'Library', icon: <IconLibrary />, chevron: true },
+    { label: 'Reading Timer', icon: <IconTimer /> },
     { label: 'My Profile', icon: <IconProfile /> },
     { label: 'Add a Book', icon: <IconPlus /> },
   ];
 
-  const quotes = [
+  const dailyQuotes = [
     { text: "A reader lives a thousand lives before he dies. The man who never reads lives only one.", author: "GEORGE R.R. MARTIN" },
     { text: "There is no friend as loyal as a book.", author: "ERNEST HEMINGWAY" },
     { text: "Fairy tales are more than true: not because they tell us that dragons exist, but because they tell us that dragons can be beaten.", author: "NEIL GAIMAN" }
@@ -232,7 +237,11 @@ const Dashboard = ({ user, onLogout }) => {
       {/* ── Main ───────────────────────── */}
       <div className="main-area">
         <header className="topbar">
-          <button className="menu-btn" onClick={() => setSidebarOpen(true)}>
+          <button 
+            className="menu-btn" 
+            onClick={() => setSidebarOpen(true)}
+            style={{ visibility: sidebarOpen ? 'hidden' : 'visible' }}
+          >
             <IconMenu />
           </button>
 
@@ -263,9 +272,17 @@ const Dashboard = ({ user, onLogout }) => {
             {activeNav === 'Search' ? (
               <Search query={searchQuery} />
             ) : activeNav === 'Add a Book' ? (
-              <AddBook />
+              <AddBook books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'My Profile' ? (
               <MyProfile user={user} />
+            ) : activeNav === 'Library' ? (
+              <Library books={books} setBooks={setBooks} />
+            ) : activeNav === 'Quotes Gallery' ? (
+              <QuotesGallery quotes={quotes} />
+            ) : activeNav === 'Received Missives' ? (
+              <ReceivedQuotes receivedQuotes={receivedQuotes} />
+            ) : activeNav === 'Reading Timer' ? (
+              <ReadingTimer quotes={quotes} setQuotes={setQuotes} books={books} user={user} />
             ) : (
               <>
             <div className="welcome-section">
@@ -350,13 +367,13 @@ const Dashboard = ({ user, onLogout }) => {
                     <IconQuote />
                   </div>
                   <div className="quote-body">
-                    "{quotes[quoteIndex].text}"
+                    "{dailyQuotes[quoteIndex].text}"
                   </div>
                   <div className="quote-author">
-                    &mdash; {quotes[quoteIndex].author}
+                    &mdash; {dailyQuotes[quoteIndex].author}
                   </div>
                   <div className="quote-nav">
-                    {quotes.map((_, idx) => (
+                    {dailyQuotes.map((_, idx) => (
                       <button 
                         key={idx} 
                         className={`quote-dot ${idx === quoteIndex ? 'active' : ''}`}

@@ -1,0 +1,98 @@
+.rq-container {
+  padding: 1rem;
+}
+
+.rq-header {
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid rgba(62, 39, 35, 0.1);
+  padding-bottom: 1rem;
+}
+
+.rq-title {
+  font-family: var(--font-heading);
+  font-size: 2.8rem;
+  color: var(--oxford-brown);
+  margin-bottom: 0.5rem;
+}
+
+.rq-subtitle {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: #a49683;
+}
+
+.rq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 800px;
+}
+
+.rq-missive-card {
+  background: rgba(246, 242, 230, 0.95);
+  border: 1px solid rgba(62, 39, 35, 0.2);
+  border-left: 5px solid var(--deep-chestnut);
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+.missive-sender-bar {
+  background: rgba(62, 39, 35, 0.05);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(62, 39, 35, 0.1);
+  font-family: var(--font-body);
+  font-variant: small-caps;
+  font-size: 1.1rem;
+  color: var(--oxford-brown);
+  display: flex;
+  align-items: center;
+}
+
+.missive-icon {
+  margin-right: 10px;
+  font-size: 1.4rem;
+  color: var(--faded-gold);
+}
+
+.m-sender {
+  font-weight: bold;
+  margin-left: 6px;
+  letter-spacing: 1px;
+}
+
+.missive-body {
+  padding: 1.8rem 2rem;
+}
+
+.missive-text {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--oxford-brown);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.missive-meta {
+  font-family: var(--font-body);
+  color: #796e62;
+  font-size: 1.1rem;
+}
+
+.missive-author {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: 8px;
+}
+
+.missive-book {
+  font-style: italic;
+  margin-right: 8px;
+}
+
+.missive-page {
+  color: #a49683;
+}

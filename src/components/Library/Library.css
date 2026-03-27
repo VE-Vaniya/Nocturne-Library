@@ -1,0 +1,143 @@
+.library-container {
+  padding: 1rem;
+}
+
+.library-header {
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid rgba(62, 39, 35, 0.1);
+  padding-bottom: 1rem;
+}
+
+.library-title {
+  font-family: var(--font-heading);
+  font-size: 2.8rem;
+  color: var(--oxford-brown);
+  margin-bottom: 0.5rem;
+}
+
+.library-subtitle {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: #a49683;
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem;
+}
+
+.book-card {
+  background: rgba(246, 242, 230, 0.95);
+  border: 1px solid rgba(62, 39, 35, 0.15);
+  border-bottom: 4px solid rgba(62, 39, 35, 0.25);
+  border-radius: 4px;
+  display: flex;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+  overflow: hidden;
+}
+
+.book-card:hover {
+  transform: translateY(-6px);
+}
+
+.book-spine {
+  width: 24px;
+  background: #6a4941;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(0,0,0,0.2);
+}
+
+.book-content {
+  padding: 1.8rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.book-genre {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #9a8a78;
+}
+
+.stamp {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border: 2px solid;
+  border-radius: 3px;
+  transform: rotate(-3deg);
+}
+
+.stamp-completed { color: #43694d; border-color: #43694d; }
+.stamp-reading { color: #a68449; border-color: #a68449; }
+.stamp-tbr { color: #756452; border-color: #756452; }
+
+.book-title {
+  font-family: var(--font-heading);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--oxford-brown);
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.book-author {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #796e62;
+  margin-bottom: 1.8rem;
+}
+
+.book-actions {
+  margin-top: auto;
+  border-top: 1px dashed rgba(62, 39, 35, 0.2);
+  padding-top: 1.2rem;
+}
+
+.book-actions label {
+  font-family: var(--font-body);
+  font-variant: small-caps;
+  font-size: 1rem;
+  color: #a49683;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.status-dropdown {
+  width: 100%;
+  padding: 0.8rem;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--oxford-brown);
+  background: transparent;
+  border: 1px solid var(--faded-gold);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 5rem 2rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1.3rem;
+  color: #a49683;
+}

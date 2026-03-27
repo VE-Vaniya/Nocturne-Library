@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AddBook.css';
 
-const AddBook = () => {
+const AddBook = ({ books, setBooks, setActiveNav }) => {
     const [formData, setFormData] = useState({
         title: '',
         author: '',
@@ -27,9 +27,24 @@ const AddBook = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        const newBook = {
+            id: Date.now().toString(),
+            title: formData.title,
+            author: formData.author,
+            genre: formData.genre,
+            status: 'to-be-read',
+            progress: '0 / 0 pages',
+        };
+        
+        setBooks([...books, newBook]);
+        
         alert(`Book "${formData.title}" added to your library!`);
         setFormData({ title: '', author: '', genre: '', cover: null });
         setPreview(null);
+        if (setActiveNav) {
+            setActiveNav('Library');
+        }
     };
 
     return (
