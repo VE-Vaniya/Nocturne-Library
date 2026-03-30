@@ -256,19 +256,19 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
         <main className={`content-scroller ${activeNav === 'My Profile' ? 'no-padding' : ''}`}>
           <div className={activeNav === 'My Profile' ? 'full-width-pane' : 'content-inner'}>
             {activeNav === 'Search' ? (
-              <Search query={searchQuery} />
+              <Search query={searchQuery} books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Add a Book' ? (
               <AddBook books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'My Profile' ? (
               <MyProfile user={user} />
             ) : activeNav === 'Library' ? (
-              <Library books={books} setBooks={setBooks} />
+              <Library books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Quotes Gallery' ? (
               <QuotesGallery quotes={quotes} />
             ) : activeNav === 'Received Missives' ? (
-              <ReceivedQuotes receivedQuotes={receivedQuotes} />
+              <ReceivedQuotes receivedQuotes={receivedQuotes} quotes={quotes} setQuotes={setQuotes} />
             ) : activeNav === 'Reading Timer' ? (
-              <ReadingTimer quotes={quotes} setQuotes={setQuotes} books={books} user={user} />
+              <ReadingTimer quotes={quotes} setQuotes={setQuotes} books={books} setBooks={setBooks} user={user} />
             ) : (
               <>
             <div className="welcome-section">
@@ -320,9 +320,9 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
                   <div className="cr-main">
                     <div className="cr-book-spine"></div>
                     <div className="cr-book-info">
-                      <div className="cr-genre">CLASSIC FICTION</div>
-                      <h2 className="cr-title">Crime and Punishment</h2>
-                      <div className="cr-author">by Fyodor Dostoevsky</div>
+                      <div className="cr-genre">{books[0]?.genre || 'CLASSIC FICTION'}</div>
+                      <h2 className="cr-title">{books[0]?.title || 'Crime and Punishment'}</h2>
+                      <div className="cr-author">by {books[0]?.author || 'Fyodor Dostoevsky'}</div>
                       <div className="cr-stars">
                         <IconStarFilled /><IconStarFilled /><IconStarFilled /><IconStarFilled /><IconStarEmpty />
                       </div>
@@ -331,16 +331,22 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
 
                   <div className="cr-progress">
                     <div className="cr-progress-labels">
-                      <span>Progress</span>
-                      <span>351 / 551 pages</span>
+                      <span>Mood Tags So Far</span>
                     </div>
-                    <div className="cr-progress-track">
-                      <div className="cr-progress-fill" style={{ width: '68%' }}></div>
+                    <div className="cr-mood-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
+                      {books[0]?.moodTags && books[0].moodTags.length > 0 ? (
+                        books[0].moodTags.map((tag, idx) => (
+                          <span key={idx} style={{ background: 'rgba(196, 165, 114, 0.2)', color: 'var(--oxford-brown)', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', border: '1px solid rgba(196, 165, 114, 0.5)' }}>
+                            #{tag.trim()}
+                          </span>
+                        ))
+                      ) : (
+                        <span style={{ fontSize: '0.85rem', color: '#796e62', fontStyle: 'italic' }}>No moods registered yet.</span>
+                      )}
                     </div>
-                    <div className="cr-progress-caption">68% complete</div>
                   </div>
 
-                  <button className="cr-action-btn">
+                  <button className="cr-action-btn" onClick={() => setActiveNav('Reading Timer')}>
                     CONTINUE READING &rarr;
                   </button>
                 </div>

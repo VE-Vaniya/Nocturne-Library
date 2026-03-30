@@ -1,7 +1,24 @@
 import React from 'react';
 import './ReceivedQuotes.css';
 
-const ReceivedQuotes = ({ receivedQuotes }) => {
+const ReceivedQuotes = ({ receivedQuotes, quotes, setQuotes }) => {
+  const handleAddToGallery = (quote) => {
+    const isAlreadyAdded = quotes.some(q => q.text === quote.text && q.author === quote.author);
+    if (isAlreadyAdded) {
+      alert('This missive is already in your Quotations Archive.');
+      return;
+    }
+    const newQuote = {
+      id: Date.now().toString(),
+      text: quote.text,
+      author: quote.author,
+      bookTitle: quote.bookTitle,
+      pageNumber: quote.pageNumber
+    };
+    setQuotes([...quotes, newQuote]);
+    alert('Missive successfully transcribed to your Quotations Archive.');
+  };
+
   return (
     <div className="rq-container">
       <div className="rq-header">
@@ -25,6 +42,27 @@ const ReceivedQuotes = ({ receivedQuotes }) => {
                     <span className="missive-author">{q.author}</span>
                     <span className="missive-book">({q.bookTitle})</span>
                     {q.pageNumber && <span className="missive-page"> p. {q.pageNumber}</span>}
+                  </div>
+                  <div className="missive-actions" style={{ marginTop: '0.8rem', textAlign: 'right' }}>
+                    <button 
+                      className="rq-action-btn" 
+                      onClick={() => handleAddToGallery(q)}
+                      style={{ 
+                        background: 'transparent', 
+                        border: '1px solid rgba(196, 165, 114, 0.4)', 
+                        color: '#796e62', 
+                        padding: '0.3rem 0.6rem', 
+                        borderRadius: '4px', 
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        transition: 'all 0.2s',
+                        fontFamily: 'var(--font-heading)'
+                      }}
+                      onMouseOver={(e) => { e.target.style.background = 'rgba(196, 165, 114, 0.1)'; e.target.style.color = 'var(--oxford-brown)'; }}
+                      onMouseOut={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#796e62'; }}
+                    >
+                      + ADD TO GALLERY
+                    </button>
                   </div>
                 </div>
              </div>

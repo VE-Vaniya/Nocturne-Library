@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './ReadingTimer.css';
 
-const ReadingTimer = ({ quotes, setQuotes, books, user }) => {
-  const [mode, setMode] = useState('setup'); // setup, running, paused
+const ReadingTimer = ({ quotes, setQuotes, books, setBooks, user }) => {
+  const [mode, setMode] = useState('setup'); // setup, running, paused, concluding
   const [timerType, setTimerType] = useState('stopwatch'); // stopwatch or countdown
   const [durationLimit, setDurationLimit] = useState(30 * 60); // 30 minutes in seconds
   const [elapsed, setElapsed] = useState(0);
@@ -39,6 +39,31 @@ const ReadingTimer = ({ quotes, setQuotes, books, user }) => {
   const handleStart = () => setMode('running');
   const handlePause = () => setMode('paused');
   const handleStop = () => {
+    setMode('concluding');
+  };
+
+  const handleFinalConclude = () => {
+    if (pageNumber || moodTags) {
+      const bookIndex = books.findIndex(b => b.title === selectedBook);
+      if (bookIndex !== -1) {
+        const updatedBooks = [...books];
+        const currentBook = updatedBooks[bookIndex];
+        
+        let newTags = currentBook.moodTags || [];
+        if (moodTags) {
+          const parsedTags = moodTags.split(',').map(t => t.trim()).filter(t => t);
+          newTags = [...new Set([...newTags, ...parsedTags])];
+        }
+
+        updatedBooks[bookIndex] = {
+          ...currentBook,
+          lastPageRead: pageNumber || currentBook.lastPageRead || 0,
+          moodTags: newTags
+        };
+        setBooks(updatedBooks);
+      }
+    }
+
     setMode('setup');
     setElapsed(0);
     setMoodTags('');
@@ -143,8 +168,8 @@ const ReadingTimer = ({ quotes, setQuotes, books, user }) => {
                   </div>
 
                   <div className="paused-form-group">
-                    <label>Mood Tags (e.g. cozy, intense, rainy)</label>
-                    <input type="text" placeholder="Enter 3-5 tags..." className="timer-input" value={moodTags} onChange={(e)=>setMoodTags(e.target.value)} />
+                    <label>Mood Tags (comma separated, e.g. cozy, intense)</label>
+                    <input type="text" placeholder="Enter tags..." className="timer-input" value={moodTags} onChange={(e)=>setMoodTags(e.target.value)} />
                   </div>
 
                   <div className="paused-form-group">
@@ -178,6 +203,27 @@ const ReadingTimer = ({ quotes, setQuotes, books, user }) => {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {mode === 'concluding' && (
+            <div className="timer-setup slide-down">
+              <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--oxford-brown)', marginBottom: '1rem' }}>Conclude Your Session</h3>
+              <p style={{ color: '#796e62', fontStyle: 'italic', marginBottom: '1.5rem', fontSize: '1rem' }}>Please log your final progress before archiving this session.</p>
+              
+              <div className="paused-form-group">
+                <label className="timer-label">Mood Tags (comma separated)</label>
+                <input type="text" placeholder="e.g. nostalgic, gripping..." className="timer-input" value={moodTags} onChange={(e)=>setMoodTags(e.target.value)} />
+              </div>
+
+              <div className="paused-form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="timer-label">Last Page Read</label>
+                <input type="number" placeholder="Enter page number..." className="timer-input" value={pageNumber} onChange={(e)=>setPageNumber(e.target.value)} />
+              </div>
+
+              <button className="timer-action-btn stop-btn" style={{ width: '100%' }} onClick={handleFinalConclude}>
+                SAVE & CONCLUDE
+              </button>
             </div>
           )}
         </div>

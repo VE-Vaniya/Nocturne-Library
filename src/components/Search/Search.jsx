@@ -29,12 +29,31 @@ const ALL_BOOKS = [
   { id: 6, title: 'The Hobbit', author: 'J.R.R. Tolkien', image: hobbitImg, genre: 'Fantasy' }
 ];
 
-const Search = ({ query }) => {
+const Search = ({ query, books, setBooks, setActiveNav }) => {
   const filteredBooks = ALL_BOOKS.filter(book => 
     book.title.toLowerCase().includes(query.toLowerCase()) ||
     book.author.toLowerCase().includes(query.toLowerCase()) ||
     book.genre.toLowerCase().includes(query.toLowerCase())
   );
+
+  const handleAddBook = (book) => {
+    if (books.some(b => b.title === book.title)) {
+      alert(`${book.title} is already in your library.`);
+      return;
+    }
+    const newBook = {
+      id: Date.now().toString(),
+      title: book.title,
+      author: book.author,
+      genre: book.genre,
+      status: 'to-be-read',
+      coverPreview: book.image,
+      lastPageRead: 0,
+      moodTags: []
+    };
+    setBooks([...books, newBook]);
+    alert(`${book.title} has been added to your Archives.`);
+  };
 
   return (
     <div className="search-container">
@@ -56,11 +75,8 @@ const Search = ({ query }) => {
                 <div className="search-card-author">by {book.author}</div>
                 
                 <div className="search-card-actions">
-                  <button className="search-action-btn tooltip" data-tooltip="Add to Library">
+                  <button className="search-action-btn tooltip" data-tooltip="Add to Library" onClick={() => handleAddBook(book)}>
                     <IconAdd />
-                  </button>
-                  <button className="search-action-btn tooltip" data-tooltip="Start Reading">
-                    <IconRead />
                   </button>
                 </div>
               </div>
