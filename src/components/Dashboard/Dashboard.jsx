@@ -8,6 +8,7 @@ import Library from '../Library/Library';
 import QuotesGallery from '../QuotesGallery/QuotesGallery';
 import ReceivedQuotes from '../ReceivedQuotes/ReceivedQuotes';
 import ReadingTimer from '../ReadingTimer/ReadingTimer';
+import Explore from '../Explore/Explore';
 
 /* ── SVG Icons ────────────────────────────────────── */
 const IconGallery = () => (
@@ -138,8 +139,18 @@ const IconLogout = () => (
   </svg>
 );
 
+const IconNetwork = () => (
+  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3" />
+    <circle cx="19" cy="6" r="2" />
+    <circle cx="5" cy="6" r="2" />
+    <circle cx="12" cy="19" r="2" />
+    <path d="M13 10.5l4.5-3M11 10.5L6.5 7.5M12 15v2" />
+  </svg>
+);
+
 /* ── Component ────────────────────────────────────── */
-const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes }) => {
+const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, users, setUsers, connectionRequests, setConnectionRequests }) => {
   const username = user?.username || 'Scholar';
   const [activeNav, setActiveNav] = useState('Library');
   const [searchQuery, setSearchQuery] = useState('');
@@ -164,6 +175,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
     { label: 'Quotes Gallery', icon: <IconGallery /> },
     { label: 'Library', icon: <IconLibrary />, chevron: true },
     { label: 'Reading Timer', icon: <IconTimer /> },
+    { label: 'Explore', icon: <IconNetwork /> },
     { label: 'My Profile', icon: <IconProfile /> },
     { label: 'Add a Book', icon: <IconPlus /> },
   ];
@@ -253,14 +265,16 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
           </div>
         </header>
 
-        <main className={`content-scroller ${activeNav === 'My Profile' ? 'no-padding' : ''}`}>
-          <div className={activeNav === 'My Profile' ? 'full-width-pane' : 'content-inner'}>
+        <main className={`content-scroller ${activeNav === 'My Profile' || activeNav === 'Explore' ? 'no-padding' : ''}`}>
+          <div className={activeNav === 'My Profile' || activeNav === 'Explore' ? 'full-width-pane' : 'content-inner'}>
             {activeNav === 'Search' ? (
               <Search query={searchQuery} books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Add a Book' ? (
               <AddBook books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'My Profile' ? (
               <MyProfile user={user} />
+            ) : activeNav === 'Explore' ? (
+              <Explore currentUser={user} users={users} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />
             ) : activeNav === 'Library' ? (
               <Library books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Quotes Gallery' ? (

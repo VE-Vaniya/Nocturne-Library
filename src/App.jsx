@@ -38,6 +38,11 @@ function App() {
     ];
   });
 
+  const [connectionRequests, setConnectionRequests] = useState(() => {
+    const saved = localStorage.getItem('nocturne_connection_requests');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [view, setView] = useState(() => {
     const savedUser = localStorage.getItem('nocturne_logged_in_user');
     return savedUser ? 'dashboard' : 'login';
@@ -59,6 +64,7 @@ function App() {
   React.useEffect(() => { localStorage.setItem('nocturne_books', JSON.stringify(books)); }, [books]);
   React.useEffect(() => { localStorage.setItem('nocturne_quotes', JSON.stringify(quotes)); }, [quotes]);
   React.useEffect(() => { localStorage.setItem('nocturne_received_quotes', JSON.stringify(receivedQuotes)); }, [receivedQuotes]);
+  React.useEffect(() => { localStorage.setItem('nocturne_connection_requests', JSON.stringify(connectionRequests)); }, [connectionRequests]);
 
   const handleLoginSuccess  = (loggedInUser) => {
     setUser(loggedInUser);
@@ -88,7 +94,7 @@ function App() {
   }));
 
   if (view === 'dashboard') {
-    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} />;
+    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />;
   }
 
   return (
