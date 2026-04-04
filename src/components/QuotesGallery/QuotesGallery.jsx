@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './QuotesGallery.css';
+import SearchBar from '../common/SearchBar';
 
 const ConnectionsModal = ({ quote, onClose, onShare }) => {
   const connections = [
@@ -37,9 +38,16 @@ const ConnectionsModal = ({ quote, onClose, onShare }) => {
 
 const QuotesGallery = ({ quotes }) => {
   const [sharingQuote, setSharingQuote] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredQuotes = quotes.filter(q => 
+    q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (q.author && q.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (q.bookTitle && q.bookTitle.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   // Group quotes by bookTitle
-  const groupedQuotes = quotes.reduce((acc, q) => {
+  const groupedQuotes = filteredQuotes.reduce((acc, q) => {
     const title = q.bookTitle || 'Uncategorized';
     if (!acc[title]) acc[title] = [];
     acc[title].push(q);
@@ -58,9 +66,18 @@ const QuotesGallery = ({ quotes }) => {
         <p className="qg-subtitle">Memorable excerpts collected from your reading journeys</p>
       </div>
 
+      <div className="secondary-search-wrap">
+        <SearchBar 
+          placeholder="Search your collected excerpts..." 
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="secondary-search-input"
+        />
+      </div>
+
       <div className="qg-content">
         {Object.keys(groupedQuotes).length === 0 ? (
-          <div className="empty-state">No quotations have been archived yet.</div>
+          <div className="empty-state">No collected excerpts match your inquiry.</div>
         ) : (
           Object.entries(groupedQuotes).map(([bookTitle, bookQuotes]) => (
             <div key={bookTitle} className="qg-book-section">

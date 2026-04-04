@@ -19,7 +19,7 @@ const IconStar = () => (
   </svg>
 );
 
-const Notifications = ({ isOpen, onClose }) => {
+const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnectionRequests, user }) => {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -57,6 +57,32 @@ const Notifications = ({ isOpen, onClose }) => {
 
   const [selectedNotif, setSelectedNotif] = useState(null);
 
+  console.log("Notifications for:", user?.email);
+  console.log("All connection requests:", connectionRequests);
+  
+  const pendingRequests = connectionRequests.filter(req => 
+    req.to?.toLowerCase() === user?.email?.toLowerCase() && 
+    req.status === 'pending'
+  );
+
+  console.log("Filtered Pending Requests:", pendingRequests);
+
+  const handleAccept = (fromEmail) => {
+    setConnectionRequests(connectionRequests.map(req =>
+      (req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === fromEmail.toLowerCase()) 
+        ? { ...req, status: 'accepted' } 
+        : req
+    ));
+    alert("Connection request accepted! They are now in your scholarly network.");
+  };
+
+  const handleDecline = (fromEmail) => {
+    setConnectionRequests(connectionRequests.filter(req =>
+      !(req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === fromEmail.toLowerCase())
+    ));
+  };
+
+
   const handleMarkAllRead = () => {
     setNotifications(notifications.map(n => ({ ...n, unread: false })));
   };
@@ -64,7 +90,7 @@ const Notifications = ({ isOpen, onClose }) => {
   const handleNotifClick = (notif) => {
     setSelectedNotif(notif);
     // Also mark this specific one as read when clicked
-    setNotifications(notifications.map(n => 
+    setNotifications(notifications.map(n =>
       n.id === notif.id ? { ...n, unread: false } : n
     ));
   };
@@ -75,7 +101,7 @@ const Notifications = ({ isOpen, onClose }) => {
         if (selectedNotif) setSelectedNotif(null);
         else onClose();
       }} />
-      
+
       <div className={`notif-panel ${isOpen ? 'open' : ''}`}>
         <div className="notif-panel-header">
           <h3>Notifications</h3>
@@ -87,6 +113,34 @@ const Notifications = ({ isOpen, onClose }) => {
         </div>
 
         <div className="notif-list">
+          {/* Scholarly Requests Section */}
+          {pendingRequests.length > 0 && (
+            <div className="notif-section">
+              <div className="notif-section-header">SCHOLARLY REQUESTS</div>
+              {pendingRequests.map(req => (
+                <div key={req.from} className="notif-item request-item" style={{ cursor: 'default' }}>
+                  <div className="notif-icon-wrap" style={{ background: 'rgba(196, 165, 114, 0.2)' }}>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M20 8v6M23 11h-6" />
+                    </svg>
+                  </div>
+                  <div className="notif-content">
+                    <div className="notif-title-row">
+                      <span className="notif-title">{req.fromName || 'Fellow Scholar'}</span>
+                      <span className="notif-time">{req.fromRole || req.role || 'Scholar'}</span>
+                    </div>
+                    <p className="notif-message-preview">Greetings! A fellow seeker of knowledge, <strong>{req.fromName || 'a resident scholar'}</strong>, wishes to join your intellectual circle.</p>
+                    <div className="request-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                      <button className="req-btn accept" onClick={() => handleAccept(req.from)}>ACCEPT</button>
+                      <button className="req-btn decline" onClick={() => handleDecline(req.from)}>REJECT</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="notif-section-header" style={{ marginTop: '1rem' }}>ALERTS & UPDATES</div>
           {notifications.map(notif => (
             <div key={notif.id} className={`notif-item ${notif.unread ? 'unread' : ''}`} onClick={() => handleNotifClick(notif)}>
               <div className="notif-icon-wrap">
@@ -124,9 +178,9 @@ const Notifications = ({ isOpen, onClose }) => {
             <h2 className="modal-title">{selectedNotif.title}</h2>
             <div className="modal-time">{selectedNotif.time}</div>
             <div className="modal-divider">
-               <span className="line"></span>
-               <span className="diamond"></span>
-               <span className="line"></span>
+              <span className="line"></span>
+              <span className="diamond"></span>
+              <span className="line"></span>
             </div>
             <p className="modal-body">{selectedNotif.message}</p>
             <button className="modal-action-btn" onClick={() => setSelectedNotif(null)}>

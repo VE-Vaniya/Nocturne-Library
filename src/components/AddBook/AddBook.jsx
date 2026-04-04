@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './AddBook.css';
+import FormCard from '../common/FormCard';
+import FormInput from '../common/FormInput';
 
 const AddBook = ({ books, setBooks, setActiveNav }) => {
     const [formData, setFormData] = useState({
@@ -54,57 +56,38 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
     };
 
     return (
-        <div className="ab-container">
-            <div className="ab-header">
-                <span>⊕ ADD NEW TOME</span>
-                <span>CATALOG</span>
-            </div>
-
+        <FormCard 
+            title="ADD NEW TOME" 
+            subtitle="CATALOG" 
+            quote="A room without books is like a body without a soul." 
+            author="MARCUS TULLIUS CICERO"
+            headerIcon="⊕"
+            containerClass="ab-container"
+        >
             <form className="ab-form" onSubmit={handleSubmit}>
-                <div className="ab-form-group">
-                    <label className="ab-label">Book Title</label>
-                    <div className="ab-input-wrapper">
-                        <input
-                            type="text"
-                            name="title"
-                            className="ab-input"
-                            value={formData.title}
-                            onChange={handleChange}
-                            required
-                        />
-                        {!formData.title && <span className="ab-placeholder">e.g. The Picture of Dorian Gray</span>}
-                    </div>
-                </div>
+                <FormInput
+                    label="Book Title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="e.g. The Picture of Dorian Gray"
+                />
 
-                <div className="ab-form-group">
-                    <label className="ab-label">Author Name</label>
-                    <div className="ab-input-wrapper">
-                        <input
-                            type="text"
-                            name="author"
-                            className="ab-input"
-                            value={formData.author}
-                            onChange={handleChange}
-                            required
-                        />
-                        {!formData.author && <span className="ab-placeholder">e.g. Oscar Wilde</span>}
-                    </div>
-                </div>
+                <FormInput
+                    label="Author Name"
+                    name="author"
+                    value={formData.author}
+                    onChange={handleChange}
+                    placeholder="e.g. Oscar Wilde"
+                />
 
-                <div className="ab-form-group">
-                    <label className="ab-label">Genre</label>
-                    <div className="ab-input-wrapper">
-                        <input
-                            type="text"
-                            name="genre"
-                            className="ab-input"
-                            value={formData.genre}
-                            onChange={handleChange}
-                            required
-                        />
-                        {!formData.genre && <span className="ab-placeholder">e.g. Gothic Fiction</span>}
-                    </div>
-                </div>
+                <FormInput
+                    label="Genre"
+                    name="genre"
+                    value={formData.genre}
+                    onChange={handleChange}
+                    placeholder="e.g. Gothic Fiction"
+                />
 
                 <div className="ab-form-group">
                     <label className="ab-label">Book Cover</label>
@@ -133,12 +116,7 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
                     SHELVE BOOK
                 </button>
             </form>
-
-            <div className="ab-quote">
-                <span className="ab-quote-text">"A room without books is like a body without a soul."</span>
-                <span className="ab-quote-author">— MARCUS TULLIUS CICERO</span>
-            </div>
-        </div>
+        </FormCard>
     );
 };
 

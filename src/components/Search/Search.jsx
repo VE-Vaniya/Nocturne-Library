@@ -30,7 +30,7 @@ const ALL_BOOKS = [
 ];
 
 const Search = ({ query, books, setBooks, setActiveNav }) => {
-  const filteredBooks = ALL_BOOKS.filter(book => 
+  const filteredBooks = ALL_BOOKS.filter(book =>
     book.title.toLowerCase().includes(query.toLowerCase()) ||
     book.author.toLowerCase().includes(query.toLowerCase()) ||
     book.genre.toLowerCase().includes(query.toLowerCase())
@@ -61,7 +61,7 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
         <h2 className="search-title">Search Results for "{query}"</h2>
         <span className="search-count">{filteredBooks.length} book{filteredBooks.length !== 1 ? 's' : ''} found</span>
       </div>
-      
+
       {filteredBooks.length > 0 ? (
         <div className="search-grid">
           {filteredBooks.map(book => (
@@ -73,7 +73,7 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
                 <div className="search-card-genre">{book.genre}</div>
                 <h3 className="search-card-title">{book.title}</h3>
                 <div className="search-card-author">by {book.author}</div>
-                
+
                 <div className="search-card-actions">
                   <button className="search-action-btn tooltip" data-tooltip="Add to Library" onClick={() => handleAddBook(book)}>
                     <IconAdd />
@@ -86,9 +86,9 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
       ) : (
         <div className="search-empty">
           <div className="search-empty-icon">
-             <svg width="48" height="48" fill="none" stroke="#a4937e" strokeWidth="1" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
-             </svg>
+            <svg width="48" height="48" fill="none" stroke="#a4937e" strokeWidth="1" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
+            </svg>
           </div>
           <p>No books found matching your spell.</p>
         </div>

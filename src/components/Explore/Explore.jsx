@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import './Explore.css';
 import '../MyProfile/MyProfile.css'; // Reuse card styles
+import SearchBar from '../common/SearchBar';
 
 import avatar1 from '../Images/Avatars/avatar1.png';
 import avatar2 from '../Images/Avatars/avatar2.png';
@@ -19,12 +20,6 @@ const getHash = (str) => {
   return Math.abs(hash);
 };
 
-const IconSearch = () => (
-  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-    <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
-  </svg>
-);
-
 const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -40,10 +35,25 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
     });
   }, [users, currentUser, searchQuery]);
 
-  const handleSendRequest = (targetEmail) => {
-    if (!connectionRequests.find(req => req.to === targetEmail && req.from === currentUser.email)) {
-      setConnectionRequests([...connectionRequests, { from: currentUser.email, to: targetEmail, status: 'pending' }]);
+  const handleSendRequest = (targetUser) => {
+    if (!connectionRequests.find(req => req.to === targetUser.email && req.from === currentUser.email)) {
+      setConnectionRequests([
+        ...connectionRequests, 
+        { 
+          from: currentUser.email, 
+          fromName: currentUser.fullName,
+          fromRole: currentUser.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
+          to: targetUser.email, 
+          toName: targetUser.fullName,
+          toRole: targetUser.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
+          status: 'pending' 
+        }
+      ]);
     }
+  };
+
+  const handleCancelRequest = (targetEmail) => {
+    setConnectionRequests(connectionRequests.filter(req => !(req.to === targetEmail && req.from === currentUser.email)));
   };
 
   const hasRequested = (targetEmail) => {
@@ -53,16 +63,13 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
   return (
     <div className="explore-dashboard-view">
       
-      <div className="explore-header">
-        <div className="explore-search">
-          <IconSearch />
-          <input 
-            type="text" 
-            placeholder="Search scholars by name or alias..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+      <div className="secondary-search-wrap">
+        <SearchBar 
+          placeholder="Search scholars by name or alias..." 
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="secondary-search-input"
+        />
       </div>
 
       <div className="explore-grid">
@@ -114,8 +121,9 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
                   <div className="explore-card-actions">
                     <button 
                       className={`action-btn-connect ${requestSent ? 'requested' : ''}`}
-                      onClick={() => handleSendRequest(profile.email)}
-                      disabled={requestSent}
+                      onClick={() => !requestSent && handleSendRequest(profile)}
+                      onDoubleClick={() => requestSent && handleCancelRequest(profile.email)}
+                      title={requestSent ? "Double click to cancel request" : "Click to send connection request"}
                     >
                       {requestSent ? 'REQUEST SENT' : 'SEND CONNECTION REQUEST'}
                     </button>

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import Dashboard from './components/Dashboard/Dashboard';
 import './index.css';
 import backgroundImage from './components/Images/Background.png';
+
+import DustMotes from './components/common/DustMotes';
+import SectionRule from './components/common/SectionRule';
 
 function App() {
   const [users, setUsers] = useState(() => {
@@ -14,10 +17,7 @@ function App() {
     ];
   });
 
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('nocturne_logged_in_user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [user, setUser] = useState(null);
 
   const [books, setBooks] = useState(() => {
     const saved = localStorage.getItem('nocturne_books');
@@ -28,7 +28,18 @@ function App() {
 
   const [quotes, setQuotes] = useState(() => {
     const saved = localStorage.getItem('nocturne_quotes');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) return parsed;
+    }
+    return [
+      { id: 'q1', text: "Deep into that darkness peering, long I stood there wondering, fearing, Doubting, dreaming dreams no mortal ever dared to dream before.", author: "Edgar Allan Poe", bookTitle: "The Raven", pageNumber: "1" },
+      { id: 'q2', text: "I am a forest, and a night of dark trees: but he who is not afraid of my darkness, will find banks full of roses under my cypresses.", author: "Friedrich Nietzsche", bookTitle: "Thus Spoke Zarathustra", pageNumber: "45" },
+      { id: 'q3', text: "The oldest and strongest emotion of mankind is fear, and the oldest and strongest kind of fear is fear of the unknown.", author: "H.P. Lovecraft", bookTitle: "Supernatural Horror in Literature", pageNumber: "12" },
+      { id: 'q4', text: "Whatever our souls are made of, his and mine are the same.", author: "Emily Brontë", bookTitle: "Wuthering Heights", pageNumber: "82" },
+      { id: 'q5', text: "It is better to be hated for what you are than to be loved for what you are not.", author: "André Gide", bookTitle: "Autumn Leaves", pageNumber: "23" },
+      { id: 'q6', text: "There are more things in Heaven and Earth, Horatio, than are dreamt of in your philosophy.", author: "William Shakespeare", bookTitle: "Hamlet", pageNumber: "156" }
+    ];
   });
 
   const [receivedQuotes, setReceivedQuotes] = useState(() => {
@@ -43,10 +54,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [view, setView] = useState(() => {
-    const savedUser = localStorage.getItem('nocturne_logged_in_user');
-    return savedUser ? 'dashboard' : 'login';
-  });
+  const [view, setView] = useState('login');
 
   // Persist users and logged-in user to localStorage whenever they change
   React.useEffect(() => {
@@ -66,32 +74,55 @@ function App() {
   React.useEffect(() => { localStorage.setItem('nocturne_received_quotes', JSON.stringify(receivedQuotes)); }, [receivedQuotes]);
   React.useEffect(() => { localStorage.setItem('nocturne_connection_requests', JSON.stringify(connectionRequests)); }, [connectionRequests]);
 
-  const handleLoginSuccess  = (loggedInUser) => {
+  // DEBUG: Track connection requests
+  useEffect(() => {
+    if (user) {
+      console.log("Current User:", user.email);
+      console.log("Current Requests:", connectionRequests);
+    }
+  }, [user, connectionRequests]);
+
+  // Add dummy requests only if they don't exist at all for this user
+  useEffect(() => {
+    if (user && user.email) {
+      const uEmail = user.email.toLowerCase();
+      const hasXyz = connectionRequests.some(req => req.from === 'xyz@nocturne.lib' && req.to?.toLowerCase() === uEmail);
+      const hasAbc = connectionRequests.some(req => req.from === 'abc@nocturne.lib' && req.to?.toLowerCase() === uEmail);
+      const hasDemo = connectionRequests.some(req => req.from === 'seraphina@nocturne.lib' && req.to?.toLowerCase() === uEmail);
+      
+      const newReqs = [];
+      if (!hasXyz) {
+        newReqs.push({ from: 'xyz@nocturne.lib', fromName: 'XYZ User', fromRole: 'Avid Reader', to: user.email, status: 'pending' });
+      }
+      if (!hasAbc) {
+        newReqs.push({ from: 'abc@nocturne.lib', fromName: 'Abigail Vanc', fromRole: 'Mystic Archivist', to: user.email, status: 'pending' });
+      }
+      if (!hasDemo) {
+        newReqs.push({ from: 'seraphina@nocturne.lib', fromName: 'Seraphina Thorne', fromRole: 'Eldritch Researcher', to: user.email, status: 'pending' });
+      }
+
+      if (newReqs.length > 0) {
+        setConnectionRequests(prev => [...prev, ...newReqs]);
+      }
+    }
+  }, [user]); // Only run when user session starts
+
+  const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
     setView('dashboard');
   };
-  
+
   const handleSignupSuccess = (newUser) => {
     const updatedUsers = [...users, newUser];
     setUsers(updatedUsers);
-    setUser(newUser);
-    setView('dashboard');
+    // Redirect to login after successful signup instead of dashboard
+    setView('login');
   };
 
   const handleLogout = () => {
     setUser(null);
     setView('login');
   };
-
-  /* ── Dust motes (auth screens only) ── */
-  const motes = Array.from({ length: 10 }).map((_, i) => ({
-    id: i,
-    left:     `${Math.random() * 100}%`,
-    top:      `${Math.random() * 100}%`,
-    size:     `${Math.random() * 3 + 1}px`,
-    delay:    `${Math.random() * 5}s`,
-    duration: `${Math.random() * 10 + 10}s`,
-  }));
 
   if (view === 'dashboard') {
     return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />;
@@ -107,16 +138,7 @@ function App() {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Dust Motes */}
-      <div className="dust-motes">
-        {motes.map((m) => (
-          <div
-            key={m.id}
-            className="mote"
-            style={{ left: m.left, top: m.top, width: m.size, height: m.size, animationDelay: m.delay, animationDuration: m.duration }}
-          />
-        ))}
-      </div>
+      <DustMotes count={10} />
 
       {/* Vignette + Header + Form */}
       <div className="library-overlay">
@@ -124,6 +146,7 @@ function App() {
           <div className="candle-top" style={{ margin: '0 auto 20px' }} />
           <h1 className="auth-title">Nocturne Library</h1>
           <p className="auth-tagline">Where readers gather at midnight</p>
+          <SectionRule className="auth-rule" />
           <div className="auth-est">EST. MDCCCXII</div>
         </div>
 

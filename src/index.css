@@ -169,3 +169,54 @@ a:hover {
   position: relative;
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
+
+/* Common Search Bar Styles */
+.common-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.common-search-bar .search-icon {
+  color: #a49683;
+  flex-shrink: 0;
+}
+
+.common-search-bar .search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--oxford-brown);
+  outline: none;
+}
+
+.common-search-bar .search-input::placeholder {
+  color: #bfae9f;
+  font-style: italic;
+}
+
+/* Secondary Search Bars (Library, Explore, etc.) */
+.secondary-search-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.secondary-search-wrap .common-search-bar {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(246, 242, 230, 0.95);
+  border: 1px solid var(--oxford-brown);
+  border-radius: 30px;
+  padding: 0.8rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-search-wrap .common-search-bar:focus-within {
+  box-shadow: 0 6px 20px rgba(62, 39, 35, 0.1);
+  background: #fbf9f3;
+}

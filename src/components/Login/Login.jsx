@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import './Login.css';
+import { IconEye } from '../common/Icons';
+import FormCard from '../common/FormCard';
+import FormInput from '../common/FormInput';
 
 const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -36,58 +40,51 @@ const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="card-header">
-                <span>✎ READER'S CARD</span>
-                <span>No. 1367</span>
-            </div>
-
+        <FormCard 
+            title="READER'S CARD" 
+            subtitle="No. 1367" 
+            quote="In books lies the soul of the whole past time." 
+            author="THOMAS CARLYLE"
+            headerIcon="✎"
+            containerClass="auth-container"
+        >
             <div className="auth-toggle">
                 <button className="toggle-btn active" type="button">Sign In</button>
                 <button className="toggle-btn" type="button" onClick={onToggle}>Register</button>
             </div>
 
             <form className="auth-form" onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label className="form-label">Email</label>
-                    <div className="form-input-wrapper">
-                        <input
-                            type="email"
-                            name="email"
-                            className="form-input"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                        {!formData.email && <span className="custom-placeholder">reader@nocturne.lib</span>}
-                    </div>
-                </div>
+                <FormInput
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="reader@nocturne.lib"
+                />
 
-                <div className="form-group">
-                    <label className="form-label"> Password</label>
-                    <div className="form-input-wrapper">
-                        <input
-                            type="password"
-                            name="password"
-                            className="form-input"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                        {!formData.password && <span className="custom-placeholder">••••••••</span>}
-                    </div>
-                </div>
+                <FormInput
+                    label="Password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                >
+                    <span 
+                        className="password-toggle" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ cursor: 'pointer', position: 'absolute', right: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.6, display: 'flex', alignItems: 'center' }}
+                    >
+                        <IconEye />
+                    </span>
+                </FormInput>
 
-                <button type="submit" className="submit-btn">
+                <button type="submit" className="submit-btn" style={{ marginTop: '1rem' }}>
                     ENTER THE LIBRARY
                 </button>
             </form>
-
-            <div className="quote-section">
-                <span className="quote-text">"In books lies the soul of the whole past time."</span>
-                <span className="quote-author">— THOMAS CARLYLE</span>
-            </div>
-        </div>
+        </FormCard>
     );
 };
 

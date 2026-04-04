@@ -8,7 +8,7 @@ import avatar5 from '../Images/Avatars/avatar5.png';
 
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-const MyProfile = ({ user }) => {
+const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => {
   const [profile, setProfile] = useState({
     username: user?.username || 'Scholar',
     fullName: user?.fullName || 'Midnight Reader',
@@ -20,12 +20,38 @@ const MyProfile = ({ user }) => {
 
   const [activeTab, setActiveTab] = useState('card');
   const [connections, setConnections] = useState([
-    { id: 1, name: 'Eleanor Vance', role: 'Chief Archivist', status: 'CONNECTED' },
-    { id: 2, name: 'Arthur Pym', role: 'Field Researcher', status: 'CONNECTED' },
-    { id: 3, name: 'Lenore Raven', role: 'Lyrical Poet', status: 'CONNECTED' },
-    { id: 4, name: 'Roderick Usher', role: 'Musical Surgeon', status: 'CONNECTED' },
-    { id: 5, name: 'Beatrix Thorne', role: 'Botanist', status: 'CONNECTED' }
+    { email: 'eleanor@nocturne.lib', name: 'Eleanor Vance', role: 'Chief Archivist', status: 'CONNECTED' },
+    { email: 'arthur@nocturne.lib', name: 'Arthur Pym', role: 'Field Researcher', status: 'CONNECTED' },
+    { email: 'lenore@nocturne.lib', name: 'Lenore Raven', role: 'Lyrical Poet', status: 'CONNECTED' },
+    { email: 'roderick@nocturne.lib', name: 'Roderick Usher', role: 'Musical Surgeon', status: 'CONNECTED' },
+    { email: 'beatrix@nocturne.lib', name: 'Beatrix Thorne', role: 'Botanist', status: 'CONNECTED' }
   ]);
+
+  const acceptedRequests = connectionRequests.filter(req => 
+    (req.to?.toLowerCase() === user?.email?.toLowerCase() || req.from?.toLowerCase() === user?.email?.toLowerCase()) && req.status === 'accepted'
+  ).map(req => {
+    const isFromMe = req.from?.toLowerCase() === user?.email?.toLowerCase();
+    return {
+      email: isFromMe ? req.to : req.from,
+      name: isFromMe ? (req.toName || 'Fellow Scholar') : (req.fromName || 'Fellow Scholar'),
+      role: isFromMe ? (req.toRole || 'Scholar') : (req.fromRole || req.role || 'Scholar'),
+      status: 'CONNECTED',
+      isRequest: true
+    };
+  });
+
+  const allConnections = [...connections, ...acceptedRequests];
+
+  const handleRemoveConnection = (conn) => {
+    if (conn.isRequest) {
+      setConnectionRequests(connectionRequests.filter(req => 
+        !((req.from?.toLowerCase() === user.email?.toLowerCase() && req.to?.toLowerCase() === conn.email?.toLowerCase()) || 
+          (req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === conn.email?.toLowerCase()))
+      ));
+    } else {
+      setConnections(connections.filter(c => c.email?.toLowerCase() !== conn.email?.toLowerCase()));
+    }
+  };
 
   const [passwordForm, setPasswordForm] = useState({
     current: '',
@@ -149,14 +175,14 @@ const MyProfile = ({ user }) => {
             </div>
             <h2 className="ledger-title">CONNECTIONS</h2>
             <div className="ledger-list">
-              {connections.map(c => (
-                <div key={c.id} className="ledger-item">
+              {allConnections.map(c => (
+                <div key={c.email} className="ledger-item">
                   <div className="ledger-item-icon">{c.name.charAt(0)}</div>
                   <div className="ledger-item-info">
                     <span className="ledger-item-name">{c.name}</span>
                     <span className="ledger-item-role">{c.role}</span>
                   </div>
-                  <button className="ledger-remove" onClick={() => setConnections(connections.filter(conn => conn.id !== c.id))}>&times;</button>
+                  <button className="ledger-remove" onClick={() => handleRemoveConnection(c)}>&times;</button>
                 </div>
               ))}
             </div>
