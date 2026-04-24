@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import './QuotesGallery.css';
 import SearchBar from '../common/SearchBar';
+import { quoteService } from '../../services/api';
 
-const ConnectionsModal = ({ quote, onClose, onShare }) => {
-  const connections = [
-    { id: 1, name: 'Eleanor Vance', role: 'Chief Archivist' },
-    { id: 2, name: 'Arthur Pym', role: 'Field Researcher' },
-    { id: 3, name: 'Lenore Raven', role: 'Lyrical Poet' },
-    { id: 4, name: 'Roderick Usher', role: 'Musical Surgeon' },
-    { id: 5, name: 'Beatrix Thorne', role: 'Botanist' }
-  ];
+const ConnectionsModal = ({ quote, onClose, onShare, user }) => {
+  const connections = (user?.connections || []).map(conn => ({
+    id: conn._id,
+    name: conn.fullName || conn.username,
+    role: conn.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
+    recipientId: conn._id
+  }));
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -20,23 +20,27 @@ const ConnectionsModal = ({ quote, onClose, onShare }) => {
         </div>
         <p className="modal-desc">Select a fellow scholar to send this excerpt.</p>
         <div className="connection-list">
-          {connections.map(c => (
-             <div key={c.id} className="connection-row">
-                <div className="conn-avatar">{c.name.charAt(0)}</div>
-                <div className="conn-info">
-                  <div className="conn-name">{c.name}</div>
-                  <div className="conn-role">{c.role}</div>
-                </div>
-                <button className="share-action-btn" onClick={() => onShare(c)}>SEND</button>
-             </div>
-          ))}
+          {connections.length > 0 ? (
+            connections.map(c => (
+              <div key={c.id} className="connection-row">
+                  <div className="conn-avatar">{c.name.charAt(0)}</div>
+                  <div className="conn-info">
+                    <div className="conn-name">{c.name}</div>
+                    <div className="conn-role">{c.role}</div>
+                  </div>
+                  <button className="share-action-btn" onClick={() => onShare(c)}>SEND</button>
+              </div>
+            ))
+          ) : (
+            <p style={{ textAlign: 'center', fontStyle: 'italic', color: '#796e62' }}>You have no connections to share with.</p>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-const QuotesGallery = ({ quotes }) => {
+const QuotesGallery = ({ quotes, user }) => {
   const [sharingQuote, setSharingQuote] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -54,9 +58,22 @@ const QuotesGallery = ({ quotes }) => {
     return acc;
   }, {});
 
-  const handleShare = (connection) => {
-    alert(`Quote sent to ${connection.name} successfully.`);
-    setSharingQuote(null);
+  const handleShare = async (connection) => {
+    try {
+      await quoteService.share({
+        quoteId: sharingQuote.id,
+        recipientId: connection.recipientId,
+        text: sharingQuote.text,
+        author: sharingQuote.author,
+        bookTitle: sharingQuote.bookTitle
+      });
+      alert(`Quote sent to ${connection.name} successfully.`);
+    } catch (error) {
+      console.error("Share error:", error);
+      alert("Failed to share quote.");
+    } finally {
+      setSharingQuote(null);
+    }
   };
 
   return (
@@ -107,6 +124,7 @@ const QuotesGallery = ({ quotes }) => {
           quote={sharingQuote} 
           onClose={() => setSharingQuote(null)}
           onShare={handleShare}
+          user={user}
         />
       )}
     </div>

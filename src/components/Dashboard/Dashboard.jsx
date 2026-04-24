@@ -23,7 +23,7 @@ import SectionRule from '../common/SectionRule';
 import SearchBar from '../common/SearchBar';
 
 /* ── Component ────────────────────────────────────── */
-const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, users, setUsers, connectionRequests, setConnectionRequests }) => {
+const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, users, setUsers, connectionRequests, setConnectionRequests, fetchProfile }) => {
   const getSearchPlaceholder = () => {
     switch (activeNav) {
       case 'Quotes Gallery':
@@ -171,13 +171,13 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
             ) : activeNav === 'Add a Book' ? (
               <AddBook books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'My Profile' ? (
-              <MyProfile user={user} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />
+              <MyProfile user={user} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />
             ) : activeNav === 'Explore' ? (
-              <Explore currentUser={user} users={users} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />
+              <Explore currentUser={user} users={users} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />
             ) : activeNav === 'Library' ? (
               <Library books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Quotes Gallery' ? (
-              <QuotesGallery quotes={quotes} />
+              <QuotesGallery quotes={quotes} user={user} />
             ) : activeNav === 'Received Missives' ? (
               <ReceivedQuotes receivedQuotes={receivedQuotes} quotes={quotes} setQuotes={setQuotes} />
             ) : activeNav === 'Reading Timer' ? (
@@ -288,6 +288,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
         connectionRequests={connectionRequests}
         setConnectionRequests={setConnectionRequests}
         user={user}
+        fetchProfile={fetchProfile}
       />
     </div>
   );

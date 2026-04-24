@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { authService } from '../../services/api';
 import './Login.css';
 import { IconEye } from '../common/Icons';
 import FormCard from '../common/FormCard';
@@ -18,7 +19,7 @@ const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -30,12 +31,14 @@ const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
             return;
         }
 
-        const foundUser = users.find(u => u.email === formData.email && u.password === formData.password);
-        
-        if (foundUser) {
-            onLoginSuccess && onLoginSuccess(foundUser);
-        } else {
-            alert("Invalid credentials. Please ensure you have signed up.");
+        try {
+            const response = await authService.login({
+                email: formData.email,
+                password: formData.password
+            });
+            onLoginSuccess && onLoginSuccess(response.data);
+        } catch (error) {
+            alert(error.response?.data?.message || "Invalid credentials. The vault remains locked.");
         }
     };
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { authService, notificationService, userService } from './services/api';
 import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -17,7 +18,50 @@ function App() {
     ];
   });
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('nocturne_logged_in_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const fetchProfile = useCallback(async () => {
+    if (user && user.token) {
+      try {
+        const response = await authService.getProfile();
+        setUser(prev => ({ ...prev, ...response.data }));
+      } catch (error) {
+        console.error("Session verification failed");
+        setUser(null);
+        localStorage.removeItem('nocturne_logged_in_user');
+      }
+    }
+  }, [user?.token]);
+
+  const fetchRequests = useCallback(async () => {
+    if (user && user.token) {
+      try {
+        const [incoming, outgoing] = await Promise.all([
+          notificationService.getNotifications(),
+          userService.getSentRequests()
+        ]);
+        // Combine both for the UI to know all pending states
+        setConnectionRequests([...incoming.data, ...outgoing.data]);
+      } catch (error) {
+        console.error("Failed to fetch requests");
+      }
+    }
+  }, [user?.token]);
+
+  useEffect(() => {
+    fetchProfile();
+    fetchRequests();
+
+    // Refresh everything every 10 seconds to keep sender/receiver in sync
+    const interval = setInterval(() => {
+      fetchProfile();
+      fetchRequests();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchProfile, fetchRequests]);
 
   const [books, setBooks] = useState(() => {
     const saved = localStorage.getItem('nocturne_books');
@@ -49,10 +93,7 @@ function App() {
     ];
   });
 
-  const [connectionRequests, setConnectionRequests] = useState(() => {
-    const saved = localStorage.getItem('nocturne_connection_requests');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [connectionRequests, setConnectionRequests] = useState([]);
 
   const [view, setView] = useState('login');
 
@@ -89,7 +130,7 @@ function App() {
       const hasXyz = connectionRequests.some(req => req.from === 'xyz@nocturne.lib' && req.to?.toLowerCase() === uEmail);
       const hasAbc = connectionRequests.some(req => req.from === 'abc@nocturne.lib' && req.to?.toLowerCase() === uEmail);
       const hasDemo = connectionRequests.some(req => req.from === 'seraphina@nocturne.lib' && req.to?.toLowerCase() === uEmail);
-      
+
       const newReqs = [];
       if (!hasXyz) {
         newReqs.push({ from: 'xyz@nocturne.lib', fromName: 'XYZ User', fromRole: 'Avid Reader', to: user.email, status: 'pending' });
@@ -125,7 +166,7 @@ function App() {
   };
 
   if (view === 'dashboard') {
-    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} />;
+    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />;
   }
 
   return (

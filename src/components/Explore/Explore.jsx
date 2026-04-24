@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { userService } from '../../services/api';
 import './Explore.css';
 import '../MyProfile/MyProfile.css'; // Reuse card styles
 import SearchBar from '../common/SearchBar';
@@ -20,14 +21,30 @@ const getHash = (str) => {
   return Math.abs(hash);
 };
 
-const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests }) => {
+const Explore = ({ currentUser, connectionRequests, setConnectionRequests, fetchProfile }) => {
+  const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await userService.getUsers();
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Failed to fetch scholars:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // Filter out the logged-in user and any that don't match the search
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       if (u.email === currentUser?.email) return false;
-      
+
       const searchLower = searchQuery.toLowerCase();
       const nameMatch = u.fullName?.toLowerCase().includes(searchLower) || false;
       const userMatch = u.username?.toLowerCase().includes(searchLower) || false;
@@ -35,38 +52,75 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
     });
   }, [users, currentUser, searchQuery]);
 
-  const handleSendRequest = (targetUser) => {
-    if (!connectionRequests.find(req => req.to === targetUser.email && req.from === currentUser.email)) {
-      setConnectionRequests([
-        ...connectionRequests, 
-        { 
-          from: currentUser.email, 
-          fromName: currentUser.fullName,
-          fromRole: currentUser.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
-          to: targetUser.email, 
-          toName: targetUser.fullName,
-          toRole: targetUser.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
-          status: 'pending' 
-        }
-      ]);
+  const handleSendRequest = async (targetUser) => {
+    const targetId = targetUser._id;
+    try {
+      // Optimistically update local state
+      if (setConnectionRequests) {
+        setConnectionRequests(prev => [
+          ...prev,
+          { to: targetId, recipientId: targetId, from: currentUser._id, senderId: currentUser._id, status: 'pending' }
+        ]);
+      }
+      await userService.connect(targetId);
+      alert("Connection request sent.");
+    } catch (error) {
+      alert("Failed to send request.");
+      // Rollback if needed
+      if (setConnectionRequests) {
+        setConnectionRequests(prev => prev.filter(r => (r.recipientId?._id || r.recipientId || r.to) !== targetId));
+      }
     }
   };
 
-  const handleCancelRequest = (targetEmail) => {
-    setConnectionRequests(connectionRequests.filter(req => !(req.to === targetEmail && req.from === currentUser.email)));
+  const handleCancelRequest = async (targetId) => {
+    try {
+      // Optimistically update
+      if (setConnectionRequests) {
+        setConnectionRequests(prev => prev.filter(req =>
+          !(req.to === targetId || req.recipientId === targetId || req.recipientId?._id === targetId)
+        ));
+      }
+      await userService.cancelConnect(targetId);
+    } catch (error) {
+      // Silently fail as the record might already be gone
+      console.warn("Cancel request failed, possibly already removed.");
+    }
   };
 
-  const hasRequested = (targetEmail) => {
-    return connectionRequests.some(req => req.to === targetEmail && req.from === currentUser?.email);
+  const handleDisconnect = async (targetId) => {
+    if (!window.confirm("Sever this scholarly bond?")) return;
+    try {
+      await userService.disconnect(targetId);
+      // Refresh user profile to update local connections list
+      if (fetchProfile) await fetchProfile();
+    } catch (error) {
+      console.error("Disconnect Error:", error);
+    }
+  };
+
+  const hasRequested = (targetId) => {
+    return connectionRequests.some(req =>
+      (req.recipientId === targetId || req.recipientId?._id === targetId || req.to === targetId) &&
+      (req.senderId === currentUser?._id || req.senderId?._id === currentUser?._id || req.from === currentUser?._id) &&
+      req.status === 'pending'
+    );
+  };
+
+  const isConnected = (targetId) => {
+    return currentUser?.connections?.some(conn => {
+      const connId = typeof conn === 'string' ? conn : conn._id;
+      return connId === targetId;
+    });
   };
 
   return (
     <div className="explore-dashboard-view">
-      
+
       <div className="secondary-search-wrap">
-        <SearchBar 
-          placeholder="Search scholars by name or alias..." 
-          value={searchQuery} 
+        <SearchBar
+          placeholder="Search scholars by name or alias..."
+          value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="secondary-search-input"
         />
@@ -79,10 +133,11 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
             const avatarIndex = hash % avatars.length;
             const cardNumber = 'NL-' + (hash % 90000 + 10000);
             const rank = profile.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar';
-            const requestSent = hasRequested(profile.email);
+            const requestSent = hasRequested(profile._id);
+            const connected = isConnected(profile._id);
 
             return (
-              <div key={profile.email} className="explore-card-wrap">
+              <div key={profile._id} className="explore-card-wrap">
                 <div className="scholar-identity-card">
                   <div className="card-ornament top-left"></div>
                   <div className="card-ornament top-right"></div>
@@ -119,14 +174,23 @@ const Explore = ({ currentUser, users, connectionRequests, setConnectionRequests
                   </div>
 
                   <div className="explore-card-actions">
-                    <button 
-                      className={`action-btn-connect ${requestSent ? 'requested' : ''}`}
-                      onClick={() => !requestSent && handleSendRequest(profile)}
-                      onDoubleClick={() => requestSent && handleCancelRequest(profile.email)}
-                      title={requestSent ? "Double click to cancel request" : "Click to send connection request"}
-                    >
-                      {requestSent ? 'REQUEST SENT' : 'SEND CONNECTION REQUEST'}
-                    </button>
+                    {connected ? (
+                      <button
+                        className="action-btn-connect requested"
+                        onClick={() => handleDisconnect(profile._id)}
+                        title="Click to remove connection"
+                      >
+                        REMOVE CONNECTION
+                      </button>
+                    ) : (
+                      <button
+                        className={`action-btn-connect ${requestSent ? 'requested' : ''}`}
+                        onClick={() => requestSent ? handleCancelRequest(profile._id) : handleSendRequest(profile)}
+                        title={requestSent ? "Click to cancel request" : "Click to send connection request"}
+                      >
+                        {requestSent ? 'REQUEST SENT' : 'SEND CONNECTION REQUEST'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

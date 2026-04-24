@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { authService, userService } from '../../services/api';
 import './MyProfile.css';
 import avatar1 from '../Images/Avatars/avatar1.png';
 import avatar2 from '../Images/Avatars/avatar2.png';
@@ -19,37 +20,32 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
   });
 
   const [activeTab, setActiveTab] = useState('card');
-  const [connections, setConnections] = useState([
-    { email: 'eleanor@nocturne.lib', name: 'Eleanor Vance', role: 'Chief Archivist', status: 'CONNECTED' },
-    { email: 'arthur@nocturne.lib', name: 'Arthur Pym', role: 'Field Researcher', status: 'CONNECTED' },
-    { email: 'lenore@nocturne.lib', name: 'Lenore Raven', role: 'Lyrical Poet', status: 'CONNECTED' },
-    { email: 'roderick@nocturne.lib', name: 'Roderick Usher', role: 'Musical Surgeon', status: 'CONNECTED' },
-    { email: 'beatrix@nocturne.lib', name: 'Beatrix Thorne', role: 'Botanist', status: 'CONNECTED' }
-  ]);
+  const [localConnections, setLocalConnections] = useState([]);
 
-  const acceptedRequests = connectionRequests.filter(req => 
-    (req.to?.toLowerCase() === user?.email?.toLowerCase() || req.from?.toLowerCase() === user?.email?.toLowerCase()) && req.status === 'accepted'
-  ).map(req => {
-    const isFromMe = req.from?.toLowerCase() === user?.email?.toLowerCase();
-    return {
-      email: isFromMe ? req.to : req.from,
-      name: isFromMe ? (req.toName || 'Fellow Scholar') : (req.fromName || 'Fellow Scholar'),
-      role: isFromMe ? (req.toRole || 'Scholar') : (req.fromRole || req.role || 'Scholar'),
-      status: 'CONNECTED',
-      isRequest: true
-    };
-  });
+  useEffect(() => {
+    const accepted = (user?.connections || []).map(conn => ({
+      ...conn,
+      name: conn.fullName || conn.username,
+      role: conn.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
+      status: 'CONNECTED'
+    }));
+    setLocalConnections(accepted);
+  }, [user?.connections]);
 
-  const allConnections = [...connections, ...acceptedRequests];
+  const handleRemoveConnection = async (conn) => {
+    const targetId = conn._id;
+    if (!window.confirm(`Sever scholarly bond with ${conn.name}?`)) return;
 
-  const handleRemoveConnection = (conn) => {
-    if (conn.isRequest) {
-      setConnectionRequests(connectionRequests.filter(req => 
-        !((req.from?.toLowerCase() === user.email?.toLowerCase() && req.to?.toLowerCase() === conn.email?.toLowerCase()) || 
-          (req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === conn.email?.toLowerCase()))
-      ));
-    } else {
-      setConnections(connections.filter(c => c.email?.toLowerCase() !== conn.email?.toLowerCase()));
+    // Optimistically remove from local view instantly
+    setLocalConnections(prev => prev.filter(c => c._id !== targetId));
+
+    try {
+      await userService.disconnect(targetId);
+      if (fetchProfile) await fetchProfile();
+    } catch (error) {
+      console.error("Connection Error:", error);
+      // Revert/Refresh if it fails
+      if (fetchProfile) await fetchProfile();
     }
   };
 
@@ -82,27 +78,36 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
     setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
   };
 
-  const handlePasswordSubmit = () => {
+  const handlePasswordSubmit = async () => {
     if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
-        alert("Please explicitly state current, new, and confirm keys.");
-        return;
+      alert("Please explicitly state current, new, and confirm keys.");
+      return;
     }
     if (passwordForm.new.length < 6) {
-        alert("Your new Vault Key must be at least 6 characters.");
-        return;
+      alert("Your new Vault Key must be at least 6 characters.");
+      return;
     }
     if (passwordForm.new !== passwordForm.confirm) {
-        alert("Your confirmation key does not match the new key.");
-        return;
+      alert("Your confirmation key does not match the new key.");
+      return;
     }
-    alert("Security Vault parameters updated successfully.");
-    setPasswordForm({ current: '', new: '', confirm: '' });
+
+    try {
+      await authService.changePassword({
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.new
+      });
+      alert("Security Vault parameters updated successfully.");
+      setPasswordForm({ current: '', new: '', confirm: '' });
+    } catch (error) {
+      alert(error.response?.data?.message || "Password update failed. The vault remains locked.");
+    }
   };
 
   return (
     <div className="profile-dashboard-view">
       <div className="profile-card-hub">
-        
+
         {/* THE SCHOLAR CARD - Always the base on mobile */}
         {((activeTab === 'card' && window.innerWidth > 768) || (window.innerWidth <= 768 && activeTab === 'card')) && (
           <div className="scholar-identity-card">
@@ -175,16 +180,23 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
             </div>
             <h2 className="ledger-title">CONNECTIONS</h2>
             <div className="ledger-list">
-              {allConnections.map(c => (
-                <div key={c.email} className="ledger-item">
-                  <div className="ledger-item-icon">{c.name.charAt(0)}</div>
-                  <div className="ledger-item-info">
-                    <span className="ledger-item-name">{c.name}</span>
-                    <span className="ledger-item-role">{c.role}</span>
+              {localConnections.length > 0 ? (
+                localConnections.map(c => (
+                  <div key={c._id || c.email} className="ledger-item">
+                    <div className="ledger-item-icon">{c.name ? c.name.charAt(0) : '?'}</div>
+                    <div className="ledger-item-info">
+                      <span className="ledger-item-name">{c.name}</span>
+                      <span className="ledger-item-role">{c.role}</span>
+                    </div>
+                    <button className="ledger-remove" onClick={() => handleRemoveConnection(c)}>&times;</button>
                   </div>
-                  <button className="ledger-remove" onClick={() => handleRemoveConnection(c)}>&times;</button>
+                ))
+              ) : (
+                <div className="empty-ledger-message">
+                  <p>Your scholarly network is currently empty.</p>
+                  <p className="hint">Visit the Explore tab to find other seekers of knowledge.</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
@@ -196,7 +208,7 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
               <button className="back-btn" onClick={() => setActiveTab('card')}>← BACK TO IDENTITY</button>
             </div>
             <h2 className="ledger-title">SECURITY VAULT</h2>
-            
+
             <div className="vault-fields">
               <div className="vault-group">
                 <label>CURRENT PASSWORD</label>

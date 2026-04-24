@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { authService } from '../../services/api';
 import './Signup.css';
 import { IconEye } from '../common/Icons';
 import FormCard from '../common/FormCard';
@@ -22,7 +23,7 @@ const Signup = ({ onToggle, onSignupSuccess }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       alert("Please enter a valid correspondence email address.");
@@ -36,12 +37,20 @@ const Signup = ({ onToggle, onSignupSuccess }) => {
       alert("Passwords do not match!");
       return;
     }
-    onSignupSuccess && onSignupSuccess({
-      fullName: formData.fullName,
-      username: formData.username,
-      email: formData.email,
-      password: formData.password
-    });
+
+    try {
+      const response = await authService.signup({
+        fullName: formData.fullName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      alert("Welcome to the registry. Please sign in.");
+      onSignupSuccess && onSignupSuccess(response.data);
+    } catch (error) {
+      alert(error.response?.data?.message || "Registration failed. The ink may have run dry.");
+    }
   };
 
   return (

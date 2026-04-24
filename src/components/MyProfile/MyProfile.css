@@ -674,3 +674,38 @@
 @media screen and (min-width: 769px) {
   .show-on-mobile { display: none !important; }
 }
+
+.pending-arrow {
+  color: #c4a572;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+.pending-status {
+  color: #9d8c6d !important;
+  font-style: italic;
+  font-size: 0.75rem !important;
+}
+
+.ledger-item-role.pending-status::before {
+  content: "⌛ ";
+}
+
+.empty-ledger-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--oxford-brown);
+  font-family: var(--font-body);
+  opacity: 0.6;
+}
+
+.empty-ledger-message p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-ledger-message .hint {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--faded-gold);
+}

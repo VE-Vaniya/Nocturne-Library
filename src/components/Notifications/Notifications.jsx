@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { notificationService } from '../../services/api';
 import './Notifications.css';
 
 const IconMail = () => (
@@ -19,7 +20,7 @@ const IconStar = () => (
   </svg>
 );
 
-const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnectionRequests, user }) => {
+const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnectionRequests, user, fetchProfile }) => {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -55,31 +56,49 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
     }
   ]);
 
+  const [apiNotifications, setApiNotifications] = useState([]);
   const [selectedNotif, setSelectedNotif] = useState(null);
 
-  console.log("Notifications for:", user?.email);
-  console.log("All connection requests:", connectionRequests);
-  
-  const pendingRequests = connectionRequests.filter(req => 
-    req.to?.toLowerCase() === user?.email?.toLowerCase() && 
-    req.status === 'pending'
+  useEffect(() => {
+    if (isOpen) {
+      const fetchNotifications = async () => {
+        try {
+          const response = await notificationService.getNotifications();
+          setApiNotifications(response.data);
+        } catch (error) {
+          console.error("Failed to fetch notifications:", error);
+        }
+      };
+      fetchNotifications();
+    }
+  }, [isOpen]);
+
+  const pendingRequests = apiNotifications.filter(notif => 
+    notif.type === 'connection_request' && notif.status === 'pending'
   );
 
   console.log("Filtered Pending Requests:", pendingRequests);
 
-  const handleAccept = (fromEmail) => {
-    setConnectionRequests(connectionRequests.map(req =>
-      (req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === fromEmail.toLowerCase()) 
-        ? { ...req, status: 'accepted' } 
-        : req
-    ));
-    alert("Connection request accepted! They are now in your scholarly network.");
+  const handleAccept = async (notifId) => {
+    try {
+      await notificationService.respond(notifId, 'accepted');
+      setApiNotifications(apiNotifications.map(n => 
+        n._id === notifId ? { ...n, status: 'accepted' } : n
+      ));
+      if (fetchProfile) await fetchProfile();
+      alert("Connection request accepted!");
+    } catch (error) {
+      alert("Failed to accept request.");
+    }
   };
 
-  const handleDecline = (fromEmail) => {
-    setConnectionRequests(connectionRequests.filter(req =>
-      !(req.to?.toLowerCase() === user.email?.toLowerCase() && req.from?.toLowerCase() === fromEmail.toLowerCase())
-    ));
+  const handleDecline = async (notifId) => {
+    try {
+      await notificationService.respond(notifId, 'rejected');
+      setApiNotifications(apiNotifications.filter(n => n._id !== notifId));
+    } catch (error) {
+      alert("Failed to decline request.");
+    }
   };
 
 
@@ -118,7 +137,7 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
             <div className="notif-section">
               <div className="notif-section-header">SCHOLARLY REQUESTS</div>
               {pendingRequests.map(req => (
-                <div key={req.from} className="notif-item request-item" style={{ cursor: 'default' }}>
+                <div key={req._id} className="notif-item request-item" style={{ cursor: 'default' }}>
                   <div className="notif-icon-wrap" style={{ background: 'rgba(196, 165, 114, 0.2)' }}>
                     <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                       <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M20 8v6M23 11h-6" />
@@ -126,13 +145,13 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
                   </div>
                   <div className="notif-content">
                     <div className="notif-title-row">
-                      <span className="notif-title">{req.fromName || 'Fellow Scholar'}</span>
-                      <span className="notif-time">{req.fromRole || req.role || 'Scholar'}</span>
+                      <span className="notif-title">{req.senderId?.fullName || 'Fellow Scholar'}</span>
+                      <span className="notif-time">@{req.senderId?.username || 'scholar'}</span>
                     </div>
-                    <p className="notif-message-preview">Greetings! A fellow seeker of knowledge, <strong>{req.fromName || 'a resident scholar'}</strong>, wishes to join your intellectual circle.</p>
+                    <p className="notif-message-preview">{req.message}</p>
                     <div className="request-actions" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                      <button className="req-btn accept" onClick={() => handleAccept(req.from)}>ACCEPT</button>
-                      <button className="req-btn decline" onClick={() => handleDecline(req.from)}>REJECT</button>
+                      <button className="req-btn accept" onClick={() => handleAccept(req._id)}>ACCEPT</button>
+                      <button className="req-btn decline" onClick={() => handleDecline(req._id)}>REJECT</button>
                     </div>
                   </div>
                 </div>
