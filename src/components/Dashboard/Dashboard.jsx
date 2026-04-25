@@ -21,6 +21,13 @@ import StatCard from '../common/StatCard';
 import ProgressBar from '../common/ProgressBar';
 import SectionRule from '../common/SectionRule';
 import SearchBar from '../common/SearchBar';
+import avatar1 from '../Images/Avatars/avatar1.png';
+import avatar2 from '../Images/Avatars/avatar2.png';
+import avatar3 from '../Images/Avatars/avatar3.png';
+import avatar4 from '../Images/Avatars/avatar4.png';
+import avatar5 from '../Images/Avatars/avatar5.png';
+
+const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
 /* ── Component ────────────────────────────────────── */
 const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, users, setUsers, connectionRequests, setConnectionRequests, fetchProfile }) => {
@@ -124,8 +131,17 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
         </nav>
 
         <div className="sidebar-footer">
-          <button className="cr-action-btn" onClick={onLogout} title="Logout" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            <IconLogout /> SECURE LOGOUT
+          <div className="sidebar-user-brief">
+            <div className="user-brief-avatar">
+              <img src={avatars[user?.avatar ? parseInt(user.avatar) : 0]} alt="User Avatar" />
+            </div>
+            <div className="user-brief-info">
+              <div className="user-brief-name">{user?.fullName || 'Scholar'}</div>
+              <div className="user-brief-rank">{user?.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar'}</div>
+            </div>
+          </div>
+          <button className="cr-action-btn logout-btn" onClick={onLogout} title="Logout">
+            <IconLogout /> LOGOUT
           </button>
         </div>
       </aside>
@@ -161,6 +177,9 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
                 <span className="notif-dot"></span>
               )}
             </button>
+            <div className="topbar-avatar" onClick={() => setActiveNav('My Profile')} title="View Profile">
+              <img src={avatars[user?.avatar ? parseInt(user.avatar) : 0]} alt="Profile" />
+            </div>
           </div>
         </header>
 

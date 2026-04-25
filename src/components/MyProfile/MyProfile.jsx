@@ -9,18 +9,20 @@ import avatar5 from '../Images/Avatars/avatar5.png';
 
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => {
+const MyProfile = ({ user, connectionRequests = [], setConnectionRequests, fetchProfile }) => {
   const [profile, setProfile] = useState({
     username: user?.username || 'Scholar',
     fullName: user?.fullName || 'Midnight Reader',
     email: user?.email || 'reader@nocturne.lib',
-    avatarIndex: 0,
+    avatarIndex: user?.avatar ? parseInt(user.avatar) : 0,
     rank: user?.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar',
     cardNumber: 'NL-' + Math.floor(Math.random() * 90000 + 10000)
   });
 
   const [activeTab, setActiveTab] = useState('card');
   const [localConnections, setLocalConnections] = useState([]);
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+  const [selectedAvatarTemp, setSelectedAvatarTemp] = useState(profile.avatarIndex);
 
   useEffect(() => {
     const accepted = (user?.connections || []).map(conn => ({
@@ -62,16 +64,40 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
         username: user.username,
         fullName: user.fullName,
         email: user.email,
+        // Only update avatarIndex if it's different from current to avoid flickering/reset
+        avatarIndex: user.avatar !== undefined && user.avatar !== null 
+          ? parseInt(user.avatar) 
+          : prev.avatarIndex,
         rank: user.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar'
       }));
     }
   }, [user]);
 
-  const handleDoubleClickAvatar = () => {
+  const handleOpenAvatarEditor = () => {
+    setSelectedAvatarTemp(profile.avatarIndex);
+    setIsEditingAvatar(true);
+  };
+
+  const handleSaveAvatar = async () => {
+    // Update locally first
     setProfile(prev => ({
       ...prev,
-      avatarIndex: (prev.avatarIndex + 1) % avatars.length
+      avatarIndex: selectedAvatarTemp
     }));
+    setIsEditingAvatar(false);
+
+    try {
+      await userService.updateAvatar(selectedAvatarTemp.toString());
+      if (fetchProfile) await fetchProfile();
+    } catch (error) {
+      console.error("Failed to update avatar:", error);
+      const errorMsg = error.response?.data?.message || error.message;
+      alert(`Archive update failed: ${errorMsg}. Reverting portrait.`);
+      setProfile(prev => ({
+        ...prev,
+        avatarIndex: user?.avatar ? parseInt(user.avatar) : 0
+      }));
+    }
   };
 
   const handlePasswordChange = (e) => {
@@ -125,9 +151,11 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
             </div>
 
             <div className="scholar-card-main">
-              <div className="scholar-portrait-wrap" onDoubleClick={handleDoubleClickAvatar} title="Double-click to cycle portrait">
+              <div className="scholar-portrait-wrap">
                 <img src={avatars[profile.avatarIndex]} alt="Scholar" className="scholar-portrait" />
-                <div className="portrait-hint">DBL CLICK TO CHANGE</div>
+                <button className="edit-portrait-btn" onClick={handleOpenAvatarEditor}>
+                  EDIT PORTRAIT
+                </button>
               </div>
 
               <div className="scholar-details">
@@ -234,6 +262,31 @@ const MyProfile = ({ user, connectionRequests = [], setConnectionRequests }) => 
           <button className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>SECURITY</button>
         </div>
       </div>
+      {/* AVATAR SELECTION MODAL */}
+      {isEditingAvatar && (
+        <div className="avatar-modal-overlay">
+          <div className="avatar-modal-card">
+            <h2 className="ledger-title">SELECT PORTRAIT</h2>
+            <div className="avatar-grid">
+              {avatars.map((img, idx) => (
+                <div 
+                  key={idx} 
+                  className={`avatar-option ${selectedAvatarTemp === idx ? 'selected' : ''}`}
+                  onClick={() => setSelectedAvatarTemp(idx)}
+                  onDoubleClick={handleSaveAvatar}
+                >
+                  <img src={img} alt={`Avatar ${idx + 1}`} />
+                  {selectedAvatarTemp === idx && <div className="selected-check">✓</div>}
+                </div>
+              ))}
+            </div>
+            <div className="avatar-modal-actions">
+              <button className="vault-submit cancel" onClick={() => setIsEditingAvatar(false)}>CANCEL</button>
+              <button className="vault-submit" onClick={handleSaveAvatar}>SAVE PORTRAIT</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

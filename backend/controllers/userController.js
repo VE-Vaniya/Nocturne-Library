@@ -136,4 +136,26 @@ const removeConnection = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, sendConnectionRequest, getOutgoingRequests, cancelConnectionRequest, removeConnection };
+// @desc    Update user avatar
+// @route   PUT /api/users/avatar
+const updateAvatar = async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    
+    // Use findById and save to ensure all hooks and simple logic work
+    const user = await User.findById(req.user._id);
+    
+    if (user) {
+      user.avatar = avatar;
+      await user.save();
+      res.json({ message: 'Avatar updated successfully', avatar: user.avatar });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error("Avatar Update Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getUsers, sendConnectionRequest, getOutgoingRequests, cancelConnectionRequest, removeConnection, updateAvatar };

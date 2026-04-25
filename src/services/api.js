@@ -31,6 +31,7 @@ export const userService = {
   getUsers: () => api.get('/users'),
   getSentRequests: () => api.get('/users/requests/sent'),
   connect: (id) => api.post(`/users/connect/${id}`),
+  updateAvatar: (avatar) => api.put('/users/avatar', { avatar }),
   cancelConnect: (id) => api.delete(`/users/connect/${id}`),
   disconnect: (id) => api.delete(`/users/disconnect/${id}`),
 };

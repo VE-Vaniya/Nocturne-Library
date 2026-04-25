@@ -130,7 +130,7 @@ const Explore = ({ currentUser, connectionRequests, setConnectionRequests, fetch
         {filteredUsers.length > 0 ? (
           filteredUsers.map((profile) => {
             const hash = getHash(profile.email);
-            const avatarIndex = hash % avatars.length;
+            const avatarIndex = profile.avatar ? parseInt(profile.avatar) : (hash % avatars.length);
             const cardNumber = 'NL-' + (hash % 90000 + 10000);
             const rank = profile.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar';
             const requestSent = hasRequested(profile._id);

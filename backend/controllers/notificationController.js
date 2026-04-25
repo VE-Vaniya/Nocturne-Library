@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const { sendNotificationEmail } = require('../services/emailService');
 
 // @desc    Get user notifications
 // @route   GET /api/notifications
@@ -32,6 +33,26 @@ const respondToRequest = async (req, res) => {
       // Add to each other's connections (using $addToSet to avoid duplicates)
       await User.findByIdAndUpdate(req.user._id, { $addToSet: { connections: notification.senderId } });
       await User.findByIdAndUpdate(notification.senderId, { $addToSet: { connections: req.user._id } });
+
+      // Send Email Notification to the original sender
+      const originalSender = await User.findById(notification.senderId);
+      if (originalSender && originalSender.email) {
+        await sendNotificationEmail(
+          originalSender.email,
+          'Connection Request Accepted - Nocturne Library',
+          `${req.user.fullName} (${req.user.email}) has accepted your connection request on Nocturne library`,
+          `<div style="font-family: 'Playfair Display', serif; padding: 20px; background-color: #f4f1ea; border: 1px solid #d1c5a9;">
+            <h2 style="color: #4a3e35;">Connection Request Accepted</h2>
+            <p style="font-size: 16px; color: #5a4d41;">
+              <b>${req.user.fullName}</b> (${req.user.email}) has accepted your connection request on Nocturne library.
+            </p>
+            <p style="font-size: 14px; color: #796e62; font-style: italic;">
+              You are now connected in the sanctuary.
+            </p>
+          </div>`
+        );
+      }
+
       res.json({ message: `Request ${status}` });
     } else {
       await Notification.findByIdAndDelete(req.params.id);
