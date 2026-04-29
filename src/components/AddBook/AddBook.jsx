@@ -35,13 +35,22 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
            return;
         }
 
+        let base64Cover = null;
+        if (formData.cover) {
+            base64Cover = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(formData.cover);
+            });
+        }
+
         const newBookData = {
             title: formData.title,
             author: formData.author,
             genre: formData.genre,
             status: 'wishlist',
             progress: '0 / 0 pages',
-            coverImage: preview || null
+            coverImage: base64Cover || preview || null
         };
         
         try {

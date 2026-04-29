@@ -56,33 +56,19 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
     }
   ]);
 
-  const [apiNotifications, setApiNotifications] = useState([]);
   const [selectedNotif, setSelectedNotif] = useState(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      const fetchNotifications = async () => {
-        try {
-          const response = await notificationService.getNotifications();
-          setApiNotifications(response.data);
-        } catch (error) {
-          console.error("Failed to fetch notifications:", error);
-        }
-      };
-      fetchNotifications();
-    }
-  }, [isOpen]);
-
-  const pendingRequests = apiNotifications.filter(notif => 
-    notif.type === 'connection_request' && notif.status === 'pending'
+  const pendingRequests = connectionRequests.filter(notif => 
+    notif.type === 'connection_request' && 
+    notif.status === 'pending' &&
+    // Only show INCOMING requests in this panel
+    (notif.senderId?._id !== user?._id && notif.senderId !== user?._id)
   );
-
-  console.log("Filtered Pending Requests:", pendingRequests);
 
   const handleAccept = async (notifId) => {
     try {
       await notificationService.respond(notifId, 'accepted');
-      setApiNotifications(apiNotifications.map(n => 
+      setConnectionRequests(connectionRequests.map(n => 
         n._id === notifId ? { ...n, status: 'accepted' } : n
       ));
       if (fetchProfile) await fetchProfile();
@@ -95,7 +81,7 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
   const handleDecline = async (notifId) => {
     try {
       await notificationService.respond(notifId, 'rejected');
-      setApiNotifications(apiNotifications.filter(n => n._id !== notifId));
+      setConnectionRequests(connectionRequests.filter(n => n._id !== notifId));
     } catch (error) {
       alert("Failed to decline request.");
     }

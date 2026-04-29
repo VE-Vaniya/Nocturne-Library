@@ -48,8 +48,8 @@ const Library = ({ books, setBooks, setActiveNav }) => {
         {filteredBooks.map(book => (
           <div key={book.id} className="library-card">
             <div className="library-card-img-wrap">
-              {book.coverPreview ? (
-                <img src={book.coverPreview} alt={book.title} className="library-card-img" />
+              {(book.coverImage || book.coverPreview) ? (
+                <img src={book.coverImage || book.coverPreview} alt={book.title} className="library-card-img" />
               ) : (
                 <div className="library-cover-placeholder">
                   <span className="placeholder-text">{book.title.charAt(0).toUpperCase()}</span>

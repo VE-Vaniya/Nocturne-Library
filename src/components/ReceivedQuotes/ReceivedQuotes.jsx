@@ -5,28 +5,40 @@ import SearchBar from '../common/SearchBar';
 const ReceivedQuotes = ({ receivedQuotes, quotes, setQuotes }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredMissives = receivedQuotes.filter(q => 
-    q.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    q.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    q.bookTitle.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMissives = (receivedQuotes || []).filter(q => {
+    const sender = q.senderName || q.sender || 'Unknown';
+    const text = q.text || '';
+    const author = q.author || '';
+    const bookTitle = q.bookTitle || '';
+    
+    return sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           bookTitle.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
-  const handleAddToGallery = (quote) => {
+  const handleAddToGallery = async (quote) => {
     const isAlreadyAdded = quotes.some(q => q.text === quote.text && q.author === quote.author);
     if (isAlreadyAdded) {
       alert('This missive is already in your Quotations Archive.');
       return;
     }
-    const newQuote = {
-      id: Date.now().toString(),
+    const newQuoteData = {
       text: quote.text,
-      author: quote.author,
-      bookTitle: quote.bookTitle,
-      pageNumber: quote.pageNumber
+      author: quote.author || 'Unknown',
+      bookTitle: quote.bookTitle || '',
+      pageNumber: quote.pageNumber || ''
     };
-    setQuotes([...quotes, newQuote]);
-    alert('Missive successfully transcribed to your Quotations Archive.');
+    
+    try {
+      const { quoteService } = await import('../../services/api');
+      const response = await quoteService.addQuote(newQuoteData);
+      setQuotes([...quotes, response.data]);
+      alert('Missive successfully transcribed to your Quotations Archive.');
+    } catch (error) {
+      console.error("Failed to add missive to gallery", error);
+      alert("Failed to archive the missive.");
+    }
   };
 
   return (
@@ -53,7 +65,7 @@ const ReceivedQuotes = ({ receivedQuotes, quotes, setQuotes }) => {
              <div key={q.id} className="rq-missive-card">
                 <div className="missive-sender-bar">
                    <span className="missive-icon">✉</span>
-                   From: <strong className="m-sender">{q.sender}</strong>
+                   From: <strong className="m-sender">{q.senderName || q.sender || 'Unknown'}</strong>
                 </div>
                 <div className="missive-body">
                    <div className="missive-text">"{q.text}"</div>
