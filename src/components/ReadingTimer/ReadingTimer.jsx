@@ -42,25 +42,53 @@ const ReadingTimer = ({ quotes, setQuotes, books, setBooks, user }) => {
     setMode('concluding');
   };
 
-  const handleFinalConclude = () => {
+  const handleFinalConclude = async () => {
+    let newTags = [];
+    let updatedPageNumber = null;
+
     if (pageNumber || moodTags) {
       const bookIndex = books.findIndex(b => b.title === selectedBook);
       if (bookIndex !== -1) {
-        const updatedBooks = [...books];
-        const currentBook = updatedBooks[bookIndex];
+        const currentBook = books[bookIndex];
         
-        let newTags = currentBook.moodTags || [];
+        newTags = currentBook.moodTags || [];
         if (moodTags) {
           const parsedTags = moodTags.split(',').map(t => t.trim()).filter(t => t);
           newTags = [...new Set([...newTags, ...parsedTags])];
         }
 
-        updatedBooks[bookIndex] = {
-          ...currentBook,
-          lastPageRead: pageNumber || currentBook.lastPageRead || 0,
-          moodTags: newTags
-        };
-        setBooks(updatedBooks);
+        updatedPageNumber = pageNumber || currentBook.lastPageRead || 0;
+
+        try {
+          const { bookService } = await import('../../services/api');
+          await bookService.updateBook(currentBook._id || currentBook.id, {
+            lastPageRead: updatedPageNumber,
+            moodTags: newTags
+          });
+
+          const updatedBooks = [...books];
+          updatedBooks[bookIndex] = {
+            ...currentBook,
+            lastPageRead: updatedPageNumber,
+            moodTags: newTags
+          };
+          setBooks(updatedBooks);
+        } catch (error) {
+          console.error("Failed to update book progress", error);
+        }
+      }
+    }
+
+    // Update reading stats
+    if (elapsed > 0) {
+      try {
+        const { userService } = await import('../../services/api');
+        await userService.updateReadingStats({
+          elapsedSeconds: elapsed,
+          pagesRead: pageNumber ? Number(pageNumber) : 0
+        });
+      } catch (error) {
+        console.error("Failed to update reading stats", error);
       }
     }
 
@@ -71,20 +99,26 @@ const ReadingTimer = ({ quotes, setQuotes, books, setBooks, user }) => {
     setQuoteFormOpen(false);
   };
 
-  const handleLogQuote = () => {
+  const handleLogQuote = async () => {
     if (!quoteText) return;
     const newQuote = {
-      id: Date.now().toString(),
       text: quoteText,
       author: books.find(b => b.title === selectedBook)?.author || 'Unknown',
       bookTitle: selectedBook,
       pageNumber: quotePage,
     };
-    setQuotes([...quotes, newQuote]);
-    setQuoteText('');
-    setQuotePage('');
-    setQuoteFormOpen(false);
-    alert('Quote securely archived in Quotations Gallery.');
+    try {
+      const { quoteService } = await import('../../services/api');
+      const response = await quoteService.addQuote(newQuote);
+      setQuotes([...quotes, response.data]);
+      setQuoteText('');
+      setQuotePage('');
+      setQuoteFormOpen(false);
+      alert('Quote securely archived in Quotations Gallery.');
+    } catch (error) {
+      console.error("Failed to log quote", error);
+      alert("Failed to log quote to the archive.");
+    }
   };
 
   // Format time MM:SS or HH:MM:SS

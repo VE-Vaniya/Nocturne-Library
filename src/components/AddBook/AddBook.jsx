@@ -27,7 +27,7 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!formData.title.trim() || !formData.author.trim() || !formData.genre.trim()) {
@@ -35,23 +35,29 @@ const AddBook = ({ books, setBooks, setActiveNav }) => {
            return;
         }
 
-        const newBook = {
-            id: Date.now().toString(),
+        const newBookData = {
             title: formData.title,
             author: formData.author,
             genre: formData.genre,
-            status: 'to-be-read',
+            status: 'wishlist',
             progress: '0 / 0 pages',
-            coverPreview: preview || null
+            coverImage: preview || null
         };
         
-        setBooks([...books, newBook]);
-        
-        alert(`Book "${formData.title}" added to your library!`);
-        setFormData({ title: '', author: '', genre: '', cover: null });
-        setPreview(null);
-        if (setActiveNav) {
-            setActiveNav('Library');
+        try {
+            const { bookService } = await import('../../services/api');
+            const response = await bookService.addBook(newBookData);
+            setBooks([...books, response.data]);
+            
+            alert(`Book "${formData.title}" added to your library!`);
+            setFormData({ title: '', author: '', genre: '', cover: null });
+            setPreview(null);
+            if (setActiveNav) {
+                setActiveNav('Library');
+            }
+        } catch (error) {
+            console.error("Failed to add book", error);
+            alert("Failed to add book to the archive.");
         }
     };
 

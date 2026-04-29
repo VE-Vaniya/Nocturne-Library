@@ -12,7 +12,9 @@ const bookSchema = new mongoose.Schema({
   },
   progress: { type: String }, // e.g., "351 / 551"
   coverImage: { type: String }, // URL or Binary data for the book cover
-  lastRead: { type: Date, default: Date.now }
+  lastRead: { type: Date, default: Date.now },
+  moodTags: [{ type: String }],
+  lastPageRead: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('Book', bookSchema);

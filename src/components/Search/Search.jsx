@@ -36,23 +36,29 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
     book.genre.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleAddBook = (book) => {
+  const handleAddBook = async (book) => {
     if (books.some(b => b.title === book.title)) {
       alert(`${book.title} is already in your library.`);
       return;
     }
-    const newBook = {
-      id: Date.now().toString(),
+    const newBookData = {
       title: book.title,
       author: book.author,
       genre: book.genre,
-      status: 'to-be-read',
-      coverPreview: book.image,
+      status: 'wishlist',
+      coverImage: book.image,
       lastPageRead: 0,
       moodTags: []
     };
-    setBooks([...books, newBook]);
-    alert(`${book.title} has been added to your Archives.`);
+    try {
+      const { bookService } = await import('../../services/api');
+      const response = await bookService.addBook(newBookData);
+      setBooks([...books, response.data]);
+      alert(`${book.title} has been added to your Archives.`);
+    } catch (error) {
+      console.error("Failed to add book", error);
+      alert("Failed to add book to the archive.");
+    }
   };
 
   return (

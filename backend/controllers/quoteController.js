@@ -62,4 +62,50 @@ const shareQuote = async (req, res) => {
   }
 };
 
-module.exports = { shareQuote };
+// @desc    Get all personal quotes
+// @route   GET /api/quotes
+const getQuotes = async (req, res) => {
+  try {
+    const quotes = await Quote.find({ ownerId: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json(quotes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Add a personal quote
+// @route   POST /api/quotes
+const addQuote = async (req, res) => {
+  const { text, author, bookTitle } = req.body;
+  try {
+    const quote = await Quote.create({
+      ownerId: req.user._id,
+      text,
+      author,
+      bookTitle
+    });
+    res.status(201).json(quote);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete a quote
+// @route   DELETE /api/quotes/:id
+const deleteQuote = async (req, res) => {
+  try {
+    const quote = await Quote.findById(req.params.id);
+    if (!quote) {
+      return res.status(404).json({ message: 'Quote not found' });
+    }
+    if (quote.ownerId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'User not authorized' });
+    }
+    await quote.remove();
+    res.status(200).json({ id: req.params.id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { shareQuote, getQuotes, addQuote, deleteQuote };

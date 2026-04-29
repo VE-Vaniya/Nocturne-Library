@@ -34,6 +34,7 @@ export const userService = {
   updateAvatar: (avatar) => api.put('/users/avatar', { avatar }),
   cancelConnect: (id) => api.delete(`/users/connect/${id}`),
   disconnect: (id) => api.delete(`/users/disconnect/${id}`),
+  updateReadingStats: (stats) => api.put('/users/reading-stats', stats),
 };
 
 export const notificationService = {
@@ -42,7 +43,21 @@ export const notificationService = {
 };
 
 export const quoteService = {
+  getQuotes: () => api.get('/quotes'),
+  addQuote: (quoteData) => api.post('/quotes', quoteData),
+  deleteQuote: (id) => api.delete(`/quotes/${id}`),
   share: (shareData) => api.post('/quotes/share', shareData),
+};
+
+export const bookService = {
+  getBooks: () => api.get('/books'),
+  addBook: (bookData) => api.post('/books', bookData),
+  updateBook: (id, bookData) => api.put(`/books/${id}`, bookData),
+  deleteBook: (id) => api.delete(`/books/${id}`),
+};
+
+export const missiveService = {
+  getMissives: () => api.get('/missives'),
 };
 
 export default api;

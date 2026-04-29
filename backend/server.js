@@ -17,6 +17,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/quotes', require('./routes/quoteRoutes'));
+app.use('/api/books', require('./routes/bookRoutes'));
+app.use('/api/missives', require('./routes/missiveRoutes'));
 
 
 // Basic Route

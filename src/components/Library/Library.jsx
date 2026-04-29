@@ -12,8 +12,14 @@ const Library = ({ books, setBooks, setActiveNav }) => {
     book.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const updateStatus = (id, newStatus) => {
-    setBooks(books.map(b => b.id === id ? { ...b, status: newStatus } : b));
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const { bookService } = await import('../../services/api');
+      await bookService.updateBook(id, { status: newStatus });
+      setBooks(books.map(b => (b._id === id || b.id === id) ? { ...b, status: newStatus } : b));
+    } catch (error) {
+      console.error("Failed to update status", error);
+    }
   };
 
   const getStampClass = (status) => {
@@ -84,7 +90,7 @@ const Library = ({ books, setBooks, setActiveNav }) => {
 
                 <select
                   value={book.status}
-                  onChange={(e) => updateStatus(book.id, e.target.value)}
+                  onChange={(e) => updateStatus(book._id || book.id, e.target.value)}
                   className="status-dropdown-inline"
                 >
                   <option value="to-be-read">TO BE READ</option>

@@ -158,4 +158,40 @@ const updateAvatar = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, sendConnectionRequest, getOutgoingRequests, cancelConnectionRequest, removeConnection, updateAvatar };
+// @desc    Update reading stats
+// @route   PUT /api/users/reading-stats
+const updateReadingStats = async (req, res) => {
+  try {
+    const { elapsedSeconds, pagesRead } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.readingTime += (elapsedSeconds || 0);
+
+      // Check if lastReadDate is today. If not, reset pagesReadToday
+      const today = new Date().setHours(0, 0, 0, 0);
+      const lastReadDate = user.lastReadDate ? new Date(user.lastReadDate).setHours(0, 0, 0, 0) : null;
+
+      if (today !== lastReadDate) {
+        user.pagesReadToday = (pagesRead || 0);
+      } else {
+        user.pagesReadToday += (pagesRead || 0);
+      }
+
+      user.lastReadDate = Date.now();
+
+      await user.save();
+      res.json({
+        readingTime: user.readingTime,
+        pagesReadToday: user.pagesReadToday,
+        lastReadDate: user.lastReadDate
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getUsers, sendConnectionRequest, getOutgoingRequests, cancelConnectionRequest, removeConnection, updateAvatar, updateReadingStats };

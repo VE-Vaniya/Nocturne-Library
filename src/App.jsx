@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { authService, notificationService, userService } from './services/api';
+import { authService, notificationService, userService, bookService, quoteService, missiveService } from './services/api';
 import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -51,47 +51,40 @@ function App() {
     }
   }, [user?.token]);
 
+  const fetchData = useCallback(async () => {
+    if (user && user.token) {
+      try {
+        const [booksRes, quotesRes, missivesRes] = await Promise.all([
+          bookService.getBooks(),
+          quoteService.getQuotes(),
+          missiveService.getMissives()
+        ]);
+        setBooks(booksRes.data);
+        setQuotes(quotesRes.data);
+        setReceivedQuotes(missivesRes.data);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    }
+  }, [user?.token]);
+
   useEffect(() => {
     fetchProfile();
     fetchRequests();
+    fetchData();
 
     // Refresh everything every 10 seconds to keep sender/receiver in sync
     const interval = setInterval(() => {
       fetchProfile();
       fetchRequests();
+      fetchData();
     }, 10000);
     return () => clearInterval(interval);
   }, [fetchProfile, fetchRequests]);
 
-  const [books, setBooks] = useState(() => {
-    const saved = localStorage.getItem('nocturne_books');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', title: 'Crime and Punishment', author: 'Fyodor Dostoevsky', genre: 'Classic Fiction', status: 'currently reading', progress: '351 / 551', coverPreview: null }
-    ];
-  });
-
-  const [quotes, setQuotes] = useState(() => {
-    const saved = localStorage.getItem('nocturne_quotes');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.length > 0) return parsed;
-    }
-    return [
-      { id: 'q1', text: "Deep into that darkness peering, long I stood there wondering, fearing, Doubting, dreaming dreams no mortal ever dared to dream before.", author: "Edgar Allan Poe", bookTitle: "The Raven", pageNumber: "1" },
-      { id: 'q2', text: "I am a forest, and a night of dark trees: but he who is not afraid of my darkness, will find banks full of roses under my cypresses.", author: "Friedrich Nietzsche", bookTitle: "Thus Spoke Zarathustra", pageNumber: "45" },
-      { id: 'q3', text: "The oldest and strongest emotion of mankind is fear, and the oldest and strongest kind of fear is fear of the unknown.", author: "H.P. Lovecraft", bookTitle: "Supernatural Horror in Literature", pageNumber: "12" },
-      { id: 'q4', text: "Whatever our souls are made of, his and mine are the same.", author: "Emily Brontë", bookTitle: "Wuthering Heights", pageNumber: "82" },
-      { id: 'q5', text: "It is better to be hated for what you are than to be loved for what you are not.", author: "André Gide", bookTitle: "Autumn Leaves", pageNumber: "23" },
-      { id: 'q6', text: "There are more things in Heaven and Earth, Horatio, than are dreamt of in your philosophy.", author: "William Shakespeare", bookTitle: "Hamlet", pageNumber: "156" }
-    ];
-  });
-
-  const [receivedQuotes, setReceivedQuotes] = useState(() => {
-    const saved = localStorage.getItem('nocturne_received_quotes');
-    return saved ? JSON.parse(saved) : [
-      { id: '101', text: "We cast a shadow on something wherever we stand", author: "E.M. Forster", sender: "Arthur Pym", bookTitle: "A Room with a View", pageNumber: "124" }
-    ];
-  });
+  const [books, setBooks] = useState([]);
+  const [quotes, setQuotes] = useState([]);
+  const [receivedQuotes, setReceivedQuotes] = useState([]);
 
   const [connectionRequests, setConnectionRequests] = useState([]);
 
@@ -110,10 +103,7 @@ function App() {
     }
   }, [user]);
 
-  React.useEffect(() => { localStorage.setItem('nocturne_books', JSON.stringify(books)); }, [books]);
-  React.useEffect(() => { localStorage.setItem('nocturne_quotes', JSON.stringify(quotes)); }, [quotes]);
-  React.useEffect(() => { localStorage.setItem('nocturne_received_quotes', JSON.stringify(receivedQuotes)); }, [receivedQuotes]);
-  React.useEffect(() => { localStorage.setItem('nocturne_connection_requests', JSON.stringify(connectionRequests)); }, [connectionRequests]);
+  // LocalStorage persistance logic is removed for books/quotes since backend handles it
 
   // DEBUG: Track connection requests
   useEffect(() => {
@@ -123,30 +113,8 @@ function App() {
     }
   }, [user, connectionRequests]);
 
-  // Add dummy requests only if they don't exist at all for this user
-  useEffect(() => {
-    if (user && user.email) {
-      const uEmail = user.email.toLowerCase();
-      const hasXyz = connectionRequests.some(req => req.from === 'xyz@nocturne.lib' && req.to?.toLowerCase() === uEmail);
-      const hasAbc = connectionRequests.some(req => req.from === 'abc@nocturne.lib' && req.to?.toLowerCase() === uEmail);
-      const hasDemo = connectionRequests.some(req => req.from === 'seraphina@nocturne.lib' && req.to?.toLowerCase() === uEmail);
+  // Dummy requests logic removed to rely entirely on backend
 
-      const newReqs = [];
-      if (!hasXyz) {
-        newReqs.push({ from: 'xyz@nocturne.lib', fromName: 'XYZ User', fromRole: 'Avid Reader', to: user.email, status: 'pending' });
-      }
-      if (!hasAbc) {
-        newReqs.push({ from: 'abc@nocturne.lib', fromName: 'Abigail Vanc', fromRole: 'Mystic Archivist', to: user.email, status: 'pending' });
-      }
-      if (!hasDemo) {
-        newReqs.push({ from: 'seraphina@nocturne.lib', fromName: 'Seraphina Thorne', fromRole: 'Eldritch Researcher', to: user.email, status: 'pending' });
-      }
-
-      if (newReqs.length > 0) {
-        setConnectionRequests(prev => [...prev, ...newReqs]);
-      }
-    }
-  }, [user]); // Only run when user session starts
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);

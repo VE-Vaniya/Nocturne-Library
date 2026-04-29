@@ -209,10 +209,10 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
                 </div>
 
                 <div className="stats-row">
-                  <StatCard icon={<IconFlame />} value="14" label="Day Streak" sub="DAYS" colorClass="color-flame" />
-                  <StatCard icon={<IconBookOutline />} value="47" label="Books Read" sub="TOTAL" colorClass="color-gold" />
-                  <StatCard icon={<IconLayout />} value="82" label="Pages Today" sub="PAGES" colorClass="color-brown" />
-                  <StatCard icon={<IconTrophy />} value="3" label="Books Read" sub="THIS MONTH" colorClass="color-green" />
+                  <StatCard icon={<IconFlame />} value="1" label="Day Streak" sub="DAYS" colorClass="color-flame" />
+                  <StatCard icon={<IconBookOutline />} value={books.filter(b => b.status === 'completed').length || 0} label="Books Read" sub="TOTAL" colorClass="color-gold" />
+                  <StatCard icon={<IconLayout />} value={user?.pagesReadToday || 0} label="Pages Today" sub="PAGES" colorClass="color-brown" />
+                  <StatCard icon={<IconTrophy />} value={Math.floor((user?.readingTime || 0) / 60)} label="Minutes Read" sub="TODAY" colorClass="color-green" />
                 </div>
 
                 <div className="bento-grid">
@@ -289,9 +289,9 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
                         <span>READING GOALS</span>
                       </div>
 
-                      <ProgressBar label="Books this year" current="47" total="52" colorClass="fill-gold" widthPercent="90%" />
-                      <ProgressBar label="Pages this week" current="320" total="500" colorClass="fill-orange" widthPercent="64%" />
-                      <ProgressBar label="Minutes read today" current="45" total="60" colorClass="fill-brown" widthPercent="75%" />
+                      <ProgressBar label="Books this year" current={books.filter(b => b.status === 'completed').length || 0} total="10" colorClass="fill-gold" widthPercent={`${Math.min(100, ((books.filter(b => b.status === 'completed').length || 0) / 10) * 100)}%`} />
+                      <ProgressBar label="Pages today" current={user?.pagesReadToday || 0} total="50" colorClass="fill-orange" widthPercent={`${Math.min(100, ((user?.pagesReadToday || 0) / 50) * 100)}%`} />
+                      <ProgressBar label="Minutes read today" current={Math.floor((user?.readingTime || 0) / 60)} total="60" colorClass="fill-brown" widthPercent={`${Math.min(100, (Math.floor((user?.readingTime || 0) / 60) / 60) * 100)}%`} />
                     </div>
                   </div>
                 </div>
