@@ -20,7 +20,7 @@ const IconStar = () => (
   </svg>
 );
 
-const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnectionRequests, user, fetchProfile }) => {
+const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnectionRequests, user, fetchProfile, setHasUnreadAlerts }) => {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -64,6 +64,12 @@ const Notifications = ({ isOpen, onClose, connectionRequests = [], setConnection
     // Only show INCOMING requests in this panel
     (notif.senderId?._id !== user?._id && notif.senderId !== user?._id)
   );
+
+  useEffect(() => {
+    if (setHasUnreadAlerts) {
+      setHasUnreadAlerts(notifications.some(n => n.unread));
+    }
+  }, [notifications, setHasUnreadAlerts]);
 
   const handleAccept = async (notifId) => {
     try {

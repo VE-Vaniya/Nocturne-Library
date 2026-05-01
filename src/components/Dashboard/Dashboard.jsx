@@ -48,6 +48,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [hasUnreadAlerts, setHasUnreadAlerts] = useState(true);
   const today = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
 
   useEffect(() => {
@@ -173,7 +174,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
             <span className="date-text">{today}</span>
             <button className="notif-btn" onClick={() => setNotifOpen(true)}>
               <IconBell />
-              {(connectionRequests.some(r => r.to?.toLowerCase() === user?.email?.toLowerCase() && r.status === 'pending')) && (
+              {(hasUnreadAlerts || connectionRequests.some(r => r.to?.toLowerCase() === user?.email?.toLowerCase() && r.status === 'pending')) && (
                 <span className="notif-dot"></span>
               )}
             </button>
@@ -308,6 +309,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
         setConnectionRequests={setConnectionRequests}
         user={user}
         fetchProfile={fetchProfile}
+        setHasUnreadAlerts={setHasUnreadAlerts}
       />
     </div>
   );
