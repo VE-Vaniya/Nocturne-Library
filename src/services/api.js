@@ -60,4 +60,8 @@ export const missiveService = {
   getMissives: () => api.get('/missives'),
 };
 
+export const searchService = {
+  searchBooks: (query) => api.get(`/search?q=${encodeURIComponent(query)}`),
+};
+
 export default api;

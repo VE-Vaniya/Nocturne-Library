@@ -20,6 +20,7 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/quotes', require('./routes/quoteRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/missives', require('./routes/missiveRoutes'));
+app.use('/api/search', require('./routes/searchRoutes'));
 
 
 // Basic Route
