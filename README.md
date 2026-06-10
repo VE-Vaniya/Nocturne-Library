@@ -1,16 +1,39 @@
-# React + Vite
+# The Cozy Nook – Aesthetic Reading Journal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Introduction
 
-Currently, two official plugins are available:
+The Cozy Nook is an aesthetic digital reading journal designed to help readers document their reading experiences, track progress, and capture memorable quotes while maintaining a cozy and visually pleasing interface. The platform allows users to manage their personal reading library, monitor reading sessions, and record emotional connections with books through mood tags.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This web application primarily targets book lovers, students, and casual readers who want a visually appealing and organized way to track their reading journey and maintain motivation to read regularly.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Technology | Purpose |
+|------------|---------|
+| React | Frontend UI framework |
+| Tailwind CSS | Styling for aesthetic design |
+| Node.js | Backend runtime |
+| Express.js | Backend API framework |
+| MongoDB | Database for storing user data |
+| Spotify API | Ambient music integration |
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Core Functionalities
+
+- **Book Search** - Search for books to add to your library
+- **Digital Bookshelf Dashboard** - Visual bookshelf displaying all books as cover images
+- **Mood Tagging System** - Assign mood tags (cozy, dark academia, light academia, etc.) to track emotional reading experiences
+- **Reading Session Tracker** - Timer interface to track reading duration
+- **Quote Collection Module** - Save favorite quotes with page numbers during or after reading sessions
+- **Ambient Reading Environment** - Spotify integration for background sounds/music
+- **Automatic Progress Saving** - Auto-saves reading progress when updating current page or stopping timer
+- **Quote Gallery** - Browse and revisit all saved quotes from reading journey
+
+## Objectives
+
+- Provide a personalized digital reading journal for organized reading activity tracking
+- Enhance reading experience through quotes, session tracking, and progress monitoring
+- Create an aesthetically pleasing interface that encourages consistent reading habits
+- Share qoutes with people in your reading circle via application
+- Store and manage reading data efficiently using a database for books, quotes, moods, and progress
