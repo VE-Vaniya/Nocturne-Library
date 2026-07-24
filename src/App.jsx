@@ -29,9 +29,15 @@ function App() {
         const response = await authService.getProfile();
         setUser(prev => ({ ...prev, ...response.data }));
       } catch (error) {
-        console.error("Session verification failed");
-        setUser(null);
-        localStorage.removeItem('nocturne_logged_in_user');
+        // Only force logout on 401 (invalid/expired token), not on network errors
+        if (error?.response?.status === 401) {
+          console.error("Session expired, logging out");
+          setUser(null);
+          localStorage.removeItem('nocturne_logged_in_user');
+          setView('login');
+        } else {
+          console.error("Profile fetch failed (network?), keeping session:", error.message);
+        }
       }
     }
   }, [user?.token]);
@@ -88,7 +94,10 @@ function App() {
 
   const [connectionRequests, setConnectionRequests] = useState([]);
 
-  const [view, setView] = useState('login');
+  const [view, setView] = useState(() => {
+    const saved = localStorage.getItem('nocturne_logged_in_user');
+    return saved ? 'dashboard' : 'login';
+  });
 
   // Persist users and logged-in user to localStorage whenever they change
   React.useEffect(() => {
