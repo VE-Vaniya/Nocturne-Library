@@ -26,12 +26,13 @@ const signup = async (req, res) => {
     });
 
     if (user) {
-      res.status(201).json({
+      const token = generateToken(user._id);
+      res.status(201).set('Authorization', `Bearer ${token}`).json({
         _id: user._id,
         username: user.username,
         fullName: user.fullName,
         email: user.email,
-        token: generateToken(user._id)
+        token: token
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -50,13 +51,14 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
+      const token = generateToken(user._id);
+      res.set('Authorization', `Bearer ${token}`).json({
         _id: user._id,
         username: user.username,
         fullName: user.fullName,
         email: user.email,
         avatar: user.avatar,
-        token: generateToken(user._id)
+        token: token
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });

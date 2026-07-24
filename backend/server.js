@@ -3,8 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const connectDB = require('./config/db');
 
-// Connect to Database
-connectDB();
+// Database configuration handled in startServer() below
 
 const app = express();
 
@@ -28,8 +27,18 @@ app.get('/', (req, res) => {
   res.send('Nocturne Library API is running...');
 });
 
-const PORT = process.env.PORT || 5000;
+// Connect to Database & Start Server
+const startServer = async () => {
+  try {
+    await connectDB();
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+startServer();

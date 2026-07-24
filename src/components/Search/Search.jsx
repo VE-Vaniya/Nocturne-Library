@@ -14,8 +14,13 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!query || !query.trim() || query.trim().length < 3) {
+      setResults([]);
+      setError(null);
+      return;
+    }
+
     const fetchBooks = async () => {
-      if (!query) return;
       setLoading(true);
       setError(null);
       try {
@@ -23,7 +28,9 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
         setResults(response.data);
       } catch (err) {
         console.error('Search failed:', err);
-        setError('Failed to fetch books from the library archives.');
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err.message || 'Search failed';
+        setError(msg);
+        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -62,6 +69,21 @@ const Search = ({ query, books, setBooks, setActiveNav }) => {
         <div className="search-loading">
           <div className="spinner"></div>
           <p>Consulting the archives...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!query || !query.trim()) {
+    return (
+      <div className="search-container">
+        <div className="search-empty">
+          <div className="search-empty-icon">
+            <svg width="48" height="48" fill="none" stroke="#a4937e" strokeWidth="1" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
+            </svg>
+          </div>
+          <p>Type a book title or author in the search bar above.</p>
         </div>
       </div>
     );
