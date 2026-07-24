@@ -1,0 +1,220 @@
+/* ── Home / Landing Page ─────────────────────────────── */
+
+.home-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Book spines image — blurred, fills the whole screen */
+.home-bg {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(3px) brightness(0.55) saturate(0.85);
+  transform: scale(1.06); /* hide blur edges */
+  z-index: 0;
+}
+
+/* Gradient overlay for depth & legibility */
+.home-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+      ellipse at 50% 40%,
+      rgba(10, 6, 4, 0.45) 0%,
+      rgba(10, 6, 4, 0.82) 100%
+    ),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(30, 10, 5, 0.55) 100%);
+  z-index: 1;
+}
+
+/* ── Fade-in Content ───────────────── */
+.home-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  padding: 3rem 2rem;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.home-content.home-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Candle ornament ───────────────── */
+.home-candle {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, #e8c97a, transparent);
+  margin: 0 auto 1.2rem;
+  position: relative;
+  opacity: 0.7;
+}
+
+.home-candle::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 12px;
+  background: radial-gradient(ellipse, #fff5c0 0%, #e8c97a 40%, transparent 80%);
+  border-radius: 50% 50% 30% 30%;
+  animation: flicker 2.5s ease-in-out infinite alternate;
+  filter: blur(1px);
+}
+
+@keyframes flicker {
+  0%   { transform: translateX(-50%) scaleX(1)   scaleY(1);    opacity: 0.9; }
+  33%  { transform: translateX(-50%) scaleX(0.92) scaleY(1.06); opacity: 1;   }
+  66%  { transform: translateX(-50%) scaleX(1.06) scaleY(0.97); opacity: 0.85; }
+  100% { transform: translateX(-50%) scaleX(0.96) scaleY(1.04); opacity: 0.95; }
+}
+
+/* ── EST badge ─────────────────────── */
+.home-est {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #a89578;
+  margin-bottom: 1.1rem;
+}
+
+/* ── Main Title ────────────────────── */
+.home-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  font-weight: 800;
+  color: #f2ead8;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.8), 0 0 80px rgba(200, 150, 80, 0.15);
+}
+
+/* ── Divider rule ──────────────────── */
+.home-rule {
+  margin: 0.7rem auto 1.4rem;
+  opacity: 0.5;
+}
+
+/* ── Tagline ───────────────────────── */
+.home-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2.5vw, 1.22rem);
+  font-style: italic;
+  color: #c9b99a;
+  line-height: 1.75;
+  max-width: 480px;
+  margin-bottom: 2.6rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ── CTA Buttons ───────────────────── */
+.home-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-btn {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0.7rem 2.2rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer hover effect */
+.home-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.home-btn:hover::after {
+  transform: translateX(100%);
+}
+
+/* Filled primary — Enter the Library */
+.home-btn--outline {
+  background: rgba(93, 64, 55, 0.85);
+  color: #f0e6d0;
+  border: 1px solid rgba(191, 167, 111, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.home-btn--outline:hover {
+  background: rgba(93, 64, 55, 1);
+  border-color: rgba(191, 167, 111, 0.9);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.5), 0 0 20px rgba(191, 167, 111, 0.15);
+  transform: translateY(-2px);
+  color: #fff8ec;
+}
+
+/* Ghost secondary — Register */
+.home-btn--ghost {
+  background: transparent;
+  color: #c9b99a;
+  border: 1px solid rgba(201, 185, 154, 0.35);
+}
+
+.home-btn--ghost:hover {
+  background: rgba(201, 185, 154, 0.08);
+  border-color: rgba(201, 185, 154, 0.65);
+  color: #f0e6d0;
+  transform: translateY(-2px);
+}
+
+/* ── Responsive ────────────────────── */
+@media (max-width: 480px) {
+  .home-title {
+    letter-spacing: -0.5px;
+  }
+
+  .home-tagline {
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .home-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .home-btn {
+    width: 100%;
+    max-width: 260px;
+  }
+}

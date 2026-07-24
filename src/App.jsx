@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { authService, notificationService, userService, bookService, quoteService, missiveService } from './services/api';
+import Home from './components/Home/Home';
 import Login from './components/Login/Login';
 import Signup from './components/Signup/Signup';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -23,11 +24,18 @@ function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
+  const [view, setView] = useState(() => {
+    const saved = localStorage.getItem('nocturne_logged_in_user');
+    return saved ? 'dashboard' : 'home';
+  });
+
   const fetchProfile = useCallback(async () => {
     if (user && user.token) {
       try {
         const response = await authService.getProfile();
-        setUser(prev => ({ ...prev, ...response.data }));
+        // Preserve the token — getProfile doesn't return it, so spreading
+        // response.data would silently delete it from state
+        setUser(prev => ({ ...prev, ...response.data, token: prev.token }));
       } catch (error) {
         // Only force logout on 401 (invalid/expired token), not on network errors
         if (error?.response?.status === 401) {
@@ -94,10 +102,7 @@ function App() {
 
   const [connectionRequests, setConnectionRequests] = useState([]);
 
-  const [view, setView] = useState(() => {
-    const saved = localStorage.getItem('nocturne_logged_in_user');
-    return saved ? 'dashboard' : 'login';
-  });
+  // view state declared above near user state so setView works in fetchProfile
 
   // Persist users and logged-in user to localStorage whenever they change
   React.useEffect(() => {
@@ -139,11 +144,15 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
-    setView('login');
+    setView('home');
   };
 
   if (view === 'dashboard') {
     return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />;
+  }
+
+  if (view === 'home') {
+    return <Home onLogin={() => setView('login')} onSignup={() => setView('signup')} />;
   }
 
   return (
@@ -167,6 +176,22 @@ function App() {
           <SectionRule className="auth-rule" />
           <div className="auth-est">EST. MDCCCXII</div>
         </div>
+
+        {/* Back to home link */}
+        <button
+          onClick={() => setView('home')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontFamily: 'var(--font-body)', fontSize: '0.85rem',
+            color: '#a09787', letterSpacing: '1px', textTransform: 'uppercase',
+            marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#c4b69c'}
+          onMouseLeave={e => e.currentTarget.style.color = '#a09787'}
+        >
+          ← Home
+        </button>
 
         {view === 'login' ? (
           <Login
