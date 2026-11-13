@@ -1,0 +1,4 @@
+# ShellCheck config (CI stage 3 "lint" -> shellcheck step).
+# Scripts must also start with `set -euo pipefail` (project requirement).
+# Follow `source`d files so cross-script variables are checked.
+external-sources=true
