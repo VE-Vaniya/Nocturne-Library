@@ -1,0 +1,46 @@
+# Frontend image build context (repo root). Only package*.json, index.html,
+# vite.config.js, public/, src/ and nginx/ are needed.
+
+# Secrets: never bake env files into an image
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+**/*.env
+*.pem
+*.key
+
+# Backend has its own image/context
+backend
+
+# Dependencies, build output, logs
+node_modules
+**/node_modules
+dist
+dist-ssr
+coverage
+logs
+*.log
+npm-debug.log*
+
+# VCS, editors, tooling, docs, design files
+.git
+.gitignore
+.github
+.vscode
+.idea
+.claude
+.DS_Store
+docs
+design
+*.md
+infra
+terraform
+
+# Docker metadata
+Dockerfile
+*.Dockerfile
+.dockerignore
+docker-compose*.yml
+compose*.yml
