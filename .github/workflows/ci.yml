@@ -1,0 +1,406 @@
+# =============================================================================
+# CI - DevSecOps stages 2-10 (stage 1 = commit/PR itself)
+#
+#   2 secret-scan      Gitleaks, full git history          (security gate)
+#   3 lint             ESLint (frontend + backend) + ShellCheck scripts/*.sh
+#   4 format           Prettier --check
+#   5 dockerfile-lint  Hadolint, both Dockerfiles (fails on warning+)
+#   6 test             Backend Jest with coverage (lcov artifact)
+#   7 sonarcloud       SonarCloud analysis + quality gate  (security gate)
+#   8 dependency-scan  Snyk, all projects, high+           (security gate)
+#   9 build            docker buildx, both images, tagged with the commit SHA
+#  10 image-scan       Trivy, HIGH/CRITICAL, fixable only  (security gate)
+#
+# Each stage is its own job and depends on the previous one (`needs:`), so a
+# failing stage stops the pipeline. Mark every job name below as a required
+# status check on `main` (Settings > Branches > Branch protection).
+#
+# Triggers: every push (except `main`, where cd.yml calls this workflow via
+# `workflow_call` before deploying, so nothing reaches AWS without passing
+# stages 2-10) and every pull request.
+#
+# Required repository SECRETS (Settings > Secrets and variables > Actions; add
+# the same two under "Dependabot" secrets so Dependabot PRs can pass):
+#   SONAR_TOKEN   SonarCloud user/project analysis token       (stage 7)
+#   SNYK_TOKEN    Snyk API token / service-account token        (stage 8)
+# No repository VARIABLES are needed by CI. CD/rollback variables are listed
+# in cd.yml: AWS_REGION, AWS_DEPLOY_ROLE_ARN, ECR_REGISTRY, ASG_NAME, APP_URL.
+#
+# Third-party actions are pinned to full commit SHAs (version in the trailing
+# comment); Dependabot (github-actions ecosystem) keeps them current.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        required: true
+      SNYK_TOKEN:
+        required: true
+
+# Least privilege: read-only token for every job; no job needs more.
+permissions:
+  contents: read
+
+# Cancel superseded runs of the same PR / branch. Pushes to main (via cd.yml)
+# are never cancelled mid-flight.
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main') }}
+
+env:
+  NODE_VERSION: '22'
+  GITLEAKS_VERSION: '8.30.1'
+  # sha256 of gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz from the release's
+  # checksums.txt. Update together with GITLEAKS_VERSION.
+  GITLEAKS_SHA256: '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb'
+  SNYK_VERSION: 'v1.1308.4'
+  TRIVY_VERSION: 'v0.70.0'
+  FRONTEND_IMAGE: nocturne-frontend
+  BACKEND_IMAGE: nocturne-backend
+
+jobs:
+  # ---------------------------------------------------------------- stage 2 --
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install gitleaks (checksum-verified)
+        run: |
+          set -euo pipefail
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSLo "$RUNNER_TEMP/$tarball" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${tarball}"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$tarball" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+
+      # `git` mode scans every commit reachable from every ref in the clone.
+      # Any finding => exit 1. Findings are redacted in the log and attached
+      # as a SARIF artifact for triage.
+      - name: Scan full git history
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/gitleaks" git . \
+            --config .gitleaks.toml \
+            --log-opts="--all" \
+            --redact \
+            --verbose \
+            --exit-code 1 \
+            --report-format sarif \
+            --report-path "$RUNNER_TEMP/gitleaks.sarif"
+
+      - name: Upload gitleaks report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: gitleaks-report
+          path: ${{ runner.temp }}/gitleaks.sarif
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- stage 3 --
+  lint:
+    name: lint
+    needs: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install root dev dependencies
+        run: npm ci --no-audit --no-fund
+
+      # One flat config (eslint.config.js) lints src/** (browser/React) and
+      # backend/** (Node/CommonJS); backend deps are not needed for linting.
+      - name: ESLint
+        run: npx eslint . --max-warnings=0
+
+      # ShellCheck is preinstalled on ubuntu-latest. Also enforce the project
+      # rule that every script runs with `set -euo pipefail`.
+      - name: ShellCheck scripts/*.sh
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+          files=(scripts/**/*.sh)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::notice::No shell scripts found under scripts/"
+            exit 0
+          fi
+          shellcheck --version
+          shellcheck --external-sources "${files[@]}"
+          missing=0
+          for f in "${files[@]}"; do
+            if ! grep -Eq '^[[:space:]]*set -[A-Za-z]*e[A-Za-z]*u[A-Za-z]*o pipefail' "$f"; then
+              echo "::error file=$f::missing 'set -euo pipefail'"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+  # ---------------------------------------------------------------- stage 4 --
+  format:
+    name: format
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install root dev dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Prettier --check
+        run: npx prettier --check .
+
+  # ---------------------------------------------------------------- stage 5 --
+  dockerfile-lint:
+    name: dockerfile-lint
+    needs: format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Threshold and rationale live in .hadolint.yaml (fail on warning+).
+      - name: Hadolint frontend Dockerfile
+        uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
+        with:
+          dockerfile: Dockerfile
+          config: .hadolint.yaml
+          failure-threshold: warning
+
+      - name: Hadolint backend Dockerfile
+        uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
+        with:
+          dockerfile: backend/Dockerfile
+          config: .hadolint.yaml
+          failure-threshold: warning
+
+  # ---------------------------------------------------------------- stage 6 --
+  test:
+    name: test
+    needs: dockerfile-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Unit tests with coverage (jest --coverage)
+        run: npm test
+        env:
+          CI: 'true'
+          NODE_ENV: test
+
+      - name: Check lcov report exists
+        run: test -s coverage/lcov.info || { echo "::error::backend/coverage/lcov.info not produced"; exit 1; }
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------- stage 7 --
+  sonarcloud:
+    name: sonarcloud
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # full history for blame / new-code detection
+          persist-credentials: false
+
+      - name: Download coverage from test job
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: backend-coverage
+          path: backend/coverage
+
+      # Jest may write lcov SF: paths relative to backend/; Sonar resolves
+      # them against the repo root, so prefix them (absolute paths untouched).
+      - name: Normalise lcov paths
+        run: |
+          set -euo pipefail
+          sed -i -E '/^SF:(\/|backend\/)/! s#^SF:(\./)?#SF:backend/#' backend/coverage/lcov.info
+          grep -m3 '^SF:' backend/coverage/lcov.info || true
+
+      # sonar-project.properties sets sonar.qualitygate.wait=true, so the
+      # scanner polls the quality gate and exits non-zero if it fails.
+      - name: SonarCloud scan + quality gate
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+
+  # ---------------------------------------------------------------- stage 8 --
+  dependency-scan:
+    name: dependency-scan
+    needs: sonarcloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
+        with:
+          snyk-version: ${{ env.SNYK_VERSION }}
+
+      # Scans package-lock.json of / and /backend. High or critical => exit 1.
+      # Dependabot (.github/dependabot.yml) runs alongside for update PRs.
+      - name: snyk test --all-projects
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --all-projects --severity-threshold=high
+
+  # ---------------------------------------------------------------- stage 9 --
+  build:
+    name: build
+    needs: dependency-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build frontend image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          outputs: type=docker,dest=${{ runner.temp }}/frontend.tar
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,scope=frontend,mode=max
+          provenance: false
+
+      - name: Build backend image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: false
+          tags: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          outputs: type=docker,dest=${{ runner.temp }}/backend.tar
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+          provenance: false
+
+      - name: Upload image tarballs
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: images-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/frontend.tar
+            ${{ runner.temp }}/backend.tar
+          retention-days: 1
+          compression-level: 0
+
+  # --------------------------------------------------------------- stage 10 --
+  image-scan:
+    name: image-scan
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # .trivyignore (if ever needed) must be justified in SECURITY.md.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download image tarballs
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: images-${{ github.sha }}
+          path: ${{ runner.temp }}/images
+
+      # ignore-unfixed: see SECURITY.md "Trivy: ignore-unfixed rationale".
+      - name: Trivy scan frontend image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          scan-type: image
+          input: ${{ runner.temp }}/images/frontend.tar
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+      - name: Trivy scan backend image
+        if: success() || failure()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          skip-setup-trivy: true
+          scan-type: image
+          input: ${{ runner.temp }}/images/backend.tar
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
