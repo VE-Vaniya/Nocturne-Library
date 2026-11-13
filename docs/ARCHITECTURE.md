@@ -105,7 +105,7 @@ The CD deploy job declares `environment: production`, so the token's `sub` is `r
 | Value | Where | Notes |
 |---|---|---|
 | `MONGO_URI`, `JWT_SECRET`, `SMTP_USER`, `SMTP_PASS` (Gmail app password), Google Books API key | SSM Parameter Store **SecureString** `/nocturne/prod/<NAME>` | Standard parameters are free; Secrets Manager (≈ $0.40/secret/month) only pays off with rotation |
-| `image_tag`, `image_tag_previous` | SSM **String** `/nocturne/prod/image_tag`, `/nocturne/prod/image_tag_previous` | Deploy + rollback state |
+| `image_tag`, `previous_image_tag` | SSM **String** `/nocturne/prod/image_tag`, `/nocturne/prod/previous_image_tag` | Deploy + rollback state |
 | AWS account ID / role ARNs, SonarCloud & Snyk tokens | GitHub Actions secrets/variables | No AWS keys |
 
 At boot, launch-template user data runs `aws ssm get-parameters-by-path --path /nocturne/prod/ --with-decryption`, writes `/opt/nocturne/.env` (root, mode 600), logs in to ECR, and runs `docker compose -f docker-compose.prod.yml up -d` with `IMAGE_TAG` from `/nocturne/prod/image_tag`. Secrets never go into the AMI, launch template, images, or repo.
@@ -114,10 +114,10 @@ At boot, launch-template user data runs `aws ssm get-parameters-by-path --path /
 
 1. PR merged to `main`; stages 1–10 already green.
 2. Stage 11 (`gha-deploy` via OIDC): build `web` + `api`, Trivy scan, push to ECR (**tag immutability ON**) as `sha-<short SHA>` and `vX.Y.Z`.
-3. Copy `/nocturne/prod/image_tag` → `image_tag_previous`; set `image_tag` = new `sha-…`.
+3. Copy `/nocturne/prod/image_tag` → `previous_image_tag`; set `image_tag` = new `sha-…`.
 4. `aws autoscaling start-instance-refresh` with `MinHealthyPercentage=50` (or `100` + `MaxHealthyPercentage=200` to launch before terminating), `InstanceWarmup=120`. New instances boot on the new tag; old ones drain (30 s).
 5. Stage 12: `scripts/smoke-test.sh` against the ALB DNS (`/health`, `/api/health`, one read endpoint) with retries.
-6. Failure → set `image_tag` back to `image_tag_previous`, start another instance refresh, fail the job (SNS alarm fires). Manual `rollback.yml` (`workflow_dispatch`, input = image tag) does the same for any tag in ECR.
+6. Failure → set `image_tag` back to `previous_image_tag`, start another instance refresh, fail the job (SNS alarm fires). Manual `rollback.yml` (`workflow_dispatch`, input = image tag) does the same for any tag in ECR.
 
 Alternative: SSM Run Command `docker compose pull && up -d` on one instance at a time — faster, but in-place rather than immutable.
 
