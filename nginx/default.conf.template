@@ -9,7 +9,7 @@ server {
     index index.html;
 
     server_tokens off;
-    client_max_body_size 5m;
+    client_max_body_size 10m;
 
     gzip on;
     gzip_vary on;
@@ -28,13 +28,6 @@ server {
         include /etc/nginx/snippets/security-headers.conf;
         add_header Cache-Control "no-store" always;
         return 200 "ok\n";
-    }
-
-    # Convenience: backend health through the proxy (backend serves /health).
-    location = /api/health {
-        access_log off;
-        proxy_pass ${BACKEND_URL}/health;
-        proxy_set_header Host $host;
     }
 
     # API: path is forwarded unchanged (/api/...), same as the ALB rule
