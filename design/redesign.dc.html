@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nocturne Library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&amp;family=IM+Fell+English+SC&amp;family=La+Belle+Aurore&amp;family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&amp;display=swap">
+<style>
+body{margin:0;background:#0d1210}
+a{color:#e9c779}a:hover{color:#f3d9a0}
+button{font-family:Spectral,Georgia,serif}
+@keyframes nl-arrive{from{opacity:0;transform:translateY(50px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes nl-flapTop{from{transform:rotateX(-178deg)}to{transform:rotateX(0deg)}}
+@keyframes nl-flapBot{from{transform:rotateX(178deg)}to{transform:rotateX(0deg)}}
+@keyframes nl-unshade{from{opacity:1}to{opacity:0}}
+.nl-letter{animation:nl-arrive .55s cubic-bezier(.22,1,.36,1) both}
+.nl-fold-top{animation:nl-flapTop 1.05s cubic-bezier(.5,0,.15,1) both .55s}
+.nl-fold-bot{animation:nl-flapBot 1.05s cubic-bezier(.5,0,.15,1) both 1.35s}
+.nl-shade-mid{opacity:0}
+.nl-shade-top{animation:nl-unshade .7s ease both .75s}
+.nl-shade-bot{animation:nl-unshade .7s ease both 1.55s}
+.nl-crease{opacity:0;animation:nl-fade .6s ease both 2.3s}
+.nl-prof{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"av stats" "name seal" "edit out";column-gap:64px;row-gap:22px;align-items:center}
+.nl-p-av{grid-area:av}.nl-p-name{grid-area:name}.nl-p-edit{grid-area:edit}.nl-p-stats{grid-area:stats;align-self:end}.nl-p-seal{grid-area:seal}.nl-p-out{grid-area:out}
+@media (max-width:760px){.nl-prof{grid-template-columns:1fr;grid-template-areas:"av" "name" "edit" "stats" "seal" "out";row-gap:18px;padding-top:24px!important}}
+main>section{overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(200,160,80,.3) transparent}
+main>section[aria-label="Home"],main>section[aria-label="Reading timer"],main>section[aria-label="Profile"]{overflow:hidden!important}
+@media (max-height:760px),(max-width:760px){main>section[aria-label="Home"],main>section[aria-label="Reading timer"],main>section[aria-label="Profile"]{overflow-y:auto!important}}
+.nl-wheel{transition:transform 1s cubic-bezier(.65,0,.35,1)}
+.nl-wheel.fast{transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.nl-wheel.drag{transition:none}
+.nl-tab{transition:color .5s ease}
+.nl-tab:hover{color:#e8dcc0!important}
+.nl-page{transition:transform 1s cubic-bezier(.65,0,.35,1),opacity .7s ease,visibility 0s linear 1s}
+.nl-page.on{transition:transform 1s cubic-bezier(.65,0,.35,1),opacity .7s ease .15s,visibility 0s}
+.nl-gate{transition:transform 1.1s cubic-bezier(.76,0,.24,1),opacity 1.1s ease}
+.nl-btn{transition:background .25s,transform .25s}
+.nl-btn:hover{background:#e9c779!important;transform:translateY(-1px)}
+.nl-ghost{transition:border-color .25s,color .25s}
+.nl-ghost:hover{border-color:#e9c779!important;color:#e9c779!important}
+.nl-spine{transition:transform .45s cubic-bezier(.22,1,.36,1),filter .3s}
+.nl-spine:hover{transform:translateY(-14px) rotate(0deg)!important;filter:brightness(1.15)}
+.nl-row{transition:background .25s}
+.nl-row:hover{background:rgba(200,160,80,.07)!important}
+.nl-fold{display:grid;transition:grid-template-rows .5s cubic-bezier(.22,1,.36,1),opacity .4s}
+.nl-qcard{transition:transform .4s cubic-bezier(.22,1,.36,1),filter .4s}
+.nl-qcard:hover{transform:scale(1.045);filter:drop-shadow(0 0 22px rgba(233,199,121,.42)) brightness(1.07)}
+.nl-in:focus{outline:none;border-bottom-color:#e9c779!important}
+.nl-hand{transition:transform .9s cubic-bezier(.4,1.6,.6,1)}
+.nl-sand{transition:stroke-dashoffset 1s linear}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #e9c779;outline-offset:3px}
+@keyframes nl-flicker{0%,100%{opacity:1}50%{opacity:.82}}
+@keyframes nl-fade{from{opacity:0}to{opacity:1}}
+@keyframes nl-pop{0%{opacity:0;transform:scale(.7) translateY(30px)}70%{opacity:1;transform:scale(1.03)}100%{transform:none}}
+@keyframes nl-unfold{0%{opacity:0;transform:perspective(1400px) rotateX(78deg) scale(.55)}55%{opacity:1;transform:perspective(1400px) rotateX(-7deg) scale(1.02)}100%{transform:none}}
+@keyframes nl-drop{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes nl-spin{to{transform:rotate(360deg)}}
+@keyframes nl-ember{0%{transform:translateY(0) scale(1);opacity:0}15%{opacity:1}100%{transform:translateY(-70vh) scale(.4);opacity:0}}
+@keyframes nl-toast{0%{opacity:0;transform:translate(-50%,16px)}12%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,8px)}}
+@keyframes nl-flame{0%,100%{transform:scaleY(1) rotate(-2deg)}50%{transform:scaleY(1.12) rotate(2deg)}}
+.nl-glow{animation:nl-flicker 7s ease-in-out infinite}
+.nl-veil{animation:nl-fade .4s ease both}
+.nl-pop{animation:nl-pop .6s cubic-bezier(.22,1,.36,1) both}
+.nl-unfold{animation:nl-unfold 1s cubic-bezier(.22,1,.36,1) both;transform-origin:50% 40%}
+.nl-drop{animation:nl-drop .35s cubic-bezier(.22,1,.36,1) both;transform-origin:20px 0}
+.nl-rays{animation:nl-spin 80s linear infinite}
+.nl-ember{animation:nl-ember 6s linear infinite}
+.nl-toast{animation:nl-toast 2.8s ease both}
+.nl-flame{animation:nl-flame 1.6s ease-in-out infinite;transform-origin:50% 100%}
+@media (max-width:760px){
+.nl-two{grid-template-columns:1fr!important}.nl-hide-sm{display:none!important}
+main>section>div{padding-left:16px!important;padding-right:16px!important}
+main h1{font-size:40px!important}
+main h2{font-size:26px!important}
+.nl-tab span{font-size:15px!important}
+.nl-corner{top:8px!important;width:40px!important;height:40px!important}
+.nl-corner-l{left:12px!important}.nl-corner-r{right:12px!important}
+.nl-watch{transform:scale(.84);transform-origin:50% 0;height:280px!important}
+.nl-gate-title{font-size:58px!important}
+.nl-cr{grid-template-columns:110px minmax(0,1fr)!important;gap:16px!important;padding:16px!important}
+.nl-cr img,.nl-cr-cover{width:110px!important;height:165px!important}
+.nl-cr .nl-btn{width:110px!important;font-size:14px!important}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
+</style>
+</helmet>
+<div style="position:relative;height:100vh;height:100dvh;min-height:560px;overflow:hidden;background:#0d1210;color:#e8dcc0;font-family:Spectral,Georgia,serif">
+  <div class="nl-glow" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(70vmax 50vmax at 50% -20%,rgba(200,140,60,.13),transparent 60%),radial-gradient(40vmax 40vmax at 100% 110%,rgba(122,34,40,.16),transparent 60%)"></div>
+
+  <!-- ═══ TOP WHEEL MENU (drag / scroll to spin, click to jump) ═══ -->
+  <header onWheel="{{onWheel}}" onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerCancel="{{onUp}}" style="position:absolute;left:0;right:0;top:0;height:150px;z-index:10;overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none">
+    <div class="nl-wheel {{wheelCls}}" style="position:absolute;left:50%;top:-4264px;width:4400px;height:4400px;margin-left:-2200px;border-radius:50%;transform:rotate({{wheelR}});background:radial-gradient(circle,#0d1210 0 calc(50% - 90px),#111814 calc(50% - 30px),#151d19 calc(50% - 1px),rgba(233,199,121,.85) calc(50% - 1px) 50%,transparent 50%)">
+      <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent calc(50% - 70px),rgba(255,196,110,.14) calc(50% - 14px),rgba(255,214,140,.28) calc(50% - 2px),rgba(255,200,120,.16) 50%,rgba(255,190,100,.06) calc(50% + 8px),transparent calc(50% + 12px))"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,222,150,0) 0deg,rgba(255,222,150,.85) .03deg,rgba(255,222,150,0) .07deg,rgba(255,222,150,0) .55deg);-webkit-mask-image:radial-gradient(circle,transparent calc(50% - 62px),#000 calc(50% - 26px),#000 calc(50% - 10px),transparent calc(50% - 1px));mask-image:radial-gradient(circle,transparent calc(50% - 62px),#000 calc(50% - 26px),#000 calc(50% - 10px),transparent calc(50% - 1px))"></div>
+      <div aria-hidden="true" style="position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from .27deg,rgba(255,214,140,0) 0deg,rgba(255,214,140,.55) .05deg,rgba(255,214,140,0) .1deg,rgba(255,214,140,0) 1.65deg);-webkit-mask-image:radial-gradient(circle,transparent calc(50% - 120px),#000 calc(50% - 50px),transparent calc(50% - 2px));mask-image:radial-gradient(circle,transparent calc(50% - 120px),#000 calc(50% - 50px),transparent calc(50% - 2px))"></div>
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+        <button type="button" class="nl-tab" onClick="{{t.go}}" aria-current="{{t.current}}" style="position:absolute;left:50%;top:50%;width:150px;height:56px;margin:-28px 0 0 -75px;transform:rotate({{t.angle}}) translateY(2122px);background:none;border:0;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:{{t.color}};text-shadow:{{t.glow}}">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{t.d}}"></path></svg>
+          <span style="font-family:'IM Fell English SC',Georgia,serif;font-size:17px;letter-spacing:.03em;white-space:nowrap">{{t.label}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <span aria-hidden="true" style="position:absolute;left:50%;top:126px;width:7px;height:7px;margin-left:-3.5px;transform:rotate(45deg);background:#e9c779;box-shadow:0 0 14px 2px rgba(233,199,121,.6)"></span>
+    <button type="button" onClick="{{spinLeft}}" aria-label="Turn the menu left" class="nl-hide-sm" style="position:absolute;left:calc(50% - 420px);top:58px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(200,160,80,.25);background:rgba(13,18,16,.7);color:#c8a050;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5 8 12l7 7"></path></svg></button>
+    <button type="button" onClick="{{spinRight}}" aria-label="Turn the menu right" class="nl-hide-sm" style="position:absolute;left:calc(50% + 384px);top:58px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(200,160,80,.25);background:rgba(13,18,16,.7);color:#c8a050;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 5 7 7-7 7"></path></svg></button>
+
+    <!-- notification bell, pinned top-left -->
+    <button type="button" class="nl-corner nl-corner-l" onClick="{{toggleNotif}}" aria-label="Notifications, {{unread}} new" aria-expanded="{{notifOpen}}" style="position:absolute;left:24px;top:16px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(200,160,80,.35);background:#151d19;color:#e8dcc0;cursor:pointer;display:flex;align-items:center;justify-content:center">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"></path></svg>
+      <sc-if value="{{hasUnread}}" hint-placeholder-val="{{true}}">
+        <span style="position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:#b8323a;color:#fff3e0;font-size:12px;font-weight:500;line-height:20px;text-align:center;box-shadow:0 0 0 2px #0d1210">{{unread}}</span>
+      </sc-if>
+    </button>
+    <button type="button" class="nl-corner nl-corner-r" onClick="{{goProfile}}" aria-label="Your profile" style="position:absolute;right:24px;top:16px;width:46px;height:46px;border-radius:50%;border:1.5px solid #c8a050;cursor:pointer;background:{{sealBg}};color:#f3d9b8;font-family:'IM Fell English',Georgia,serif;font-size:19px;overflow:hidden;padding:0">{{initial}}<sc-if value="{{hasPhoto}}" hint-placeholder-val="{{false}}"><img src="{{photo}}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%"></sc-if></button>
+  </header>
+
+  <div aria-hidden="true" style="position:absolute;left:0;right:0;top:120px;height:110px;z-index:9;pointer-events:none;background:radial-gradient(ellipse 46% 60% at 50% 12%,rgba(255,196,110,.16),rgba(255,196,110,.05) 55%,transparent 75%)"></div>
+
+  <!-- notifications panel -->
+  <sc-if value="{{notifOpen}}" hint-placeholder-val="{{false}}">
+    <button type="button" aria-label="Close notifications" onClick="{{toggleNotif}}" style="position:absolute;inset:0;z-index:28;background:transparent;border:0;cursor:default"></button>
+    <div class="nl-drop" role="dialog" aria-label="Notifications" style="position:absolute;left:24px;top:72px;z-index:29;width:380px;max-width:calc(100vw - 48px);max-height:70vh;overflow-y:auto;background:#141c18;border:1px solid rgba(200,160,80,.3);border-radius:10px;box-shadow:0 30px 60px -20px rgba(0,0,0,.9)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px 10px">
+        <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:24px">Notifications</b>
+        <button type="button" onClick="{{markAll}}" style="background:none;border:0;color:#e9c779;font-size:14px;cursor:pointer;min-height:36px">Mark all read</button>
+      </div>
+      <sc-for list="{{notes}}" as="n" hint-placeholder-count="5">
+        <div style="border-top:1px solid rgba(200,160,80,.12)">
+          <button type="button" class="nl-row" onClick="{{n.open}}" style="width:100%;display:grid;grid-template-columns:40px minmax(0,1fr) 10px;gap:12px;align-items:center;padding:12px 18px;background:none;border:0;text-align:left;color:#e8dcc0;cursor:pointer;font-size:15px">
+            <span style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{n.bg}};font-family:'IM Fell English',Georgia,serif;font-size:17px;color:#f3d9b8">{{n.initial}}</span>
+            <span style="min-width:0"><b style="font-weight:{{n.weight}}">{{n.from}}</b> <span style="color:#a89f88">{{n.what}}</span><br><span style="color:#8f8775;font-size:13px">{{n.when}}</span></span>
+            <span style="width:9px;height:9px;border-radius:50%;background:{{n.dot}}"></span>
+          </button>
+          <sc-if value="{{n.isRequest}}" hint-placeholder-val="{{false}}">
+            <div style="display:flex;gap:8px;padding:0 18px 14px 70px">
+              <sc-if value="{{n.pending}}" hint-placeholder-val="{{true}}">
+                <button type="button" class="nl-btn" onClick="{{n.accept}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:14px;cursor:pointer">Accept</button>
+                <button type="button" class="nl-ghost" onClick="{{n.decline}}" style="min-height:36px;padding:0 16px;border:1px solid rgba(200,160,80,.4);border-radius:999px;background:none;color:#e8dcc0;font-size:14px;cursor:pointer">Decline</button>
+              </sc-if>
+              <sc-if value="{{n.answered}}" hint-placeholder-val="{{false}}"><span style="color:#a89f88;font-size:14px;font-style:italic">{{n.answer}}</span></sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ═══ PAGES ═══ -->
+  <main style="position:absolute;left:0;right:0;top:150px;bottom:0">
+
+    <!-- 0 HOME -->
+    <section aria-label="Home" class="{{p0.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p0.t}};opacity:{{p0.o}};visibility:{{p0.v}}">
+      <div style="max-width:980px;margin:0 auto;padding:30px 32px 20px;display:grid;gap:36px">
+        <div class="nl-two" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:start">
+          <div>
+            <h1 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:62px;line-height:1">Good evening, <i style="color:#e9c779">{{firstName}}</i>.</h1>
+            <blockquote style="margin:18px 0 0;padding:0 0 0 18px;border-left:1px solid rgba(200,160,80,.5)">
+              <p style="margin:0;font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:24px;line-height:1.35;color:#d9cdb0;max-width:34ch">“We are all in the gutter, but some of us are looking at the stars.”</p>
+              <p style="margin:6px 0 0;color:#8f8775;font-size:15px">Oscar Wilde · from your quotes</p>
+            </blockquote>
+          </div>
+          <div aria-label="{{streak}} nights in a row" style="display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid rgba(200,160,80,.28);border-radius:999px;background:rgba(21,29,25,.7)">
+            <span class="nl-flame" aria-hidden="true" style="width:16px;height:24px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 75%,#fff6d8 0 18%,#ffc65a 42%,#c8501e 75%,rgba(200,80,30,0) 76%);box-shadow:0 0 22px 4px rgba(255,170,70,.3)"></span>
+            <span><b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:30px;line-height:1">{{streak}}</b> <span style="color:#a89f88">night streak</span></span>
+          </div>
+        </div>
+
+        <section aria-label="Continue reading" class="nl-cr" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start;padding:24px;border:1px solid rgba(200,160,80,.2);border-radius:10px;background:linear-gradient(135deg,rgba(47,74,59,.25),rgba(13,18,16,0) 60%)">
+          <div style="display:grid;gap:12px;justify-items:center">
+            <sc-if value="{{cur.hasCover}}" hint-placeholder-val="{{false}}">
+              <img src="{{cur.cover}}" alt="Cover of {{cur.title}}" style="width:132px;height:198px;object-fit:cover;border-radius:3px 7px 7px 3px;box-shadow:0 24px 32px -16px rgba(0,0,0,.9)">
+            </sc-if>
+            <sc-if value="{{cur.noCover}}" hint-placeholder-val="{{true}}">
+              <div class="nl-cr-cover" style="width:132px;height:198px;box-sizing:border-box;border-radius:3px 7px 7px 3px;padding:16px 12px;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(255,255,255,.06) 12%,rgba(0,0,0,0) 30%),linear-gradient(160deg,#2f4a3b,#142019);color:#e7cf93;font-family:'IM Fell English',Georgia,serif;font-size:18px;line-height:1.1;box-shadow:0 24px 32px -16px rgba(0,0,0,.9);outline:1px solid rgba(231,207,147,.35);outline-offset:-8px">{{cur.title}}</div>
+            </sc-if>
+            <button type="button" class="nl-btn" onClick="{{goTimer}}" style="width:132px;min-height:42px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:15px;font-weight:500;cursor:pointer">Start a sitting</button>
+          </div>
+          <div style="min-width:0;padding-top:4px">
+            <p style="margin:0;color:#8f8775;font-size:14px;letter-spacing:.08em;text-transform:uppercase">Continue reading</p>
+            <h2 style="margin:6px 0 4px;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:36px;line-height:1.05">{{cur.title}}</h2>
+            <p style="margin:0;color:#a89f88">{{cur.author}}</p>
+            <div style="height:3px;background:#1e2924;margin:18px 0 8px;max-width:360px;position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:58%;background:linear-gradient(90deg,#c8a050,#e9c779)"></span></div>
+            <p style="margin:0;color:#a89f88;font-size:15px">Page 148 of 254 · about 2 hours left</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 1 SHELVES -->
+    <section aria-label="Shelves" class="{{p1.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p1.t}};opacity:{{p1.o}};visibility:{{p1.v}}">
+      <div style="max-width:1080px;margin:0 auto;padding:30px 32px 80px;display:grid;gap:22px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <h1 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:54px;line-height:1">Your shelves</h1>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div role="group" aria-label="View" style="display:flex;border:1px solid rgba(200,160,80,.35);border-radius:999px;padding:3px">
+              <button type="button" onClick="{{viewShelf}}" aria-pressed="{{shelfOn}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{shelfBg}};color:{{shelfColor}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">Shelf</button>
+              <button type="button" onClick="{{viewList}}" aria-pressed="{{listOn}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{listBg}};color:{{listColor}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">List</button>
+            </div>
+            <button type="button" class="nl-ghost" onClick="{{goSearch}}" style="min-height:42px;padding:0 18px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:15px;cursor:pointer">+ Add a book</button>
+          </div>
+        </div>
+        <div role="tablist" aria-label="Shelf" style="display:flex;gap:26px;border-bottom:1px solid rgba(200,160,80,.2);flex-wrap:wrap">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+            <button type="button" role="tab" aria-selected="{{f.on}}" onClick="{{f.pick}}" style="min-height:42px;background:none;border:0;border-bottom:2px solid {{f.line}};margin-bottom:-1px;padding:0;color:{{f.color}};font-size:16px;cursor:pointer;transition:color .3s,border-color .3s">{{f.label}} <span style="color:#6f6a5c;font-size:13px">{{f.count}}</span></button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{shelfOn}}" hint-placeholder-val="{{true}}">
+          <div style="display:grid;gap:0;padding:14px 14px 0;border-radius:6px;background:linear-gradient(#17100a,#21160d);box-shadow:inset 0 0 60px rgba(0,0,0,.7)">
+            <sc-for list="{{rows}}" as="row" hint-placeholder-count="4">
+              <div>
+                <div style="display:flex;align-items:flex-end;gap:3px;height:212px;padding:12px 14px 0;overflow-x:auto;overflow-y:hidden;box-shadow:inset 0 22px 30px -18px rgba(0,0,0,.85)">
+                  <sc-for list="{{row.books}}" as="b" hint-placeholder-count="8">
+                    <button type="button" class="nl-spine" onClick="{{b.pick}}" aria-label="{{b.title}} by {{b.author}}" style="position:relative;flex:none;height:{{b.h}};width:{{b.w}};border:0;border-radius:3px 3px 1px 1px;padding:0;cursor:pointer;transform:rotate({{b.lean}});transform-origin:50% 100%;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(255,255,255,.14) 18%,rgba(255,255,255,0) 40%,rgba(0,0,0,.18) 70%,rgba(0,0,0,.55)),repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,rgba(0,0,0,.03) 1px 3px),{{b.color}};box-shadow:4px 0 8px -2px rgba(0,0,0,.6);color:{{b.ink}};display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">
+                      <sc-if value="{{b.v0}}" hint-placeholder-val="{{true}}">
+                        <span aria-hidden="true" style="position:absolute;left:0;right:0;top:14px;height:7px;border-top:1.5px solid {{b.ink}};border-bottom:1.5px solid {{b.ink}};opacity:.7"></span>
+                        <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:14px;height:7px;border-top:1.5px solid {{b.ink}};border-bottom:1.5px solid {{b.ink}};opacity:.7"></span>
+                      </sc-if>
+                      <sc-if value="{{b.v1}}" hint-placeholder-val="{{false}}">
+                        <span aria-hidden="true" style="position:absolute;left:4px;right:4px;top:28%;bottom:28%;background:rgba(0,0,0,.28);border:1px solid {{b.ink}};opacity:.6;border-radius:2px"></span>
+                      </sc-if>
+                      <sc-if value="{{b.v2}}" hint-placeholder-val="{{false}}">
+                        <span aria-hidden="true" style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 30px,rgba(0,0,0,.35) 30px 33px,rgba(255,255,255,.12) 33px 35px)"></span>
+                      </sc-if>
+                      <sc-if value="{{b.v3}}" hint-placeholder-val="{{false}}">
+                        <span aria-hidden="true" style="position:absolute;top:16px;left:50%;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);border:1.5px solid {{b.ink}};opacity:.8"></span>
+                        <span aria-hidden="true" style="position:absolute;bottom:16px;left:50%;width:10px;height:10px;margin-left:-5px;transform:rotate(45deg);background:{{b.ink}};opacity:.6"></span>
+                      </sc-if>
+                      <span style="position:relative;writing-mode:vertical-rl;font-family:'IM Fell English',Georgia,serif;font-size:14px;letter-spacing:.03em;max-height:72%;overflow:hidden;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.6)">{{b.title}}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <div aria-hidden="true" style="height:14px;background:linear-gradient(#5a3f28,#3a2818 60%,#24180e);box-shadow:0 10px 16px -6px rgba(0,0,0,.9);border-radius:1px"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{listOn}}" hint-placeholder-val="{{false}}">
+          <ol style="list-style:none;margin:0;padding:0">
+            <sc-for list="{{listBooks}}" as="b" hint-placeholder-count="8">
+              <li>
+                <button type="button" class="nl-row" onClick="{{b.pick}}" style="width:100%;display:grid;grid-template-columns:44px 10px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 10px;background:none;border:0;border-bottom:1px solid rgba(200,160,80,.13);text-align:left;color:#e8dcc0;cursor:pointer;font-size:16px">
+                  <span style="font-family:'IM Fell English',Georgia,serif;font-size:22px;color:#8f8775">{{b.num}}</span>
+                  <span aria-hidden="true" style="width:8px;height:34px;border-radius:2px;background:{{b.color}}"></span>
+                  <span style="min-width:0"><b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:21px">{{b.title}}</b><br><span style="color:#a89f88;font-size:15px">{{b.author}}</span></span>
+                  <span style="color:#a89f88;font-size:14px;text-align:right">{{b.note}}</span>
+                </button>
+              </li>
+            </sc-for>
+          </ol>
+        </sc-if>
+      </div>
+    </section>
+
+    <!-- 2 FIND (books + people) -->
+    <section aria-label="Find" class="{{p2.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p2.t}};opacity:{{p2.o}};visibility:{{p2.v}}">
+      <div style="max-width:980px;margin:0 auto;padding:30px 32px 80px;display:grid;gap:22px">
+        <h1 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:54px;line-height:1">Find</h1>
+        <div role="tablist" aria-label="Search for" style="display:flex;gap:26px;border-bottom:1px solid rgba(200,160,80,.2)">
+          <button type="button" role="tab" aria-selected="{{booksTab}}" onClick="{{tabBooks}}" style="min-height:42px;background:none;border:0;border-bottom:2px solid {{booksLine}};margin-bottom:-1px;padding:0;color:{{booksColor}};font-size:17px;cursor:pointer;transition:color .3s,border-color .3s">Books</button>
+          <button type="button" role="tab" aria-selected="{{peopleTab}}" onClick="{{tabPeople}}" style="min-height:42px;background:none;border:0;border-bottom:2px solid {{peopleLine}};margin-bottom:-1px;padding:0;color:{{peopleColor}};font-size:17px;cursor:pointer;transition:color .3s,border-color .3s">People</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid #c8a050">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c8a050" stroke-width="1.5"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M16 16l5 5"></path></svg>
+          <label for="nl-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{placeholder}}</label>
+          <input id="nl-q" class="nl-in" value="{{q}}" onChange="{{setQ}}" placeholder="{{placeholder}}" style="flex:1;min-width:0;background:transparent;border:0;border-bottom:1px solid transparent;color:#e8dcc0;font-family:'IM Fell English',Georgia,serif;font-size:28px;padding:10px 0">
+        </div>
+        <p style="margin:0;color:#8f8775;font-size:14px;letter-spacing:.08em;text-transform:uppercase">{{findHeading}}</p>
+        <sc-if value="{{booksTab}}" hint-placeholder-val="{{true}}">
+          <div>
+            <sc-for list="{{bookResults}}" as="r" hint-placeholder-count="5">
+              <div class="nl-row" style="display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 10px;border-bottom:1px solid rgba(200,160,80,.13);border-radius:4px">
+                <span aria-hidden="true" style="width:8px;height:40px;border-radius:2px;background:{{r.color}}"></span>
+                <div style="min-width:0"><b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:23px">{{r.title}}</b><br><span style="color:#a89f88;font-size:15px">{{r.author}} · {{r.year}} · {{r.why}}</span></div>
+                <button type="button" onClick="{{r.toggle}}" style="min-height:40px;padding:0 18px;border-radius:999px;border:1px solid {{r.border}};background:{{r.bg}};color:{{r.fg}};font-size:15px;cursor:pointer;transition:background .3s,color .3s">{{r.label}}</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{peopleTab}}" hint-placeholder-val="{{false}}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px">
+            <sc-for list="{{peopleResults}}" as="r" hint-placeholder-count="6">
+              <div style="display:grid;justify-items:center;gap:6px;text-align:center;padding:24px 16px;border:1px solid rgba(200,160,80,.2);border-radius:10px;background:#121915">
+                <span style="width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{r.bg}};font-family:'IM Fell English',Georgia,serif;font-size:25px;color:#f3d9b8">{{r.initial}}</span>
+                <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:21px">{{r.name}}</b>
+                <span style="color:#a89f88;font-size:14px">{{r.why}}</span>
+                <button type="button" onClick="{{r.toggle}}" style="margin-top:6px;min-height:38px;padding:0 18px;border-radius:999px;border:1px solid {{r.border}};background:{{r.bg2}};color:{{r.fg}};font-size:14px;cursor:pointer;transition:background .3s,color .3s">{{r.label}}</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+
+    <!-- 3 QUOTES (pin board) -->
+    <section aria-label="Quotes" class="{{p3.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p3.t}};opacity:{{p3.o}};visibility:{{p3.v}}">
+      <div style="max-width:1120px;margin:0 auto;padding:30px 32px 80px;display:grid;gap:24px">
+        <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+          <h1 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:54px;line-height:1">Your quotes</h1>
+          <span style="color:#8f8775">{{quoteCount}} kept · tap one to hold it up to the light</span>
+        </div>
+        <div style="columns:3 260px;column-gap:22px">
+          <sc-for list="{{board}}" as="q" hint-placeholder-count="9">
+            <button type="button" class="nl-qcard" onClick="{{q.open}}" style="display:block;width:100%;break-inside:avoid;margin:0 0 22px;border:0;cursor:pointer;box-sizing:border-box;box-shadow:0 18px 28px -16px rgba(0,0,0,.9);rotate:{{q.tilt}};{{q.frame}}">
+              <span style="display:block;font-family:'IM Fell English',Georgia,serif;font-size:{{q.size}};line-height:1.3">“{{q.text}}”</span>
+              <span style="display:block;margin-top:12px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;opacity:.75">{{q.book}} · {{q.author}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 TIMER -->
+    <section aria-label="Reading timer" class="{{p4.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p4.t}};opacity:{{p4.o}};visibility:{{p4.v}}">
+      <div style="max-width:980px;margin:0 auto;padding:16px 32px 20px;display:grid;gap:14px;justify-items:center;text-align:center">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+          <div role="group" aria-label="Mode" style="display:flex;border:1px solid rgba(200,160,80,.35);border-radius:999px;padding:3px">
+            <button type="button" onClick="{{modeTimer}}" aria-pressed="{{isTimer}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{timerBg}};color:{{timerFg}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">Timer</button>
+            <button type="button" onClick="{{modeWatch}}" aria-pressed="{{isStop}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{stopBg}};color:{{stopFg}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">Stopwatch</button>
+          </div>
+          <div role="group" aria-label="Clock face" style="display:flex;border:1px solid rgba(200,160,80,.35);border-radius:999px;padding:3px">
+            <button type="button" onClick="{{facePocket}}" aria-pressed="{{pocket}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{pocketBg}};color:{{pocketFg}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">Pocket watch</button>
+            <button type="button" onClick="{{faceRing}}" aria-pressed="{{ring}}" style="min-height:36px;padding:0 16px;border:0;border-radius:999px;background:{{ringBg}};color:{{ringFg}};cursor:pointer;font-size:15px;transition:background .3s,color .3s">Simple ring</button>
+          </div>
+        </div>
+        <p style="margin:0;color:#a89f88">Reading <i style="color:#e8dcc0">The Picture of Dorian Gray</i></p>
+
+        <sc-if value="{{pocket}}" hint-placeholder-val="{{true}}">
+          <div class="nl-watch" style="width:340px;height:330px;max-width:100%"><div style="position:relative;width:340px;height:400px;transform:scale(.82);transform-origin:50% 0">
+            <svg aria-hidden="true" viewBox="0 0 340 80" style="position:absolute;left:0;top:0;width:340px;height:80px"><path d="M170 58 C 150 20, 90 10, 40 30 S -10 70, 10 76" fill="none" stroke="#a8823a" stroke-width="3" stroke-dasharray="7 3" stroke-linecap="round"></path></svg>
+            <span aria-hidden="true" style="position:absolute;left:156px;top:34px;width:28px;height:28px;border-radius:50%;border:4px solid #c8a050;box-sizing:border-box"></span>
+            <span aria-hidden="true" style="position:absolute;left:160px;top:56px;width:20px;height:16px;border-radius:3px;background:repeating-linear-gradient(90deg,#e9c779 0 2px,#8a6a2a 2px 4px)"></span>
+            <div style="position:absolute;left:0;top:66px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#f6dc95,#c8a050 38%,#7a5a22 72%,#3e2c10);box-shadow:0 30px 50px -18px rgba(0,0,0,.9),inset 0 0 0 3px rgba(255,236,180,.35),inset 0 -8px 16px rgba(0,0,0,.4)">
+              <div style="position:absolute;inset:20px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#f5ead0,#e8d7ad 70%,#cdb17a);box-shadow:inset 0 4px 14px rgba(0,0,0,.35)">
+                <div aria-hidden="true" style="position:absolute;inset:8px;border-radius:50%;background:repeating-conic-gradient(#3a2a16 0 .6deg,transparent .6deg 6deg);-webkit-mask-image:radial-gradient(circle,transparent 88%,#000 89%);mask-image:radial-gradient(circle,transparent 88%,#000 89%)"></div>
+                <sc-for list="{{numerals}}" as="n" hint-placeholder-count="12">
+                  <span aria-hidden="true" style="position:absolute;left:50%;top:50%;width:40px;height:24px;margin:-12px 0 0 -20px;transform:rotate({{n.a}}) translateY(-112px) rotate({{n.b}});font-family:'IM Fell English',Georgia,serif;font-size:19px;color:#2a1d10;text-align:center;line-height:24px">{{n.r}}</span>
+                </sc-for>
+                <span aria-hidden="true" style="position:absolute;left:50%;top:62%;transform:translateX(-50%);font-family:'IM Fell English SC',Georgia,serif;font-size:12px;letter-spacing:.2em;color:#6b5330">NOCTURNE</span>
+                <span class="nl-hand" aria-hidden="true" style="position:absolute;left:50%;bottom:50%;width:6px;height:84px;margin-left:-3px;border-radius:3px 3px 1px 1px;background:#1d140a;transform-origin:50% 100%;transform:rotate({{minDeg}})"></span>
+                <span class="nl-hand" aria-hidden="true" style="position:absolute;left:50%;bottom:50%;width:2px;height:116px;margin-left:-1px;background:#8a252c;transform-origin:50% 100%;transform:rotate({{secDeg}})"></span>
+                <span aria-hidden="true" style="position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#1d140a;box-shadow:0 0 0 3px #c8a050"></span>
+              </div>
+            </div>
+          </div></div>
+        </sc-if>
+        <sc-if value="{{ring}}" hint-placeholder-val="{{false}}">
+          <div style="position:relative;width:300px;max-width:100%;aspect-ratio:1">
+            <svg aria-hidden="true" viewBox="0 0 200 200" style="position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)">
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#1e2924" stroke-width="3"></circle>
+              <circle class="nl-sand" cx="100" cy="100" r="90" fill="none" stroke="#c8a050" stroke-width="3" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="{{offset}}"></circle>
+            </svg>
+          </div>
+        </sc-if>
+        <div role="timer" style="margin-top:-6px">
+          <span style="font-family:'IM Fell English',Georgia,serif;font-size:64px;line-height:1;font-variant-numeric:tabular-nums">{{clock}}</span>
+          <p style="margin:2px 0 0;color:#a89f88">{{clockNote}}</p>
+        </div>
+        <sc-if value="{{isTimer}}" hint-placeholder-val="{{true}}">
+          <div style="display:flex;gap:10px;align-items:center;justify-content:center">
+            <button type="button" onClick="{{minus}}" aria-label="Five minutes less" style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(200,160,80,.4);background:none;color:#e8dcc0;font-size:20px;cursor:pointer">−</button>
+            <label for="nl-mins" style="color:#a89f88">Sit for</label>
+            <input id="nl-mins" class="nl-in" type="number" min="1" max="300" value="{{mins}}" onChange="{{setMins}}" style="width:70px;background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.45);color:#e8dcc0;font-family:'IM Fell English',Georgia,serif;font-size:26px;text-align:center;padding:2px 0">
+            <span style="color:#a89f88">minutes</span>
+            <button type="button" onClick="{{plus}}" aria-label="Five minutes more" style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(200,160,80,.4);background:none;color:#e8dcc0;font-size:20px;cursor:pointer">+</button>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button type="button" class="nl-btn" onClick="{{toggleRun}}" style="min-height:50px;min-width:140px;padding:0 26px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:17px;font-weight:500;cursor:pointer">{{runLabel}}</button>
+          <button type="button" class="nl-ghost" onClick="{{openLog}}" style="min-height:50px;padding:0 22px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:17px;cursor:pointer">✎ Log a quote</button>
+          <button type="button" class="nl-ghost" onClick="{{finish}}" style="min-height:50px;padding:0 22px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:17px;cursor:pointer">Finish</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 PROFILE -->
+    <section aria-label="Profile" class="{{p5.cls}}" style="position:absolute;inset:0;overflow-y:auto;transform-origin:50% -2100px;transform:{{p5.t}};opacity:{{p5.o}};visibility:{{p5.v}}">
+      <div style="max-width:920px;margin:0 auto;padding:44px 32px 20px;display:grid;justify-items:center;text-align:center" class="nl-prof">
+        <span class="nl-p-av" style="position:relative;width:108px;height:108px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:{{sealBg}};font-family:'IM Fell English',Georgia,serif;font-size:48px;color:#f3d9b8;box-shadow:0 0 0 1px #c8a050,0 0 0 8px #0d1210,0 0 0 9px rgba(200,160,80,.4);transition:background .5s">
+          {{initial}}
+          <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{false}}"><img src="{{photo}}" alt="Your profile photo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if>
+        </span>
+        <div class="nl-p-name">
+          <h1 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:46px;line-height:1">{{name}}</h1>
+          <p style="margin:6px 0 0;color:#a89f88">@{{handle}} · reading since October</p>
+          <sc-if value="{{hasBio}}" hint-placeholder-val="{{true}}"><p style="margin:10px auto 0;max-width:40ch;color:#c9bd9f;font-style:italic">{{bio}}</p></sc-if>
+        </div>
+        <div class="nl-p-stats" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%;border-top:1px solid rgba(200,160,80,.2);border-bottom:1px solid rgba(200,160,80,.2);padding:12px 0">
+          <button type="button" class="nl-row" onClick="{{goShelves}}" style="background:none;border:0;border-radius:8px;padding:8px 0;color:#e8dcc0;cursor:pointer"><b style="display:block;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:34px;line-height:1">{{bookCount}}</b><span style="color:#a89f88">books</span></button>
+          <button type="button" class="nl-row" onClick="{{goQuotes}}" style="background:none;border:0;border-radius:8px;padding:8px 0;color:#e8dcc0;cursor:pointer"><b style="display:block;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:34px;line-height:1">{{quoteCount}}</b><span style="color:#a89f88">quotes</span></button>
+          <button type="button" class="nl-row" onClick="{{openFriends}}" style="background:none;border:0;border-radius:8px;padding:8px 0;color:#e8dcc0;cursor:pointer"><b style="display:block;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:34px;line-height:1">{{friendCount}}</b><span style="color:#a89f88">friends</span></button>
+        </div>
+        <button type="button" class="nl-btn nl-p-edit" onClick="{{openEdit}}" style="min-height:44px;padding:0 26px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:16px;font-weight:500;cursor:pointer">Edit profile</button>
+        <div class="nl-p-seal">
+          <p style="margin:0 0 12px;color:#a89f88">Seal colour</p>
+          <div role="radiogroup" aria-label="Seal colour" style="display:flex;gap:14px;justify-content:center">
+            <sc-for list="{{seals}}" as="s" hint-placeholder-count="4">
+              <button type="button" role="radio" aria-checked="{{s.on}}" aria-label="{{s.name}}" onClick="{{s.pick}}" style="width:44px;height:44px;border-radius:50%;cursor:pointer;background:{{s.bg}};border:2px solid {{s.ring}};transition:border-color .3s"></button>
+            </sc-for>
+          </div>
+        </div>
+        <button type="button" class="nl-ghost nl-p-out" onClick="{{signOut}}" style="min-height:44px;padding:0 22px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:16px;cursor:pointer">Sign out</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══ OVERLAYS ═══ -->
+  <sc-if value="{{modalOpen}}" hint-placeholder-val="{{false}}">
+    <div class="nl-veil" style="position:absolute;inset:0;z-index:40;background:rgba(5,8,7,.74);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)"></div>
+    <button type="button" aria-label="Close" onClick="{{closeModal}}" style="position:absolute;inset:0;z-index:41;background:transparent;border:0;cursor:default"></button>
+    <div style="position:absolute;inset:0;z-index:42;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;pointer-events:none;overflow:hidden">
+
+      <!-- letter / shared quote on burnt parchment -->
+      <sc-if value="{{m.isPaper}}" hint-placeholder-val="{{false}}">
+        <div style="display:grid;gap:16px;justify-items:center;pointer-events:auto">
+          <div class="nl-letter" role="dialog" aria-label="Letter from {{m.from}}" style="position:relative;width:min(500px,88vw);height:min(620px,70vh);perspective:1800px">
+            <sc-for list="{{folds}}" as="f" hint-placeholder-count="3">
+              <div class="{{f.cls}}" aria-hidden="{{f.hide}}" style="position:absolute;inset:0;clip-path:{{f.clip}};transform-origin:{{f.origin}};backface-visibility:visible">
+                <svg aria-hidden="true" viewBox="0 0 500 620" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">
+                  <defs>
+                    <filter id="nlBurn" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="0.024" numOctaves="4" seed="9" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="38" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+                    <filter id="nlStreak" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.006 0.11" numOctaves="3" seed="3"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0 0.05  1.7 0 0 0 -0.65"></feColorMatrix></filter>
+                    <radialGradient id="nlParch" cx="50%" cy="46%" r="68%"><stop offset="0%" stop-color="#d9c79c"></stop><stop offset="55%" stop-color="#c4a874"></stop><stop offset="84%" stop-color="#9c7744"></stop><stop offset="100%" stop-color="#4f3115"></stop></radialGradient>
+                    <mask id="nlPaperMask"><rect x="26" y="26" width="448" height="568" fill="#fff" filter="url(#nlBurn)"></rect></mask>
+                  </defs>
+                  <rect x="14" y="14" width="472" height="592" fill="#1a0d05" filter="url(#nlBurn)"></rect>
+                  <g mask="url(#nlPaperMask)">
+                    <rect x="0" y="0" width="500" height="620" fill="url(#nlParch)"></rect>
+                    <rect x="0" y="0" width="500" height="620" filter="url(#nlStreak)" opacity=".6"></rect>
+                  </g>
+                </svg>
+                <div style="position:absolute;inset:13% 15% 12%;display:flex;flex-direction:column;color:#241508;text-align:left">
+                  <p style="margin:0;font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:17px;opacity:.8">{{m.salute}}</p>
+                  <p style="margin:18px 0 0;font-family:'IM Fell English',Georgia,serif;font-size:clamp(19px,4.6vw,25px);line-height:1.4">{{m.body}}</p>
+                  <p style="margin:14px 0 0;font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:16px;opacity:.75">{{m.source}}</p>
+                  <p style="margin:auto 0 0;font-family:'La Belle Aurore',cursive;font-size:30px;text-align:right;color:#33200e">{{m.sign}}</p>
+                </div>
+                <div class="{{f.shadeCls}}" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(25,12,4,.9),rgba(25,12,4,.75))"></div>
+              </div>
+            </sc-for>
+            <div class="nl-crease" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:33.33%;height:1px;background:linear-gradient(90deg,transparent,rgba(40,20,6,.35),transparent)"></div>
+            <div class="nl-crease" aria-hidden="true" style="position:absolute;left:6%;right:6%;top:66.66%;height:1px;background:linear-gradient(90deg,transparent,rgba(40,20,6,.35),transparent)"></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <sc-if value="{{m.canSave}}" hint-placeholder-val="{{false}}">
+              <button type="button" class="nl-btn" onClick="{{m.save}}" style="min-height:44px;padding:0 22px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:16px;cursor:pointer">{{m.saveLabel}}</button>
+            </sc-if>
+            <button type="button" class="nl-ghost" onClick="{{closeModal}}" style="min-height:44px;padding:0 22px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:rgba(13,18,16,.8);color:#e8dcc0;font-size:16px;cursor:pointer">Close</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- quote held up to the light -->
+      <sc-if value="{{m.isQuote}}" hint-placeholder-val="{{false}}">
+        <div style="position:relative;display:grid;gap:18px;justify-items:center;pointer-events:auto">
+          <div class="nl-rays" aria-hidden="true" style="position:absolute;left:50%;top:44%;width:1100px;height:1100px;margin:-550px 0 0 -550px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,214,140,0) 0deg,rgba(255,214,140,.28) 1.2deg,rgba(255,214,140,0) 2.6deg,rgba(255,214,140,0) 7deg);-webkit-mask-image:radial-gradient(circle,transparent 16%,#000 30%,rgba(0,0,0,.4) 46%,transparent 64%);mask-image:radial-gradient(circle,transparent 16%,#000 30%,rgba(0,0,0,.4) 46%,transparent 64%)"></div>
+          <div aria-hidden="true" style="position:absolute;left:50%;top:44%;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(233,199,121,.22),transparent 62%)"></div>
+          <div class="nl-pop" role="dialog" aria-label="Quote" style="position:relative;width:min(460px,86vw);box-sizing:border-box;box-shadow:0 0 0 1px rgba(233,199,121,.5),0 0 70px rgba(233,199,121,.35),0 40px 60px -20px rgba(0,0,0,.9);{{m.frame}}">
+            <p style="margin:0;font-family:'IM Fell English',Georgia,serif;font-size:30px;line-height:1.3">“{{m.text}}”</p>
+            <p style="margin:16px 0 0;font-size:14px;letter-spacing:.06em;text-transform:uppercase;opacity:.8">{{m.book}} · {{m.author}} · {{m.page}}</p>
+          </div>
+          <div style="position:relative;display:flex;gap:10px">
+            <button type="button" class="nl-btn" onClick="{{openShare}}" style="min-height:44px;padding:0 22px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:16px;cursor:pointer">Send to friends</button>
+            <button type="button" class="nl-ghost" onClick="{{closeModal}}" style="min-height:44px;padding:0 22px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:rgba(13,18,16,.8);color:#e8dcc0;font-size:16px;cursor:pointer">Close</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- share sheet -->
+      <sc-if value="{{m.isShare}}" hint-placeholder-val="{{false}}">
+        <div class="nl-pop" role="dialog" aria-label="Send to friends" style="width:min(460px,90vw);pointer-events:auto;background:#141c18;border:1px solid rgba(200,160,80,.3);border-radius:16px;padding:22px;box-sizing:border-box;display:grid;gap:16px;box-shadow:0 40px 70px -20px rgba(0,0,0,.95)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:26px">Send to</b>
+            <button type="button" onClick="{{backToQuote}}" style="background:none;border:0;color:#a89f88;cursor:pointer;font-size:15px;min-height:36px">Back</button>
+          </div>
+          <p style="margin:0;font-family:'IM Fell English',Georgia,serif;font-style:italic;color:#c9bd9f;font-size:18px">“{{m.text}}”</p>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+            <sc-for list="{{friends}}" as="f" hint-placeholder-count="6">
+              <button type="button" onClick="{{f.toggle}}" aria-pressed="{{f.on}}" style="display:grid;justify-items:center;gap:6px;background:none;border:0;cursor:pointer;color:#e8dcc0;padding:0">
+                <span style="position:relative;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{f.bg}};font-family:'IM Fell English',Georgia,serif;font-size:23px;color:#f3d9b8;box-shadow:0 0 0 2px {{f.ring}};transition:box-shadow .25s">
+                  {{f.initial}}
+                  <sc-if value="{{f.on}}" hint-placeholder-val="{{false}}"><span style="position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;background:#c8a050;color:#0d1210;font-size:13px;line-height:22px;text-align:center;font-family:Spectral,Georgia,serif;box-shadow:0 0 0 2px #141c18">✓</span></sc-if>
+                </span>
+                <span style="font-size:13px">{{f.first}}</span>
+              </button>
+            </sc-for>
+          </div>
+          <label for="nl-msg" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Add a message</label>
+          <textarea id="nl-msg" rows="2" placeholder="Add a message (optional)" value="{{shareMsg}}" onChange="{{setShareMsg}}" style="background:#0d1210;border:1px solid rgba(200,160,80,.25);border-radius:10px;color:#e8dcc0;font-family:Spectral,Georgia,serif;font-size:16px;padding:10px 12px;resize:none"></textarea>
+          <button type="button" class="nl-btn" onClick="{{sendShare}}" style="min-height:48px;border:0;border-radius:999px;background:{{sendBg}};color:#0d1210;font-size:16px;font-weight:500;cursor:pointer">{{sendLabel}}</button>
+        </div>
+      </sc-if>
+
+      <!-- book details -->
+      <sc-if value="{{m.isBook}}" hint-placeholder-val="{{false}}">
+        <div class="nl-pop" role="dialog" aria-label="{{m.title}}" style="width:min(560px,90vw);max-height:80vh;overflow-y:auto;pointer-events:auto;background:#141c18;border:1px solid rgba(200,160,80,.3);border-radius:16px;padding:26px;box-sizing:border-box;display:grid;gap:18px;box-shadow:0 40px 70px -20px rgba(0,0,0,.95)">
+          <div style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center">
+            <div style="width:96px;height:144px;box-sizing:border-box;border-radius:2px 6px 6px 2px;padding:10px 8px;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(255,255,255,.06) 12%,rgba(0,0,0,0) 30%),{{m.color}};color:{{m.ink}};font-family:'IM Fell English',Georgia,serif;font-size:14px;line-height:1.1;box-shadow:0 16px 24px -12px rgba(0,0,0,.9)">{{m.title}}</div>
+            <div>
+              <h2 style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:32px;line-height:1.05">{{m.title}}</h2>
+              <p style="margin:4px 0 0;color:#a89f88">{{m.author}} · {{m.note}}</p>
+            </div>
+          </div>
+          <div>
+            <p style="margin:0 0 8px;color:#8f8775;font-size:14px;letter-spacing:.08em;text-transform:uppercase">Your quotes from this book</p>
+            <sc-if value="{{m.hasQuotes}}" hint-placeholder-val="{{true}}">
+              <sc-for list="{{m.quotes}}" as="q" hint-placeholder-count="2">
+                <p style="margin:0 0 10px;padding-left:14px;border-left:2px solid {{m.color}};font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:19px;line-height:1.35">“{{q.text}}” <span style="font-family:Spectral,Georgia,serif;font-style:normal;font-size:13px;color:#8f8775">{{q.page}}</span></p>
+              </sc-for>
+            </sc-if>
+            <sc-if value="{{m.noQuotes}}" hint-placeholder-val="{{false}}">
+              <p style="margin:0;color:#a89f88;font-style:italic">No quotes kept yet. Log one during your next sitting.</p>
+            </sc-if>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button type="button" class="nl-ghost" onClick="{{closeModal}}" style="min-height:44px;padding:0 20px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:15px;cursor:pointer">Close</button>
+            <button type="button" class="nl-btn" onClick="{{readThis}}" style="min-height:44px;padding:0 20px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:15px;cursor:pointer">Read now</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- log a quote mid-sitting -->
+      <sc-if value="{{m.isLog}}" hint-placeholder-val="{{false}}">
+        <div class="nl-pop" role="dialog" aria-label="Log a quote" style="width:min(480px,90vw);pointer-events:auto;background:#e9e0c9;color:#2a221a;border-radius:4px;padding:26px;box-sizing:border-box;display:grid;gap:14px;box-shadow:0 40px 70px -20px rgba(0,0,0,.95)">
+          <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:26px">A line from Dorian Gray</b>
+          <label for="nl-line" style="font-size:14px;color:#5b4f40">The quote</label>
+          <textarea id="nl-line" rows="3" value="{{logText}}" onChange="{{setLogText}}" style="background:transparent;border:0;border-bottom:1px dashed rgba(42,34,26,.5);font-family:'IM Fell English',Georgia,serif;font-size:21px;line-height:1.35;color:#2a221a;resize:vertical"></textarea>
+          <div style="display:flex;gap:10px;align-items:center"><label for="nl-pg" style="font-size:14px;color:#5b4f40">Page</label><input id="nl-pg" value="{{logPage}}" onChange="{{setLogPage}}" style="width:80px;background:transparent;border:0;border-bottom:1px dashed rgba(42,34,26,.5);font-size:17px;color:#2a221a;padding:4px 0"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button type="button" onClick="{{closeModal}}" style="min-height:42px;padding:0 18px;border:1px solid rgba(42,34,26,.4);border-radius:999px;background:none;color:#2a221a;font-size:15px;cursor:pointer">Cancel</button>
+            <button type="button" onClick="{{saveLog}}" style="min-height:42px;padding:0 20px;border:0;border-radius:999px;background:#2a221a;color:#e9e0c9;font-size:15px;cursor:pointer">Save to my quotes</button>
+          </div>
+          <p style="margin:0;font-size:13px;color:#5b4f40">The timer keeps running while you write.</p>
+        </div>
+      </sc-if>
+
+      <!-- friends list -->
+      <sc-if value="{{m.isFriends}}" hint-placeholder-val="{{false}}">
+        <div class="nl-pop" role="dialog" aria-label="Friends" style="width:min(440px,92vw);max-height:78vh;display:grid;grid-template-rows:auto auto minmax(0,1fr);pointer-events:auto;background:#141c18;border:1px solid rgba(200,160,80,.3);border-radius:16px;box-sizing:border-box;box-shadow:0 40px 70px -20px rgba(0,0,0,.95);overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px">
+            <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:26px">Friends · {{friendCount}}</b>
+            <button type="button" onClick="{{closeModal}}" aria-label="Close" style="width:40px;height:40px;border-radius:50%;border:0;background:none;color:#a89f88;font-size:22px;cursor:pointer">×</button>
+          </div>
+          <div style="padding:0 18px 10px">
+            <label for="nl-fq" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search friends</label>
+            <input id="nl-fq" class="nl-in" value="{{fq}}" onChange="{{setFq}}" placeholder="Search friends" style="width:100%;box-sizing:border-box;background:#0d1210;border:1px solid rgba(200,160,80,.22);border-radius:10px;color:#e8dcc0;font-size:16px;padding:10px 12px">
+          </div>
+          <div style="overflow-y:auto;padding:0 8px 12px">
+            <sc-for list="{{friendRows}}" as="f" hint-placeholder-count="6">
+              <div class="nl-row" style="display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px;border-radius:10px">
+                <span style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:{{f.bg}};font-family:'IM Fell English',Georgia,serif;font-size:20px;color:#f3d9b8;box-shadow:0 0 0 2px {{f.ring}}">{{f.initial}}</span>
+                <span style="min-width:0;text-align:left"><b style="font-weight:500">{{f.name}}</b><br><span style="color:#a89f88;font-size:14px">{{f.reading}}</span></span>
+                <span style="display:flex;gap:6px">
+                  <button type="button" class="nl-ghost" onClick="{{f.message}}" style="min-height:34px;padding:0 12px;border:1px solid rgba(200,160,80,.4);border-radius:8px;background:none;color:#e8dcc0;font-size:14px;cursor:pointer">Letter</button>
+                  <button type="button" onClick="{{f.remove}}" aria-label="Remove {{f.name}}" style="min-height:34px;padding:0 10px;border:0;border-radius:8px;background:#1e2924;color:#a89f88;font-size:14px;cursor:pointer">{{f.removeLabel}}</button>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- edit profile -->
+      <sc-if value="{{m.isEdit}}" hint-placeholder-val="{{false}}">
+        <form class="nl-pop" role="dialog" aria-label="Edit profile" style="width:min(460px,92vw);max-height:82vh;overflow-y:auto;pointer-events:auto;background:#141c18;border:1px solid rgba(200,160,80,.3);border-radius:16px;padding:22px;box-sizing:border-box;display:grid;gap:16px;box-shadow:0 40px 70px -20px rgba(0,0,0,.95)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b style="font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:26px">Edit profile</b>
+            <button type="button" onClick="{{closeModal}}" aria-label="Close" style="width:40px;height:40px;border-radius:50%;border:0;background:none;color:#a89f88;font-size:22px;cursor:pointer">×</button>
+          </div>
+          <div style="display:flex;gap:16px;align-items:center">
+            <span style="position:relative;width:76px;height:76px;flex:none;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:{{sealBg}};font-family:'IM Fell English',Georgia,serif;font-size:32px;color:#f3d9b8">
+              {{draftInitial}}
+              <sc-if value="{{draftHasPhoto}}" hint-placeholder-val="{{false}}"><img src="{{draftPhoto}}" alt="New profile photo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></sc-if>
+            </span>
+            <div style="display:grid;gap:6px">
+              <label for="nl-photo" class="nl-ghost" style="display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border:1px solid rgba(200,160,80,.45);border-radius:999px;color:#e8dcc0;font-size:14px;cursor:pointer">Upload a photo</label>
+              <input id="nl-photo" type="file" accept="image/*" onChange="{{pickPhoto}}" style="position:absolute;width:1px;height:1px;opacity:0">
+              <sc-if value="{{draftHasPhoto}}" hint-placeholder-val="{{false}}"><button type="button" onClick="{{clearPhoto}}" style="justify-self:start;background:none;border:0;color:#a89f88;font-size:14px;text-decoration:underline;cursor:pointer;padding:0">Remove photo</button></sc-if>
+            </div>
+          </div>
+          <div style="display:grid;gap:4px"><label for="nl-ename" style="color:#a89f88;font-size:14px">Name</label><input id="nl-ename" class="nl-in" value="{{draft.name}}" onChange="{{setDraftName}}" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-size:18px;padding:8px 0;min-width:0"></div>
+          <div style="display:grid;gap:4px"><label for="nl-ehandle" style="color:#a89f88;font-size:14px">Username</label><input id="nl-ehandle" class="nl-in" value="{{draft.handle}}" onChange="{{setDraftHandle}}" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-size:18px;padding:8px 0;min-width:0"></div>
+          <div style="display:grid;gap:4px"><label for="nl-ebio" style="color:#a89f88;font-size:14px">Bio</label><textarea id="nl-ebio" rows="2" value="{{draft.bio}}" onChange="{{setDraftBio}}" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-family:Spectral,Georgia,serif;font-size:17px;padding:8px 0;resize:none"></textarea></div>
+          <button type="button" onClick="{{togglePw}}" aria-expanded="{{pwOpen}}" style="justify-self:start;background:none;border:0;padding:0;color:#e9c779;font-size:15px;cursor:pointer;min-height:36px">{{pwLabel}}</button>
+          <div class="nl-fold" style="grid-template-rows:{{pwRows}};opacity:{{pwOp}}">
+            <div style="overflow:hidden;display:grid;gap:12px">
+              <div style="display:grid;gap:4px"><label for="nl-pw0" style="color:#a89f88;font-size:14px">Current password</label><input id="nl-pw0" class="nl-in" type="password" autocomplete="current-password" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-size:17px;padding:8px 0;min-width:0"></div>
+              <div style="display:grid;gap:4px"><label for="nl-pw1" style="color:#a89f88;font-size:14px">New password</label><input id="nl-pw1" class="nl-in" type="password" autocomplete="new-password" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-size:17px;padding:8px 0;min-width:0"></div>
+              <div style="display:grid;gap:4px"><label for="nl-pw2" style="color:#a89f88;font-size:14px">Confirm new password</label><input id="nl-pw2" class="nl-in" type="password" autocomplete="new-password" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-size:17px;padding:8px 0;min-width:0"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button type="button" class="nl-ghost" onClick="{{closeModal}}" style="min-height:44px;padding:0 20px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:none;color:#e8dcc0;font-size:15px;cursor:pointer">Cancel</button>
+            <button type="button" class="nl-btn" onClick="{{saveProfile}}" style="min-height:44px;padding:0 22px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:15px;font-weight:500;cursor:pointer">Save</button>
+          </div>
+        </form>
+      </sc-if>
+
+      <!-- celebration -->
+      <sc-if value="{{m.isDone}}" hint-placeholder-val="{{false}}">
+        <div style="position:relative;display:grid;gap:14px;justify-items:center;text-align:center;pointer-events:auto">
+          <div class="nl-rays" aria-hidden="true" style="position:absolute;left:50%;top:40%;width:1300px;height:1300px;margin:-650px 0 0 -650px;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,214,140,0) 0deg,rgba(255,214,140,.34) 1.4deg,rgba(255,214,140,0) 3deg,rgba(255,214,140,0) 9deg);-webkit-mask-image:radial-gradient(circle,transparent 6%,#000 18%,rgba(0,0,0,.35) 40%,transparent 60%);mask-image:radial-gradient(circle,transparent 6%,#000 18%,rgba(0,0,0,.35) 40%,transparent 60%)"></div>
+          <sc-for list="{{embers}}" as="e" hint-placeholder-count="14">
+            <span class="nl-ember" aria-hidden="true" style="position:absolute;left:{{e.x}};top:70vh;width:{{e.s}};height:{{e.s}};border-radius:50%;background:#ffc65a;box-shadow:0 0 10px 2px rgba(255,170,70,.6);animation-delay:{{e.d}};pointer-events:none"></span>
+          </sc-for>
+          <span class="nl-flame nl-pop" aria-hidden="true" style="width:34px;height:52px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 75%,#fff6d8 0 18%,#ffc65a 42%,#c8501e 75%,rgba(200,80,30,0) 76%);box-shadow:0 0 50px 14px rgba(255,170,70,.35)"></span>
+          <h2 class="nl-pop" style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:64px;line-height:1">Well read.</h2>
+          <p class="nl-pop" style="margin:0;font-size:20px;color:#e8dcc0;animation-delay:.1s">{{m.summary}}</p>
+          <p class="nl-pop" style="margin:0;color:#e9c779;animation-delay:.2s">Your streak is now {{streak}} nights.</p>
+          <div class="nl-pop" style="display:flex;gap:10px;margin-top:10px;animation-delay:.3s">
+            <button type="button" class="nl-btn" onClick="{{goHomeDone}}" style="min-height:46px;padding:0 24px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:16px;cursor:pointer">Back home</button>
+            <button type="button" class="nl-ghost" onClick="{{closeModal}}" style="min-height:46px;padding:0 24px;border:1px solid rgba(200,160,80,.45);border-radius:999px;background:rgba(13,18,16,.8);color:#e8dcc0;font-size:16px;cursor:pointer">Another sitting</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+    <div class="nl-toast" role="status" style="position:absolute;left:50%;bottom:28px;z-index:60;padding:12px 20px;border-radius:999px;background:#e9e0c9;color:#2a221a;font-size:15px;box-shadow:0 20px 30px -12px rgba(0,0,0,.8);white-space:nowrap">{{toast}}</div>
+  </sc-if>
+
+  <!-- ═══ SIGN IN GATE ═══ -->
+  <div class="nl-gate" style="position:absolute;inset:0;z-index:80;background:#0d1210;display:flex;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;transform:{{gateT}};opacity:{{gateO}};pointer-events:{{gatePE}}">
+    <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(60vmax 50vmax at 50% 120%,rgba(200,140,60,.16),transparent 60%),radial-gradient(40vmax 40vmax at 0% 0%,rgba(122,34,40,.18),transparent 60%)"></div>
+    <div style="position:relative;width:100%;max-width:420px;display:grid;gap:30px;text-align:center">
+      <div>
+        <h1 class="nl-gate-title" style="margin:0;font-family:'IM Fell English',Georgia,serif;font-weight:400;font-size:76px;line-height:.92">Nocturne<br><i style="color:#e9c779">Library</i></h1>
+        <p style="margin:16px 0 0;color:#a89f88;font-size:18px">Your books, your quotes, your reading friends.</p>
+      </div>
+      <form aria-label="{{authTitle}}" style="display:grid;gap:18px;text-align:left">
+        <div class="nl-fold" style="grid-template-rows:{{regRows}};opacity:{{regOp}}">
+          <div style="overflow:hidden;display:grid;gap:18px">
+            <div style="display:grid;gap:4px"><label for="nl-name" style="color:#a89f88;font-size:15px">Name</label><input id="nl-name" class="nl-in" value="Julian Blackwood" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-family:Spectral,Georgia,serif;font-size:19px;padding:8px 0;min-width:0"></div>
+          </div>
+        </div>
+        <div style="display:grid;gap:4px"><label for="nl-email" style="color:#a89f88;font-size:15px">Email</label><input id="nl-email" class="nl-in" type="email" value="julian@nocturne.lib" autocomplete="email" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-family:Spectral,Georgia,serif;font-size:19px;padding:8px 0;min-width:0"></div>
+        <div style="display:grid;gap:4px"><label for="nl-pass" style="color:#a89f88;font-size:15px">Password</label><input id="nl-pass" class="nl-in" type="password" value="midnight-oil" autocomplete="current-password" style="background:transparent;border:0;border-bottom:1px solid rgba(200,160,80,.4);color:#e8dcc0;font-family:Spectral,Georgia,serif;font-size:19px;padding:8px 0;min-width:0"></div>
+        <button type="button" class="nl-btn" onClick="{{enter}}" style="margin-top:10px;min-height:52px;border:0;border-radius:999px;background:#c8a050;color:#0d1210;font-size:18px;font-weight:500;cursor:pointer">{{authCta}}</button>
+        <button type="button" onClick="{{flipAuth}}" style="justify-self:center;min-height:44px;background:none;border:0;color:#e9c779;font-size:16px;text-decoration:underline;text-underline-offset:4px;cursor:pointer">{{authSwitch}}</button>
+      </form>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startSignedIn":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":900}}'>
+const STEP = 3.3;
+const TABS = [
+  ["Home","M4 20h16M6 20V9l6-5 6 5v11M10 20v-5h4v5"],
+  ["Shelves","M4 4v16M8 6v14M12 4v16M16 7l3 13M3 20h18"],
+  ["Find","M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14M16 16l5 5"],
+  ["Quotes","M5 5c3-1 5 0 7 2 2-2 4-3 7-2v14c-3-1-5 0-7 2-2-2-4-3-7-2zM12 7v14"],
+  ["Timer","M12 7v5l3 2M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M10 1h4"],
+  ["Profile","M20 4c-8 1-13 6-15 16M20 4c-1 7-6 11-12 12M20 4l-8 8"]
+];
+// title, author, status, cloth colour, ink, height, width, variant, note, coverUrl
+const BOOKS = [
+  ["The Secret History","Donna Tartt","reading","#3b1d22","#e9cf8f",186,46,0,"page 212 of 559",null],
+  ["Dracula","Bram Stoker","finished","#1f2a3a","#d9c08a",176,40,2,"finished in October",null],
+  ["Frankenstein","Mary Shelley","finished","#2e3a2a","#e2cf9a",164,36,3,"finished in September",null],
+  ["The Picture of Dorian Gray","Oscar Wilde","reading","#2f4a3b","#ecd59b",182,42,1,"page 148 of 254",null],
+  ["Brideshead Revisited","Evelyn Waugh","want","#4a3420","#efd9a6",192,44,0,"want to read",null],
+  ["Jane Eyre","Charlotte Brontë","finished","#5a2a2a","#ecd59b",188,46,2,"finished in August",null],
+  ["Wuthering Heights","Emily Brontë","finished","#2b2b33","#cfc3a0",170,40,3,"finished in July",null],
+  ["Rebecca","Daphne du Maurier","want","#3a2f45","#e5cf9e",180,42,1,"want to read",null],
+  ["Crime and Punishment","Fyodor Dostoevsky","reading","#262d27","#d8c38f",194,52,0,"page 301 of 671",null],
+  ["Mrs Dalloway","Virginia Woolf","finished","#33404a","#e3d3a8",160,30,1,"finished in June",null],
+  ["The Turn of the Screw","Henry James","finished","#3a3a2a","#e0cc96",150,28,3,"finished in May",null],
+  ["Paradise Lost","John Milton","want","#2a1f1a","#d6b46a",192,50,2,"want to read",null],
+  ["Middlemarch","George Eliot","want","#41452f","#e8d6a0",196,56,0,"want to read",null],
+  ["The Woman in White","Wilkie Collins","finished","#e2d6ba","#3a2a1a",184,44,1,"finished in April",null],
+  ["Carmilla","J. Sheridan Le Fanu","finished","#5e1f2a","#f0d7a2",146,26,3,"finished in March",null],
+  ["Great Expectations","Charles Dickens","finished","#24343a","#e0c98e",186,46,2,"finished in February",null],
+  ["Anna Karenina","Leo Tolstoy","want","#2c2238","#e6cf98",198,58,0,"want to read",null],
+  ["The Moonstone","Wilkie Collins","finished","#3d3524","#ead6a0",176,40,1,"finished in January",null],
+  ["Persuasion","Jane Austen","finished","#6b5a3e","#f4e6c0",166,34,3,"finished last year",null],
+  ["Northanger Abbey","Jane Austen","want","#46303a","#ecd59b",162,32,2,"want to read",null],
+  ["Les Misérables","Victor Hugo","want","#1d2622","#d6c08c",200,64,0,"want to read",null],
+  ["Heart of Darkness","Joseph Conrad","finished","#141414","#c9b27a",150,24,1,"finished last year",null],
+  ["The Brothers Karamazov","Fyodor Dostoevsky","want","#3a2618","#e1c78c",198,60,2,"want to read",null],
+  ["Villette","Charlotte Brontë","finished","#304433","#e8d3a0",172,38,3,"finished last year",null]
+];
+const STATUS_OK = { all:() => true, reading:b => b[2]==='reading', finished:b => b[2]==='finished', want:b => b[2]==='want' };
+const FILTERS = [["all","All"],["reading","Reading"],["finished","Finished"],["want","Want to read"]];
+const COLOR = {}; BOOKS.forEach(b => { COLOR[b[0]] = b[3]; });
+const CAT = [["The Castle of Otranto","Horace Walpole","1764","#3a2618","because you finished Carmilla"],["Uncle Silas","J. Sheridan Le Fanu","1864","#2f2a3a","more Le Fanu"],["The Monk","Matthew Lewis","1796","#5a1f24","gothic, like Dracula"],["Notes from Underground","Fyodor Dostoevsky","1864","#262d27","you're reading Dostoevsky"],["Lady Audley's Secret","Mary Elizabeth Braddon","1862","#4a3420","Victorian suspense"],["The Picture of Dorian Gray","Oscar Wilde","1890","#2f4a3b","on your shelf"],["Silas Marner","George Eliot","1861","#41452f","popular with Silas"]];
+const PEOPLE = [["Percival Hale","P","#25324a","reads The Secret History · 3 books in common","none"],["Clementine Ashby","C","#33404a","loves Woolf · 4 books in common","none"],["Ezra Thorne","E","#262d27","reading The Name of the Rose","sent"],["Margot Lisle","M","#5a2a2a","gothic reader · friend of Ines","none"],["Rowan Pike","R","#2f4a3b","2 books in common","none"],["Silas Ashgrove","S","#2f4a3b","your friend","friend"],["Ines Marlowe","I","#5a1f24","your friend","friend"]];
+const FRIENDS = [["Silas Ashgrove","S","#2f4a3b"],["Ines Marlowe","I","#5a1f24"],["Octavia Wren","O","#4a3420"],["Theodora Vane","T","#3a2f45"],["Ezra Thorne","E","#262d27"],["Clementine Ashby","C","#33404a"],["Percival Hale","P","#25324a"],["Rowan Pike","R","#2f4a3b"]];
+const NOTES0 = [
+  { kind:'letter', from:'Silas Ashgrove', initial:'S', bg:'#2f4a3b', what:'sent you a letter', when:'tonight', read:false, body:'Finished Pride and Prejudice on the night train. You were right about Mr Bennet. Your turn: what do we read next?', source:'', salute:'Dear Julian,', sign:'Silas' },
+  { kind:'quote', from:'Theodora Vane', initial:'T', bg:'#3a2f45', what:'sent you a quote', when:'2h ago', read:false, body:'“Last night I dreamt I went to Manderley again.”', source:'Daphne du Maurier, Rebecca', salute:'Read this and thought of you —', sign:'Theodora', q:{ text:'Last night I dreamt I went to Manderley again.', book:'Rebecca', author:'Daphne du Maurier', page:'p. 1' } },
+  { kind:'request', from:'Percival Hale', initial:'P', bg:'#25324a', what:'wants to be friends', when:'yesterday', read:false },
+  { kind:'quote', from:'Ines Marlowe', initial:'I', bg:'#5a1f24', what:'sent you a quote', when:'yesterday', read:false, body:'“Reader, I married him.”', source:'Charlotte Brontë, Jane Eyre', salute:'Chapter thirty-eight undid me on the train —', sign:'Ines', q:{ text:'Reader, I married him.', book:'Jane Eyre', author:'Charlotte Brontë', page:'p. 498' } },
+  { kind:'letter', from:'Octavia Wren', initial:'O', bg:'#4a3420', what:'sent you a letter', when:'Tue', read:true, body:'Starting Anna Karenina tonight. One chapter each, every night, until we finish? I will light a candle for us both.', source:'', salute:'Julian —', sign:'Octavia' }
+];
+const QUOTES0 = [
+  ["We are all in the gutter, but some of us are looking at the stars.","The Picture of Dorian Gray","Oscar Wilde","p. 47"],
+  ["I am no bird; and no net ensnares me.","Jane Eyre","Charlotte Brontë","p. 318"],
+  ["Beware; for I am fearless, and therefore powerful.","Frankenstein","Mary Shelley","p. 162"],
+  ["Whatever our souls are made of, his and mine are the same.","Wuthering Heights","Emily Brontë","p. 80"],
+  ["Listen to them, the children of the night. What music they make!","Dracula","Bram Stoker","p. 24"],
+  ["The only way to get rid of a temptation is to yield to it.","The Picture of Dorian Gray","Oscar Wilde","p. 21"],
+  ["Mrs. Dalloway said she would buy the flowers herself.","Mrs Dalloway","Virginia Woolf","p. 1"],
+  ["Pain and suffering are always inevitable for a large intelligence and a deep heart.","Crime and Punishment","Fyodor Dostoevsky","p. 264"],
+  ["The mind is its own place, and in itself can make a Heaven of Hell, a Hell of Heaven.","Paradise Lost","John Milton","Book I"],
+  ["I would always rather be happy than dignified.","Jane Eyre","Charlotte Brontë","p. 287"],
+  ["It is a strange thing, but when you are dreading something, and would give anything to slow down time, it has a disobliging habit of speeding up.","The Secret History","Donna Tartt","p. 112"]
+].map(q => ({ text:q[0], book:q[1], author:q[2], page:q[3] }));
+const SEALS = [["Oxblood","#a8353c","#7a2228","#4c1216"],["Bottle green","#3f6b55","#2f4a3b","#16231c"],["Midnight","#3a4f72","#25324a","#111722"],["Plum","#5e4a70","#3a2f45","#1a1420"]];
+const ROMAN = ["XII","I","II","III","IIII","V","VI","VII","VIII","IX","X","XI"];
+const TILTS = ["-1.4deg","0.9deg","0deg","1.5deg","-0.6deg","0.5deg","-1deg","1.2deg","-0.3deg"];
+const sealBg = x => 'radial-gradient(circle at 35% 30%,' + x[1] + ',' + x[2] + ' 55%,' + x[3] + ')';
+function frame(q, i){
+  const c = COLOR[q.book] || '#3a2f45';
+  const v = i % 6;
+  if (v === 0) return 'background:linear-gradient(160deg,' + c + ',#0e0e0e);color:#f1dfb0;border:1px solid #c8a050;outline:1px solid rgba(200,160,80,.45);outline-offset:-9px;border-radius:3px;padding:34px 28px;text-align:left';
+  if (v === 1) return 'background:#ebe1c8;color:#2a221a;border-left:9px solid ' + c + ';border-radius:2px;padding:26px 24px;text-align:left';
+  if (v === 2) return 'background:linear-gradient(180deg,color-mix(in srgb,' + c + ' 85%,#fff 12%),' + c + ');color:#f1dfb0;border-radius:220px 220px 8px 8px;padding:74px 30px 32px;text-align:center';
+  if (v === 3) return 'background:radial-gradient(circle at 0 50%,#0d1210 13px,transparent 14px),radial-gradient(circle at 100% 50%,#0d1210 13px,transparent 14px),color-mix(in srgb,' + c + ' 30%,#ecdfc2);color:#1d1712;border-radius:8px;padding:30px 38px;text-align:center;border-top:1px dashed rgba(0,0,0,.25);border-bottom:1px dashed rgba(0,0,0,.25)';
+  if (v === 4) return 'background:radial-gradient(circle at 35% 30%,color-mix(in srgb,' + c + ' 75%,#fff 18%),' + c + ' 60%,#0b0b0b);color:#f1dfb0;border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;justify-content:center;padding:44px;text-align:center';
+  return 'background:' + c + ';color:#f1dfb0;border:14px solid #efe5cc;border-bottom-width:46px;border-radius:2px;padding:24px 22px;text-align:left';
+}
+function sizeFor(q, i){ const n = q.text.length; if (i % 6 === 4) return n > 70 ? '16px' : '19px'; return n < 50 ? '27px' : n < 90 ? '22px' : '19px'; }
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    this.state = { signedIn: p.startSignedIn !== false, register:false, page:0, spin:0, wheelCls:'',
+      notifOpen:false, notes: NOTES0.map(n => Object.assign({}, n)), answers:{},
+      modal:null, toast:'', toastKey:0,
+      view:'shelf', filter:'all',
+      findTab:'books', q:'', added:[], rel:{},
+      quotes: QUOTES0.slice(), savedShared:{},
+      share:[], shareMsg:'',
+      mode:'timer', face:'pocket', mins:30, secs:754, running:false, sessionQuotes:0, logText:'', logPage:'',
+      streak:6, seal:0,
+      profile:{ name:'Julian Blackwood', handle:'j_blackwood', bio:'Gothic novels, candlelight and long nights.', photo:'' },
+      draft:null, pwOpen:false, fq:'', friendList: FRIENDS.slice(0,6).map(f => f[0]), removed:[] };
+    this.t = null; this.drag = null; this.moved = false; this.tt = null;
+  }
+  componentWillUnmount(){ clearInterval(this.t); clearTimeout(this.tt); }
+  say(msg){ clearTimeout(this.tt); this.setState({ toast:msg, toastKey:this.state.toastKey + 1 }); this.tt = setTimeout(() => this.setState({ toast:'' }), 2800); }
+  go(i){ if (this.moved) { this.moved = false; return; } this.setState({ page:i, spin:0, wheelCls:'', notifOpen:false }); }
+  clampSpin(v){ const lo = -STEP*1.2 - this.state.page*STEP, hi = (TABS.length - 1 + 1.2)*STEP - this.state.page*STEP; return Math.max(lo, Math.min(hi, v)); }
+  panel(i){ const d = i - this.state.page; const on = d === 0; return { cls: on ? 'nl-page on' : 'nl-page', t: 'rotate(' + (-Math.max(-1.5, Math.min(1.5, d))*24) + 'deg)', o: on ? 1 : 0, v: on ? 'visible' : 'hidden' }; }
+  tick(){
+    const s = this.state; const next = s.secs + 1;
+    if (s.mode === 'timer' && next >= s.mins*60) { this.setState({ secs: s.mins*60 }); this.complete(); return; }
+    this.setState({ secs: next });
+  }
+  complete(){
+    clearInterval(this.t);
+    const s = this.state; const m = Math.max(1, Math.round(s.secs/60));
+    this.setState({ running:false, streak: 7, modal:{ type:'done', summary: m + ' minutes with Dorian Gray' + (s.sessionQuotes ? ', ' + s.sessionQuotes + (s.sessionQuotes === 1 ? ' quote' : ' quotes') + ' kept.' : '.') }, secs:0, sessionQuotes:0 });
+  }
+  openNote(i){
+    const notes = this.state.notes.map((n,k) => k === i ? Object.assign({}, n, { read:true }) : n);
+    const n = notes[i];
+    if (n.kind === 'request') { this.setState({ notes }); return; }
+    this.setState({ notes, notifOpen:false, modal:{ type:'paper', idx:i } });
+  }
+  renderVals(){
+    const s = this.state;
+    const unread = s.notes.filter(n => !n.read).length;
+    const total = s.mins * 60;
+    const shown = s.mode === 'timer' ? Math.max(0, total - s.secs) : s.secs;
+    const hh = Math.floor(shown/3600), mm = Math.floor((shown%3600)/60), ss = shown % 60;
+    const pad = x => String(x).padStart(2,'0');
+    const filtered = BOOKS.filter(STATUS_OK[s.filter]);
+    const perRow = Math.ceil(filtered.length / 4) || 1;
+    const bookObj = (b) => { const idx = BOOKS.indexOf(b); return { title:b[0], author:b[1], color:b[3], ink:b[4], h:b[5]+'px', w:b[6]+'px', note:b[8],
+      v0:b[7]===0, v1:b[7]===1, v2:b[7]===2, v3:b[7]===3, lean: (idx % 7 === 3) ? '-4deg' : (idx % 11 === 5 ? '3deg' : '0deg'),
+      pick: () => this.setState({ modal:{ type:'book', idx } }) }; };
+    const rows = [0,1,2,3].map(r => ({ books: filtered.slice(r*perRow, (r+1)*perRow).map(bookObj) }));
+    const qq = s.q.trim().toLowerCase();
+    const m = s.modal;
+    let mv = { isPaper:false, isQuote:false, isShare:false, isBook:false, isLog:false, isDone:false, isFriends:false, isEdit:false };
+    if (m && m.type === 'friends') mv.isFriends = true;
+    if (m && m.type === 'edit') mv.isEdit = true;
+    const pr = s.profile; const dr = s.draft || pr;
+    const READING = { 'Silas Ashgrove':'reading Middlemarch', 'Ines Marlowe':'reading Jane Eyre', 'Octavia Wren':'reading Anna Karenina', 'Theodora Vane':'reading Rebecca', 'Ezra Thorne':'reading The Name of the Rose', 'Clementine Ashby':'reading Mrs Dalloway' };
+    const fqq = s.fq.trim().toLowerCase();
+    const friendCount = s.friendList.filter(n => !s.removed.includes(n)).length;
+    if (m && m.type === 'paper') {
+      const n = s.notes[m.idx]; const saved = !!s.savedShared[m.idx];
+      Object.assign(mv, { isPaper:true, from:n.from, salute:n.salute, body:n.body, source:n.source, sign:n.sign, canSave: n.kind === 'quote', saveLabel: saved ? 'Saved ✓' : 'Save to my quotes',
+        save: () => { if (saved) return; this.setState({ quotes:[n.q].concat(s.quotes), savedShared:Object.assign({}, s.savedShared, { [m.idx]:true }) }); this.say('Saved to your quotes'); } });
+    }
+    if (m && (m.type === 'quote' || m.type === 'share')) {
+      const q = s.quotes[m.idx];
+      Object.assign(mv, { isQuote: m.type === 'quote', isShare: m.type === 'share', text:q.text, book:q.book, author:q.author, page:q.page, frame: frame(q, m.idx) });
+    }
+    if (m && m.type === 'book') {
+      const b = BOOKS[m.idx]; const qs = s.quotes.filter(q => q.book === b[0]);
+      Object.assign(mv, { isBook:true, title:b[0], author:b[1], note:b[8], color:b[3], ink:b[4], quotes:qs, hasQuotes: qs.length > 0, noQuotes: qs.length === 0 });
+    }
+    if (m && m.type === 'log') mv.isLog = true;
+    if (m && m.type === 'done') Object.assign(mv, { isDone:true, summary:m.summary });
+    const seg = (on) => ({ bg: on ? '#c8a050' : 'transparent', fg: on ? '#0d1210' : '#a89f88' });
+    const out = {
+      wheelR: (s.page*STEP + s.spin) + 'deg', wheelCls: s.wheelCls,
+      tabs: TABS.map((t,i) => ({ label:t[0], d:t[1], angle:(-i*STEP)+'deg', current: i===s.page ? 'page' : 'false', color: i===s.page ? '#e9c779' : '#8f8775', glow: i===s.page ? '0 0 14px rgba(233,199,121,.55)' : 'none', go: () => this.go(i) })),
+      onWheel: e => { const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; this.setState({ spin: this.clampSpin(this.state.spin + d*0.012), wheelCls:'fast' }); },
+      onDown: e => { this.drag = { x:e.clientX, spin:this.state.spin, id:e.pointerId, el:e.currentTarget, cap:false }; this.moved = false; },
+      onMove: e => { const d = this.drag; if (!d) return; const dx = e.clientX - d.x; if (!d.cap && Math.abs(dx) > 6) { d.cap = true; this.moved = true; try { d.el.setPointerCapture(d.id); } catch (err) {} } if (d.cap) this.setState({ spin: this.clampSpin(d.spin - dx*0.027), wheelCls:'drag' }); },
+      onUp: () => { if (this.drag && this.drag.cap) { this.setState({ wheelCls:'fast' }); setTimeout(() => { this.moved = false; }, 0); } this.drag = null; },
+      spinLeft: () => this.setState({ spin: this.clampSpin(this.state.spin - STEP*2), wheelCls:'fast' }),
+      spinRight: () => this.setState({ spin: this.clampSpin(this.state.spin + STEP*2), wheelCls:'fast' }),
+      goTimer: () => this.go(4), goSearch: () => this.go(2), goProfile: () => this.go(5),
+      sealBg: sealBg(SEALS[s.seal]),
+      unread, hasUnread: unread > 0, notifOpen: s.notifOpen,
+      toggleNotif: () => this.setState({ notifOpen: !s.notifOpen }),
+      markAll: () => this.setState({ notes: s.notes.map(n => Object.assign({}, n, { read:true })) }),
+      notes: s.notes.map((n,i) => { const a = s.answers[i]; return { from:n.from, initial:n.initial, bg:n.bg, what:n.what, when:n.when, weight: n.read ? 400 : 600, dot: n.read ? 'transparent' : '#e9c779',
+        isRequest: n.kind === 'request', pending: n.kind === 'request' && !a, answered: !!a, answer: a === 'yes' ? 'You are now friends.' : 'Request declined.',
+        open: () => this.openNote(i),
+        accept: () => this.setState({ answers:Object.assign({}, s.answers, { [i]:'yes' }), notes: s.notes.map((x,k) => k===i ? Object.assign({}, x, { read:true }) : x) }),
+        decline: () => this.setState({ answers:Object.assign({}, s.answers, { [i]:'no' }), notes: s.notes.map((x,k) => k===i ? Object.assign({}, x, { read:true }) : x) }) }; }),
+      streak: s.streak,
+      cur: { title:'The Picture of Dorian Gray', author:'Oscar Wilde', cover: BOOKS[3][9] || '', hasCover: !!BOOKS[3][9], noCover: !BOOKS[3][9] },
+      shelfOn: s.view==='shelf', listOn: s.view==='list',
+      shelfBg: seg(s.view==='shelf').bg, shelfColor: seg(s.view==='shelf').fg, listBg: seg(s.view==='list').bg, listColor: seg(s.view==='list').fg,
+      viewShelf: () => this.setState({ view:'shelf' }), viewList: () => this.setState({ view:'list' }),
+      filters: FILTERS.map(([k,l]) => ({ label:l, count: BOOKS.filter(STATUS_OK[k]).length, on:k===s.filter, line: k===s.filter ? '#c8a050' : 'transparent', color: k===s.filter ? '#e8dcc0' : '#8f8775', pick: () => this.setState({ filter:k }) })),
+      rows, listBooks: filtered.map((b,i) => Object.assign(bookObj(b), { num: pad(i+1) })),
+      booksTab: s.findTab==='books', peopleTab: s.findTab==='people',
+      booksLine: s.findTab==='books' ? '#c8a050' : 'transparent', booksColor: s.findTab==='books' ? '#e8dcc0' : '#8f8775',
+      peopleLine: s.findTab==='people' ? '#c8a050' : 'transparent', peopleColor: s.findTab==='people' ? '#e8dcc0' : '#8f8775',
+      tabBooks: () => this.setState({ findTab:'books' }), tabPeople: () => this.setState({ findTab:'people' }),
+      placeholder: s.findTab==='books' ? 'Search books by title or author' : 'Search people by name',
+      findHeading: qq ? 'Results' : (s.findTab==='books' ? 'Suggested for you' : 'People you may know'),
+      q: s.q, setQ: e => this.setState({ q: e.target.value }),
+      bookResults: CAT.filter(c => !qq || (c[0]+' '+c[1]).toLowerCase().includes(qq)).map(c => { const has = s.added.includes(c[0]) || c[4]==='on your shelf'; return { title:c[0], author:c[1], year:c[2], color:c[3], why:c[4], label: has ? 'On your shelf ✓' : 'Add to shelf', bg: has ? '#c8a050' : 'transparent', fg: has ? '#0d1210' : '#e8dcc0', border: has ? '#c8a050' : 'rgba(200,160,80,.45)', toggle: () => { if (c[4]==='on your shelf') return; this.setState({ added: has ? s.added.filter(x=>x!==c[0]) : s.added.concat(c[0]) }); if (!has) this.say(c[0] + ' added to Want to read'); } }; }),
+      peopleResults: PEOPLE.filter(p => qq ? p[0].toLowerCase().includes(qq) : p[4] !== 'friend').map((p,i) => { const st = s.rel[p[0]] || p[4]; return { name:p[0], initial:p[1], bg:p[2], why:p[3], label: st==='friend' ? 'Friends' : st==='sent' ? 'Requested' : 'Add friend', bg2: st==='none' ? '#c8a050' : 'transparent', fg: st==='none' ? '#0d1210' : '#a89f88', border: st==='none' ? '#c8a050' : 'rgba(200,160,80,.3)', toggle: () => { if (st==='friend') return; this.setState({ rel:Object.assign({}, s.rel, { [p[0]]: st==='sent' ? 'none' : 'sent' }) }); } }; }),
+      quoteCount: s.quotes.length,
+      board: s.quotes.map((q,i) => ({ text:q.text, book:q.book, author:q.author, tilt:TILTS[i % TILTS.length], frame:frame(q,i), size:sizeFor(q,i), open: () => this.setState({ modal:{ type:'quote', idx:i }, share:[], shareMsg:'' }) })),
+      isTimer: s.mode==='timer', isStop: s.mode==='stopwatch',
+      timerBg: seg(s.mode==='timer').bg, timerFg: seg(s.mode==='timer').fg, stopBg: seg(s.mode==='stopwatch').bg, stopFg: seg(s.mode==='stopwatch').fg,
+      modeTimer: () => this.setState({ mode:'timer' }), modeWatch: () => this.setState({ mode:'stopwatch' }),
+      pocket: s.face==='pocket', ring: s.face==='ring',
+      pocketBg: seg(s.face==='pocket').bg, pocketFg: seg(s.face==='pocket').fg, ringBg: seg(s.face==='ring').bg, ringFg: seg(s.face==='ring').fg,
+      facePocket: () => this.setState({ face:'pocket' }), faceRing: () => this.setState({ face:'ring' }),
+      numerals: ROMAN.map((r,i) => ({ r, a:(i*30)+'deg', b:(-i*30)+'deg' })),
+      minDeg: (s.secs/10) + 'deg', secDeg: (s.secs*6) + 'deg',
+      offset: (565.5*(1 - (s.mode==='timer' ? Math.min(s.secs/total,1) : (s.secs%3600)/3600))).toFixed(1),
+      clock: (hh ? hh + ':' : '') + pad(mm) + ':' + pad(ss),
+      clockNote: s.mode==='timer' ? 'left of a ' + s.mins + ' minute sitting' : 'elapsed',
+      mins: s.mins,
+      setMins: e => { const v = parseInt(e.target.value, 10); if (!isNaN(v)) this.setState({ mins: Math.max(1, Math.min(300, v)) }); },
+      minus: () => this.setState({ mins: Math.max(1, s.mins - 5) }), plus: () => this.setState({ mins: Math.min(300, s.mins + 5) }),
+      runLabel: s.running ? 'Pause' : (s.secs ? 'Resume' : 'Start'),
+      toggleRun: () => { if (s.running) { clearInterval(this.t); this.setState({ running:false }); } else { clearInterval(this.t); this.t = setInterval(() => this.tick(), 1000); this.setState({ running:true }); } },
+      finish: () => this.complete(),
+      openLog: () => this.setState({ modal:{ type:'log' }, logText:'', logPage:'' }),
+      logText: s.logText, logPage: s.logPage,
+      setLogText: e => this.setState({ logText: e.target.value }), setLogPage: e => this.setState({ logPage: e.target.value }),
+      saveLog: () => { const t = s.logText.trim(); if (!t) { this.say('Write the line first'); return; } this.setState({ quotes:[{ text:t, book:'The Picture of Dorian Gray', author:'Oscar Wilde', page: s.logPage ? 'p. ' + s.logPage : '' }].concat(s.quotes), sessionQuotes: s.sessionQuotes + 1, modal:null }); this.say('Saved to your quotes'); },
+      modalOpen: !!m, m: mv,
+      closeModal: () => this.setState({ modal:null }),
+      openShare: () => this.setState({ modal:{ type:'share', idx:m.idx } }),
+      backToQuote: () => this.setState({ modal:{ type:'quote', idx:m.idx } }),
+      friends: FRIENDS.map(f => { const on = s.share.includes(f[0]); return { name:f[0], first:f[0].split(' ')[0], initial:f[1], bg:f[2], on, ring: on ? '#e9c779' : 'transparent', toggle: () => this.setState({ share: on ? s.share.filter(x=>x!==f[0]) : s.share.concat(f[0]) }) }; }),
+      shareMsg: s.shareMsg, setShareMsg: e => this.setState({ shareMsg: e.target.value }),
+      sendLabel: s.share.length ? 'Send to ' + s.share.length + (s.share.length === 1 ? ' friend' : ' friends') : 'Pick friends to send to',
+      sendBg: s.share.length ? '#c8a050' : '#6f6448',
+      sendShare: () => { if (!s.share.length) return; const n = s.share.length; this.setState({ modal:null, share:[], shareMsg:'' }); this.say('Sent to ' + n + (n === 1 ? ' friend' : ' friends')); },
+      readThis: () => { this.setState({ modal:null }); this.go(4); },
+      goHomeDone: () => this.setState({ modal:null, page:0, spin:0, wheelCls:'' }),
+      embers: [8,15,22,31,38,46,53,61,68,74,81,88,93,27].map((x,i) => ({ x: x + '%', s: (3 + (i%3)*2) + 'px', d: (i*0.41).toFixed(2) + 's' })),
+      hasToast: !!s.toast, toast: s.toast,
+      bookCount: BOOKS.length, friendCount,
+      folds: [
+        { cls:'nl-fold-mid', hide:'false', clip:'inset(33.3% -8% 33.3% -8%)', origin:'50% 50%', shadeCls:'nl-shade-mid' },
+        { cls:'nl-fold-bot', hide:'true', clip:'inset(66.6% -8% -8% -8%)', origin:'50% 66.66%', shadeCls:'nl-shade-bot' },
+        { cls:'nl-fold-top', hide:'true', clip:'inset(-8% -8% 66.7% -8%)', origin:'50% 33.33%', shadeCls:'nl-shade-top' }
+      ],
+      name: pr.name, handle: pr.handle, bio: pr.bio, hasBio: !!pr.bio, photo: pr.photo, hasPhoto: !!pr.photo,
+      initial: (pr.name.trim()[0] || 'J').toUpperCase(), firstName: pr.name.trim().split(' ')[0] || 'reader',
+      goShelves: () => this.go(1), goQuotes: () => this.go(3),
+      openFriends: () => this.setState({ modal:{ type:'friends' }, fq:'' }),
+      openEdit: () => this.setState({ modal:{ type:'edit' }, draft: Object.assign({}, pr), pwOpen:false }),
+      fq: s.fq, setFq: e => this.setState({ fq: e.target.value }),
+      friendRows: FRIENDS.filter(f => s.friendList.includes(f[0]) && (!fqq || f[0].toLowerCase().includes(fqq))).map(f => { const gone = s.removed.includes(f[0]); return {
+        name:f[0], initial:f[1], bg:f[2], ring: gone ? 'transparent' : 'rgba(200,160,80,.5)', reading: gone ? 'removed from friends' : (READING[f[0]] || 'reading something good'),
+        removeLabel: gone ? 'Undo' : 'Remove',
+        remove: () => this.setState({ removed: gone ? s.removed.filter(x=>x!==f[0]) : s.removed.concat(f[0]) }),
+        message: () => { this.setState({ modal:null }); this.say('Letter to ' + f[0].split(' ')[0] + ' started'); } }; }),
+      draft: { name: dr.name, handle: dr.handle, bio: dr.bio },
+      draftInitial: (dr.name.trim()[0] || 'J').toUpperCase(), draftPhoto: dr.photo, draftHasPhoto: !!dr.photo,
+      setDraftName: e => this.setState({ draft: Object.assign({}, s.draft, { name: e.target.value }) }),
+      setDraftHandle: e => this.setState({ draft: Object.assign({}, s.draft, { handle: e.target.value.replace(/[^a-z0-9_.]/gi, '').toLowerCase() }) }),
+      setDraftBio: e => this.setState({ draft: Object.assign({}, s.draft, { bio: e.target.value.slice(0, 140) }) }),
+      pickPhoto: e => { const f = e.target.files && e.target.files[0]; if (!f) return; this.setState({ draft: Object.assign({}, s.draft, { photo: URL.createObjectURL(f) }) }); },
+      clearPhoto: () => this.setState({ draft: Object.assign({}, s.draft, { photo:'' }) }),
+      pwOpen: s.pwOpen, pwLabel: s.pwOpen ? 'Keep my current password' : 'Change password',
+      pwRows: s.pwOpen ? '1fr' : '0fr', pwOp: s.pwOpen ? 1 : 0, togglePw: () => this.setState({ pwOpen: !s.pwOpen }),
+      saveProfile: () => { const d = s.draft; if (!d.name.trim() || !d.handle.trim()) { this.say('Name and username can’t be empty'); return; } this.setState({ profile: Object.assign({}, d, { name: d.name.trim() }), modal:null, draft:null }); this.say(s.pwOpen ? 'Profile and password updated' : 'Profile updated'); },
+      seals: SEALS.map((x,i) => ({ name:x[0], bg:sealBg(x), on:i===s.seal, ring: i===s.seal ? '#e9c779' : 'transparent', pick: () => this.setState({ seal:i }) })),
+      gateT: s.signedIn ? 'translateY(-104%)' : 'none', gateO: s.signedIn ? 0 : 1, gatePE: s.signedIn ? 'none' : 'auto',
+      regRows: s.register ? '1fr' : '0fr', regOp: s.register ? 1 : 0,
+      authTitle: s.register ? 'Create account' : 'Sign in', authCta: s.register ? 'Create my account' : 'Enter the library',
+      authSwitch: s.register ? 'I already have an account' : 'New here? Create an account',
+      flipAuth: () => this.setState({ register: !s.register }),
+      enter: () => this.setState({ signedIn:true, page:0, spin:0 }),
+      signOut: () => this.setState({ signedIn:false })
+    };
+    for (let i = 0; i < TABS.length; i++) out['p'+i] = this.panel(i);
+    return out;
+  }
+}
+</script>
+</body>
+</html>
