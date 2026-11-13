@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EcrAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcrReadOnlyProjectRepos",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:DescribeImages",
+        "ecr:DescribeImageScanFindings"
+      ],
+      "Resource": [
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_FRONTEND__",
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_BACKEND__"
+      ]
+    }
+  ]
+}
