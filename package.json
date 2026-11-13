@@ -30,7 +30,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "prettier": "^3.10.1",
-    "vite": "^7.3.8"
+    "vite": "^8.3.7"
   },
   "engines": {
     "node": ">=22"
