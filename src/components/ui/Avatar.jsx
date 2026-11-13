@@ -11,7 +11,17 @@ import { sealBg, sealFor } from './seals.js';
  *   alt       img alt (default '' → avatar is decorative; print the name next to it)
  *   className / style (style merges last, so it can override boxShadow etc.)
  */
-export default function Avatar({ src: srcProp, photo, name = '', seal, size = 46, ring, alt = '', className = '', style }) {
+export default function Avatar({
+  src: srcProp,
+  photo,
+  name = '',
+  seal,
+  size = 46,
+  ring,
+  alt = '',
+  className = '',
+  style,
+}) {
   const src = srcProp ?? photo;
   const initial = ((name || '').trim()[0] || '?').toUpperCase();
   return (

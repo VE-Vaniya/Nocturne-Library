@@ -30,13 +30,13 @@ Start order is enforced by health checks: `mongo` healthy, then `backend`
 
 ## URLs
 
-| What | URL |
-| --- | --- |
-| App (SPA) | http://localhost:8080 |
-| API via the nginx proxy (what the browser uses) | http://localhost:8080/api/... |
-| Backend health via the proxy | http://localhost:8080/api/health |
-| Frontend container health | http://localhost:8080/health |
-| API directly (debugging, bound to 127.0.0.1) | http://localhost:5000/health |
+| What                                            | URL                              |
+| ----------------------------------------------- | -------------------------------- |
+| App (SPA)                                       | http://localhost:8080            |
+| API via the nginx proxy (what the browser uses) | http://localhost:8080/api/...    |
+| Backend health via the proxy                    | http://localhost:8080/api/health |
+| Frontend container health                       | http://localhost:8080/health     |
+| API directly (debugging, bound to 127.0.0.1)    | http://localhost:5000/health     |
 
 MongoDB is not published to the host. To inspect it, run:
 `docker compose exec mongo mongosh nocturnelibrary`

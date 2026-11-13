@@ -27,13 +27,32 @@ export default function Modal({
   const { closeModal } = useApp();
   const Tag = as;
   const v =
-    variant === 'paper' ? 'nl-panel nl-panel--paper' : variant === 'flush' ? 'nl-panel nl-panel--flush' : 'nl-panel';
+    variant === 'paper'
+      ? 'nl-panel nl-panel--paper'
+      : variant === 'flush'
+        ? 'nl-panel nl-panel--flush'
+        : 'nl-panel';
   return (
-    <Tag role="dialog" aria-modal="true" aria-label={label} className={`nl-pop ${v} ${className}`} style={{ width, ...style }} {...rest}>
+    <Tag
+      role="dialog"
+      aria-modal="true"
+      aria-label={label}
+      className={`nl-pop ${v} ${className}`}
+      style={{ width, ...style }}
+      {...rest}
+    >
       {title != null && (
-        <div className="nl-panel__head" style={variant === 'flush' ? { padding: '16px 18px 8px' } : undefined}>
+        <div
+          className="nl-panel__head"
+          style={variant === 'flush' ? { padding: '16px 18px 8px' } : undefined}
+        >
           <b className="nl-panel__title">{title}</b>
-          <button type="button" className="nl-panel__x" aria-label="Close" onClick={onClose || closeModal}>
+          <button
+            type="button"
+            className="nl-panel__x"
+            aria-label="Close"
+            onClick={onClose || closeModal}
+          >
             ×
           </button>
         </div>

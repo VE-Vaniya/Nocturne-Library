@@ -48,7 +48,13 @@ export default function Shell({ pages }) {
           const p = panel(i, current);
           const active = i === current;
           return (
-            <section key={name} aria-label={aria} aria-hidden={!active} className={p.className} style={p.style}>
+            <section
+              key={name}
+              aria-label={aria}
+              aria-hidden={!active}
+              className={p.className}
+              style={p.style}
+            >
               <PageComponent active={active} />
             </section>
           );

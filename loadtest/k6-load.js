@@ -1,4 +1,3 @@
-/* global __ENV */
 // k6 load test that drives the ASG to scale out, then lets it scale in.
 //
 // Profile (default, ~16 min): ramp 0 -> 200 VUs over 5 min, hold 200 for

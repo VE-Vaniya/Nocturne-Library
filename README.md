@@ -8,19 +8,19 @@ This web application primarily targets book lovers, students, and casual readers
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| Frontend | React 19 | UI framework |
-| Frontend | Vite 7 | Dev server and production build |
-| Frontend | Plain CSS (`src/**/*.css`) | Styling (no CSS framework) |
-| Frontend | Axios | HTTP client for the backend API |
-| Backend | Node.js (>= 22) | Runtime |
-| Backend | Express 5 | REST API (`/api/*`) |
-| Backend | MongoDB + Mongoose 9 | Persistence (users, books, quotes, missives, notifications) |
-| Backend | JSON Web Tokens + bcryptjs | Authentication and password hashing |
-| Backend | Nodemailer | Email notifications over SMTP |
-| External | Google Books API | Book search (called from the backend) |
-| External | Spotify embed (iframe) | Ambient playlist on the reading timer page (embed only; no Spotify API integration) |
+| Layer    | Technology                 | Purpose                                                                             |
+| -------- | -------------------------- | ----------------------------------------------------------------------------------- |
+| Frontend | React 19                   | UI framework                                                                        |
+| Frontend | Vite 7                     | Dev server and production build                                                     |
+| Frontend | Plain CSS (`src/**/*.css`) | Styling (no CSS framework)                                                          |
+| Frontend | Axios                      | HTTP client for the backend API                                                     |
+| Backend  | Node.js (>= 22)            | Runtime                                                                             |
+| Backend  | Express 5                  | REST API (`/api/*`)                                                                 |
+| Backend  | MongoDB + Mongoose 9       | Persistence (users, books, quotes, missives, notifications)                         |
+| Backend  | JSON Web Tokens + bcryptjs | Authentication and password hashing                                                 |
+| Backend  | Nodemailer                 | Email notifications over SMTP                                                       |
+| External | Google Books API           | Book search (called from the backend)                                               |
+| External | Spotify embed (iframe)     | Ambient playlist on the reading timer page (embed only; no Spotify API integration) |
 
 ## Features
 
@@ -48,12 +48,12 @@ This web application primarily targets book lovers, students, and casual readers
 
 The project is developed by a team of 5. Fill in names, GitHub handles and roles.
 
-| Name | GitHub | Role / area |
-|------|--------|-------------|
-| _TBD_ | @_TBD_ | _e.g. Frontend_ |
-| _TBD_ | @_TBD_ | _e.g. Backend_ |
-| _TBD_ | @_TBD_ | _e.g. CI / security_ |
-| _TBD_ | @_TBD_ | _e.g. Containers / delivery_ |
+| Name  | GitHub | Role / area                        |
+| ----- | ------ | ---------------------------------- |
+| _TBD_ | @_TBD_ | _e.g. Frontend_                    |
+| _TBD_ | @_TBD_ | _e.g. Backend_                     |
+| _TBD_ | @_TBD_ | _e.g. CI / security_               |
+| _TBD_ | @_TBD_ | _e.g. Containers / delivery_       |
 | _TBD_ | @_TBD_ | _e.g. Infrastructure / monitoring_ |
 
 ## Repository Layout
@@ -105,6 +105,7 @@ We use **trunk-based development**.
   - `docs/<short-description>` – documentation only
 
   Use lowercase kebab-case, optionally prefixed with an issue number, e.g. `feature/42-quote-sharing`.
+
 - Changes reach `main` only through a **pull request** that has:
   - at least **1 approving review** from another group member (CODEOWNERS are requested automatically), and
   - **all CI checks green**.

@@ -5,7 +5,6 @@ const notFound = (req, res) => {
 
 // Central error handler. Express 5 forwards rejected promises from async
 // handlers here, so controllers do not need their own try/catch.
-// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   if (res.headersSent) return next(err);
 

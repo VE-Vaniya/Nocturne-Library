@@ -27,7 +27,8 @@ export default function OverlayHost() {
         stage.querySelector('[role="dialog"]') ||
         stage.querySelector(FOCUSABLE);
       if (target) {
-        if (!target.hasAttribute('tabindex') && target.getAttribute('role') === 'dialog') target.setAttribute('tabindex', '-1');
+        if (!target.hasAttribute('tabindex') && target.getAttribute('role') === 'dialog')
+          target.setAttribute('tabindex', '-1');
         target.focus({ preventScroll: true });
       }
     }, 30);
@@ -38,7 +39,8 @@ export default function OverlayHost() {
     if (key) return;
     const el = returnTo.current;
     returnTo.current = null;
-    if (el && typeof el.focus === 'function' && document.contains(el)) el.focus({ preventScroll: true });
+    if (el && typeof el.focus === 'function' && document.contains(el))
+      el.focus({ preventScroll: true });
   }, [key]);
 
   // Escape: listener lives exactly as long as the open modal (removed on close/unmount),
@@ -60,11 +62,16 @@ export default function OverlayHost() {
     if (e.key !== 'Tab') return;
     const stage = stageRef.current;
     if (!stage) return;
-    const items = [...stage.querySelectorAll(FOCUSABLE)].filter((x) => x.offsetParent !== null || x === document.activeElement);
+    const items = [...stage.querySelectorAll(FOCUSABLE)].filter(
+      (x) => x.offsetParent !== null || x === document.activeElement,
+    );
     if (!items.length) return;
     const firstEl = items[0];
     const lastEl = items[items.length - 1];
-    if (e.shiftKey && (document.activeElement === firstEl || !stage.contains(document.activeElement))) {
+    if (
+      e.shiftKey &&
+      (document.activeElement === firstEl || !stage.contains(document.activeElement))
+    ) {
       e.preventDefault();
       lastEl.focus();
     } else if (!e.shiftKey && document.activeElement === lastEl) {
@@ -76,7 +83,13 @@ export default function OverlayHost() {
   return (
     <div className="nl-overlay" onKeyDown={onKeyDown}>
       <div className="nl-overlay__veil nl-veil" />
-      <button type="button" className="nl-overlay__close" aria-label="Close" tabIndex={-1} onClick={closeModal} />
+      <button
+        type="button"
+        className="nl-overlay__close"
+        aria-label="Close"
+        tabIndex={-1}
+        onClick={closeModal}
+      />
       <div className="nl-overlay__stage" ref={stageRef} key={modal.key}>
         {modal.node}
       </div>

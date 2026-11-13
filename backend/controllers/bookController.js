@@ -3,7 +3,18 @@ const { isObjectId } = require('../utils/helpers');
 
 // Fields a client may set via POST / PUT. Anything else (userId, _id, ...)
 // is ignored so a book can't be reassigned to another user.
-const UPDATABLE_FIELDS = ['title', 'author', 'genre', 'status', 'progress', 'coverImage', 'totalPages', 'moodTags', 'lastPageRead', 'lastRead'];
+const UPDATABLE_FIELDS = [
+  'title',
+  'author',
+  'genre',
+  'status',
+  'progress',
+  'coverImage',
+  'totalPages',
+  'moodTags',
+  'lastPageRead',
+  'lastRead',
+];
 
 const pick = (body) => {
   const out = {};
@@ -26,8 +37,12 @@ const getBooks = async (req, res) => {
 // @route   POST /api/books
 const addBook = async (req, res) => {
   const fields = pick(req.body);
-  if (typeof fields.title !== 'string' || !fields.title.trim()
-    || typeof fields.author !== 'string' || !fields.author.trim()) {
+  if (
+    typeof fields.title !== 'string' ||
+    !fields.title.trim() ||
+    typeof fields.author !== 'string' ||
+    !fields.author.trim()
+  ) {
     return res.status(400).json({ message: 'Title and author are required' });
   }
   const book = await Book.create({
@@ -50,7 +65,7 @@ const updateBook = async (req, res) => {
   const updatedBook = await Book.findByIdAndUpdate(
     book._id,
     { $set: pick(req.body) },
-    { returnDocument: 'after', runValidators: true }
+    { returnDocument: 'after', runValidators: true },
   );
   return res.status(200).json(updatedBook);
 };
@@ -68,5 +83,5 @@ module.exports = {
   getBooks,
   addBook,
   updateBook,
-  deleteBook
+  deleteBook,
 };

@@ -19,7 +19,10 @@ function progressNote(read, total) {
   if (!total) return read ? `Page ${read}` : 'Not begun yet';
   if (read >= total) return `Page ${total} of ${total} · the final page`;
   const mins = Math.round((total - read) * MIN_PER_PAGE);
-  const left = mins < 60 ? `about ${Math.max(1, mins)} minutes left` : `about ${Math.round(mins / 60)} ${Math.round(mins / 60) === 1 ? 'hour' : 'hours'} left`;
+  const left =
+    mins < 60
+      ? `about ${Math.max(1, mins)} minutes left`
+      : `about ${Math.round(mins / 60)} ${Math.round(mins / 60) === 1 ? 'hour' : 'hours'} left`;
   return `${read ? `Page ${read} of ${total}` : `${total} pages`} · ${left}`;
 }
 
@@ -69,8 +72,26 @@ export default function ContinueReading({ book, onSit, onFind }) {
           </Button>
         </div>
         <div style={{ minWidth: 0, paddingTop: 4 }}>
-          <p style={{ margin: 0, color: '#8f8775', fontSize: 14, letterSpacing: '.08em', textTransform: 'uppercase' }}>Continue reading</p>
-          <h2 style={{ margin: '6px 0 4px', fontFamily: 'var(--nl-serif)', fontWeight: 400, fontSize: 36, lineHeight: 1.05 }}>
+          <p
+            style={{
+              margin: 0,
+              color: '#8f8775',
+              fontSize: 14,
+              letterSpacing: '.08em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Continue reading
+          </p>
+          <h2
+            style={{
+              margin: '6px 0 4px',
+              fontFamily: 'var(--nl-serif)',
+              fontWeight: 400,
+              fontSize: 36,
+              lineHeight: 1.05,
+            }}
+          >
             The nightstand is empty
           </h2>
           <p style={{ margin: 0, color: '#a89f88', maxWidth: '42ch' }}>
@@ -89,7 +110,11 @@ export default function ContinueReading({ book, onSit, onFind }) {
     <section aria-label="Continue reading" className="nl-cr" style={card}>
       <div style={{ display: 'grid', gap: 12, justifyItems: 'center' }}>
         {book.coverImage ? (
-          <img src={book.coverImage} alt={`Cover of ${book.title}`} style={{ ...coverBox, objectFit: 'cover' }} />
+          <img
+            src={book.coverImage}
+            alt={`Cover of ${book.title}`}
+            style={{ ...coverBox, objectFit: 'cover' }}
+          />
         ) : (
           <div
             className="nl-cr-cover"
@@ -120,7 +145,17 @@ export default function ContinueReading({ book, onSit, onFind }) {
         </Button>
       </div>
       <div style={{ minWidth: 0, paddingTop: 4 }}>
-        <p style={{ margin: 0, color: '#8f8775', fontSize: 14, letterSpacing: '.08em', textTransform: 'uppercase' }}>Continue reading</p>
+        <p
+          style={{
+            margin: 0,
+            color: '#8f8775',
+            fontSize: 14,
+            letterSpacing: '.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Continue reading
+        </p>
         <h2
           style={{
             margin: '6px 0 4px',
@@ -143,9 +178,25 @@ export default function ContinueReading({ book, onSit, onFind }) {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
-          style={{ height: 3, background: '#1e2924', margin: '18px 0 8px', maxWidth: 360, position: 'relative' }}
+          style={{
+            height: 3,
+            background: '#1e2924',
+            margin: '18px 0 8px',
+            maxWidth: 360,
+            position: 'relative',
+          }}
         >
-          <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct}%`, background: 'linear-gradient(90deg,#c8a050,#e9c779)', transition: 'width .8s cubic-bezier(.22,1,.36,1)' }} />
+          <span
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: `${pct}%`,
+              background: 'linear-gradient(90deg,#c8a050,#e9c779)',
+              transition: 'width .8s cubic-bezier(.22,1,.36,1)',
+            }}
+          />
         </div>
         <p style={{ margin: 0, color: '#a89f88', fontSize: 15 }}>{progressNote(read, total)}</p>
       </div>

@@ -12,14 +12,23 @@ describe('PUT /api/users/me', () => {
   it('updates profile fields and never returns the password', async () => {
     const u = await createUser();
     const res = await request(app).put('/api/users/me').set(u.auth).send({
-      fullName: ' Julian Blackwood ', username: 'j.black_wood', bio: 'Gothic novels.',
-      avatar: 'https://example.com/a.png', sealColor: 'plum', email: 'hacker@example.com',
+      fullName: ' Julian Blackwood ',
+      username: 'j.black_wood',
+      bio: 'Gothic novels.',
+      avatar: 'https://example.com/a.png',
+      sealColor: 'plum',
+      email: 'hacker@example.com',
     });
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(expect.objectContaining({
-      fullName: 'Julian Blackwood', username: 'j.black_wood', bio: 'Gothic novels.',
-      avatar: 'https://example.com/a.png', sealColor: 'plum',
-    }));
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        fullName: 'Julian Blackwood',
+        username: 'j.black_wood',
+        bio: 'Gothic novels.',
+        avatar: 'https://example.com/a.png',
+        sealColor: 'plum',
+      }),
+    );
     expect(res.body.password).toBeUndefined();
     expect(res.body.email).toBe(u.user.email); // email is not updatable here
   });
@@ -42,7 +51,7 @@ describe('PUT /api/users/me', () => {
     [{ avatar: 'http://insecure.example/a.png' }],
     [{ avatar: 'javascript:alert(1)' }],
     [{ avatar: 'data:text/html;base64,PGgxPg==' }],
-    [{ avatar: `data:image/png;base64,${'A'.repeat(2 * 1024 * 1024 * 4 / 3 + 8)}` }],
+    [{ avatar: `data:image/png;base64,${'A'.repeat((2 * 1024 * 1024 * 4) / 3 + 8)}` }],
     [{ avatar: 42 }],
     [{ fullName: '' }],
   ])('rejects invalid input %#', async (body) => {
@@ -55,19 +64,33 @@ describe('PUT /api/users/me', () => {
   it('rejects a username taken by someone else (case-insensitive)', async () => {
     const a = await createUser({ username: 'taken_name' });
     const b = await createUser();
-    const res = await request(app).put('/api/users/me').set(b.auth).send({ username: 'taken_name' });
+    const res = await request(app)
+      .put('/api/users/me')
+      .set(b.auth)
+      .send({ username: 'taken_name' });
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/taken/);
     await User.updateOne({ _id: a.id }, { username: 'Mixed_Case' });
-    await request(app).put('/api/users/me').set(b.auth).send({ username: 'mixed_case' }).expect(400);
+    await request(app)
+      .put('/api/users/me')
+      .set(b.auth)
+      .send({ username: 'mixed_case' })
+      .expect(400);
     // keeping your own username is fine
-    await request(app).put('/api/users/me').set(a.auth).send({ username: 'mixed_case' }).expect(200);
+    await request(app)
+      .put('/api/users/me')
+      .set(a.auth)
+      .send({ username: 'mixed_case' })
+      .expect(200);
   });
 
   it('legacy PUT /avatar validates and saves', async () => {
     const u = await createUser();
     await request(app).put('/api/users/avatar').set(u.auth).send({ avatar: 'ftp://x' }).expect(400);
-    const res = await request(app).put('/api/users/avatar').set(u.auth).send({ avatar: 'https://x.example/a.png' });
+    const res = await request(app)
+      .put('/api/users/avatar')
+      .set(u.auth)
+      .send({ avatar: 'https://x.example/a.png' });
     expect(res.status).toBe(200);
     expect((await User.findById(u.id)).avatar).toBe('https://x.example/a.png');
   });
@@ -79,7 +102,11 @@ describe('stats and reading sessions', () => {
     const b = await createUser();
     await makeFriends(a, b);
     await addBook(a, 'Dracula');
-    await request(app).post('/api/quotes').set(a.auth).send({ text: 'Listen to them.' }).expect(201);
+    await request(app)
+      .post('/api/quotes')
+      .set(a.auth)
+      .send({ text: 'Listen to them.' })
+      .expect(201);
     const res = await request(app).get('/api/users/stats').set(a.auth);
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ streak: 0, readingTimeSeconds: 0, books: 1, quotes: 1, friends: 1 });
@@ -107,7 +134,10 @@ describe('stats and reading sessions', () => {
     expect((await request(app).get('/api/users/stats').set(u.auth)).body.streak).toBe(5);
 
     // a gap of more than one day: stats show 0, next session restarts at 1
-    await User.updateOne({ _id: u.id }, { lastReadDate: new Date(Date.now() - 3 * day), streak: 9 });
+    await User.updateOne(
+      { _id: u.id },
+      { lastReadDate: new Date(Date.now() - 3 * day), streak: 9 },
+    );
     expect((await request(app).get('/api/users/stats').set(u.auth)).body.streak).toBe(0);
     res = await log({ elapsedSeconds: 30 });
     expect(res.body.streak).toBe(1);
@@ -115,18 +145,41 @@ describe('stats and reading sessions', () => {
 
   it('a zero-length session does not start a streak', async () => {
     const u = await createUser();
-    const res = await request(app).put('/api/users/reading-stats').set(u.auth).send({ elapsedSeconds: 0 });
+    const res = await request(app)
+      .put('/api/users/reading-stats')
+      .set(u.auth)
+      .send({ elapsedSeconds: 0 });
     expect(res.body).toEqual({ streak: 0, readingTimeSeconds: 0 });
   });
 
   it('works across consecutive days with fake timers', async () => {
     const u = await createUser();
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'queueMicrotask', 'performance', 'hrtime'] });
+    jest.useFakeTimers({
+      doNotFake: [
+        'nextTick',
+        'setImmediate',
+        'setTimeout',
+        'setInterval',
+        'clearTimeout',
+        'clearInterval',
+        'queueMicrotask',
+        'performance',
+        'hrtime',
+      ],
+    });
     try {
       const streaks = [];
-      for (const d of ['2026-03-01T23:30:00Z', '2026-03-02T00:10:00Z', '2026-03-03T12:00:00Z', '2026-03-05T12:00:00Z']) {
+      for (const d of [
+        '2026-03-01T23:30:00Z',
+        '2026-03-02T00:10:00Z',
+        '2026-03-03T12:00:00Z',
+        '2026-03-05T12:00:00Z',
+      ]) {
         jest.setSystemTime(new Date(d));
-        const res = await request(app).put('/api/users/reading-stats').set(u.auth).send({ elapsedSeconds: 60 });
+        const res = await request(app)
+          .put('/api/users/reading-stats')
+          .set(u.auth)
+          .send({ elapsedSeconds: 60 });
         streaks.push(res.body.streak);
       }
       expect(streaks).toEqual([1, 2, 3, 1]);
@@ -137,9 +190,14 @@ describe('stats and reading sessions', () => {
 
   it('updates the book lastPageRead and lastRead', async () => {
     const u = await createUser();
-    const book = await addBook(u, 'Dorian Gray', 'currently reading', { lastRead: new Date('2020-01-01') });
-    await request(app).put('/api/users/reading-stats').set(u.auth)
-      .send({ elapsedSeconds: 120, bookId: String(book._id), lastPageRead: 148 }).expect(200);
+    const book = await addBook(u, 'Dorian Gray', 'currently reading', {
+      lastRead: new Date('2020-01-01'),
+    });
+    await request(app)
+      .put('/api/users/reading-stats')
+      .set(u.auth)
+      .send({ elapsedSeconds: 120, bookId: String(book._id), lastPageRead: 148 })
+      .expect(200);
     const fresh = await Book.findById(book._id);
     expect(fresh.lastPageRead).toBe(148);
     expect(fresh.lastRead.getFullYear()).toBeGreaterThan(2020);
@@ -168,14 +226,22 @@ describe('friends and connection requests', () => {
     await makeFriends(a, b);
     await makeFriends(a, c);
     await addBook(b, 'Old read', 'currently reading', { lastRead: new Date('2025-01-01') });
-    await addBook(b, 'The Secret History', 'currently reading', { lastRead: new Date('2026-01-01') });
+    await addBook(b, 'The Secret History', 'currently reading', {
+      lastRead: new Date('2026-01-01'),
+    });
     await addBook(c, 'Finished', 'completed');
 
     const res = await request(app).get('/api/users/friends').set(a.auth);
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(2);
     const byId = Object.fromEntries(res.body.map((f) => [f._id, f]));
-    expect(byId[b.id]).toEqual({ _id: b.id, username: b.user.username, fullName: b.user.fullName, avatar: '', currentlyReading: 'The Secret History' });
+    expect(byId[b.id]).toEqual({
+      _id: b.id,
+      username: b.user.username,
+      fullName: b.user.fullName,
+      avatar: '',
+      currentlyReading: 'The Secret History',
+    });
     expect(byId[c.id].currentlyReading).toBeNull();
     expect(JSON.stringify(res.body)).not.toMatch(/@example\.com/);
   });
@@ -201,24 +267,51 @@ describe('friends and connection requests', () => {
     const feed = await request(app).get('/api/notifications').set(b.auth);
     expect(feed.body).toHaveLength(1);
     const note = feed.body[0];
-    expect(note).toEqual(expect.objectContaining({ type: 'connection_request', status: 'pending', read: false, missive: null }));
-    expect(note.from).toEqual({ _id: a.id, username: a.user.username, fullName: a.user.fullName, avatar: '' });
+    expect(note).toEqual(
+      expect.objectContaining({
+        type: 'connection_request',
+        status: 'pending',
+        read: false,
+        missive: null,
+      }),
+    );
+    expect(note.from).toEqual({
+      _id: a.id,
+      username: a.user.username,
+      fullName: a.user.fullName,
+      avatar: '',
+    });
 
     // only the recipient may respond
-    await request(app).put(`/api/notifications/${note._id}`).set(a.auth).send({ status: 'accepted' }).expect(404);
+    await request(app)
+      .put(`/api/notifications/${note._id}`)
+      .set(a.auth)
+      .send({ status: 'accepted' })
+      .expect(404);
 
-    const accepted = await request(app).put(`/api/notifications/${note._id}`).set(b.auth).send({ status: 'accepted' });
+    const accepted = await request(app)
+      .put(`/api/notifications/${note._id}`)
+      .set(b.auth)
+      .send({ status: 'accepted' });
     expect(accepted.status).toBe(200);
-    expect(accepted.body.notification).toEqual(expect.objectContaining({ status: 'accepted', read: true }));
+    expect(accepted.body.notification).toEqual(
+      expect.objectContaining({ status: 'accepted', read: true }),
+    );
 
     // cannot respond twice
-    await request(app).put(`/api/notifications/${note._id}`).set(b.auth).send({ status: 'rejected' }).expect(404);
+    await request(app)
+      .put(`/api/notifications/${note._id}`)
+      .set(b.auth)
+      .send({ status: 'rejected' })
+      .expect(404);
 
     expect((await User.findById(a.id)).connections.map(String)).toContain(b.id);
     expect((await User.findById(b.id)).connections.map(String)).toContain(a.id);
 
     const aFeed = await request(app).get('/api/notifications').set(a.auth);
-    expect(aFeed.body[0]).toEqual(expect.objectContaining({ type: 'request_accepted', status: null }));
+    expect(aFeed.body[0]).toEqual(
+      expect.objectContaining({ type: 'request_accepted', status: null }),
+    );
     expect(aFeed.body[0].from._id).toBe(b.id);
 
     // already friends
@@ -237,7 +330,10 @@ describe('friends and connection requests', () => {
     const b = await createUser();
     await request(app).post(`/api/users/connect/${b.id}`).set(a.auth).expect(201);
     const n = await Notification.findOne({ recipientId: b.id });
-    const res = await request(app).put(`/api/notifications/${n._id}`).set(b.auth).send({ status: 'rejected' });
+    const res = await request(app)
+      .put(`/api/notifications/${n._id}`)
+      .set(b.auth)
+      .send({ status: 'rejected' });
     expect(res.status).toBe(200);
     expect(res.body.notification.status).toBe('rejected');
     expect((await User.findById(a.id)).connections).toHaveLength(0);
@@ -245,15 +341,26 @@ describe('friends and connection requests', () => {
 
   it('validates respond input', async () => {
     const a = await createUser();
-    await request(app).put('/api/notifications/abc').set(a.auth).send({ status: 'maybe' }).expect(400);
-    await request(app).put('/api/notifications/abc').set(a.auth).send({ status: 'accepted' }).expect(404);
+    await request(app)
+      .put('/api/notifications/abc')
+      .set(a.auth)
+      .send({ status: 'maybe' })
+      .expect(400);
+    await request(app)
+      .put('/api/notifications/abc')
+      .set(a.auth)
+      .send({ status: 'accepted' })
+      .expect(404);
   });
 
   it('rejects self, unknown and invalid targets', async () => {
     const a = await createUser();
     await request(app).post(`/api/users/connect/${a.id}`).set(a.auth).expect(400);
     await request(app).post('/api/users/connect/not-an-id').set(a.auth).expect(400);
-    await request(app).post(`/api/users/connect/${new mongoose.Types.ObjectId()}`).set(a.auth).expect(404);
+    await request(app)
+      .post(`/api/users/connect/${new mongoose.Types.ObjectId()}`)
+      .set(a.auth)
+      .expect(404);
   });
 
   it('DELETE /connect/:id cancels only my pending request', async () => {
@@ -301,11 +408,24 @@ describe('people: suggestions and search', () => {
 
     const byId = Object.fromEntries(res.body.map((p) => [p._id, p]));
     expect(byId[two.id]).toEqual({
-      _id: two.id, username: two.user.username, fullName: 'Two Common', avatar: '',
-      booksInCommon: 2, currentlyReading: null, requestStatus: 'none',
+      _id: two.id,
+      username: two.user.username,
+      fullName: 'Two Common',
+      avatar: '',
+      booksInCommon: 2,
+      currentlyReading: null,
+      requestStatus: 'none',
     });
-    expect(byId[one.id]).toEqual(expect.objectContaining({ booksInCommon: 1, currentlyReading: 'Jane Eyre', requestStatus: 'incoming' }));
-    expect(byId[none.id]).toEqual(expect.objectContaining({ booksInCommon: 0, requestStatus: 'sent' }));
+    expect(byId[one.id]).toEqual(
+      expect.objectContaining({
+        booksInCommon: 1,
+        currentlyReading: 'Jane Eyre',
+        requestStatus: 'incoming',
+      }),
+    );
+    expect(byId[none.id]).toEqual(
+      expect.objectContaining({ booksInCommon: 0, requestStatus: 'sent' }),
+    );
     expect(JSON.stringify(res.body)).not.toMatch(/email/);
   });
 
@@ -328,7 +448,9 @@ describe('people: suggestions and search', () => {
     let res = await request(app).get('/api/users/search?q=SILAS').set(me.auth);
     expect(res.status).toBe(200);
     expect(res.body.map((p) => p._id)).toEqual([silas.id]);
-    expect(res.body[0]).toEqual(expect.objectContaining({ booksInCommon: 1, requestStatus: 'none', currentlyReading: null }));
+    expect(res.body[0]).toEqual(
+      expect.objectContaining({ booksInCommon: 1, requestStatus: 'none', currentlyReading: null }),
+    );
 
     res = await request(app).get('/api/users/search?q=OWREN').set(me.auth);
     expect(res.body).toHaveLength(1);
@@ -339,7 +461,10 @@ describe('people: suggestions and search', () => {
     res = await request(app).get('/api/users/search').set(me.auth);
     expect(res.body).toEqual([]);
 
-    await request(app).get(`/api/users/search?q=${'a'.repeat(65)}`).set(me.auth).expect(400);
+    await request(app)
+      .get(`/api/users/search?q=${'a'.repeat(65)}`)
+      .set(me.auth)
+      .expect(400);
   });
 
   it('legacy GET /api/users exposes no emails', async () => {

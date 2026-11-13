@@ -38,13 +38,17 @@ const signup = async (req, res) => {
     return res.status(400).json({ message: 'Full name must be at most 80 characters' });
   }
   if (!USERNAME_RE.test(username)) {
-    return res.status(400).json({ message: 'Username must be 3-30 characters: lowercase letters, digits, _ or .' });
+    return res
+      .status(400)
+      .json({ message: 'Username must be 3-30 characters: lowercase letters, digits, _ or .' });
   }
   if (!EMAIL_RE.test(email) || email.length > 254) {
     return res.status(400).json({ message: 'Please provide a valid email address' });
   }
   if (password.length < MIN_PASSWORD || password.length > MAX_PASSWORD) {
-    return res.status(400).json({ message: `Password must be ${MIN_PASSWORD}-${MAX_PASSWORD} characters` });
+    return res
+      .status(400)
+      .json({ message: `Password must be ${MIN_PASSWORD}-${MAX_PASSWORD} characters` });
   }
 
   if (await User.exists({ email })) {
@@ -62,9 +66,10 @@ const signup = async (req, res) => {
     // Unique index violation (race between the checks above and the insert)
     if (error && error.code === 11000) {
       const field = Object.keys(error.keyPattern || error.keyValue || {})[0];
-      const message = field === 'username'
-        ? 'That username is already taken.'
-        : 'An account with that email already exists.';
+      const message =
+        field === 'username'
+          ? 'That username is already taken.'
+          : 'An account with that email already exists.';
       return res.status(400).json({ message });
     }
     throw error;
@@ -98,7 +103,9 @@ const changePassword = async (req, res) => {
     return res.status(400).json({ message: 'currentPassword and newPassword are required' });
   }
   if (newPassword.length < MIN_PASSWORD || newPassword.length > MAX_PASSWORD) {
-    return res.status(400).json({ message: `New password must be ${MIN_PASSWORD}-${MAX_PASSWORD} characters` });
+    return res
+      .status(400)
+      .json({ message: `New password must be ${MIN_PASSWORD}-${MAX_PASSWORD} characters` });
   }
 
   const user = await User.findById(req.user._id);

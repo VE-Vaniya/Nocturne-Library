@@ -22,7 +22,11 @@ export default function WheelMenu({ tabs, pageIndex, onGo, bell, me }) {
   };
   const setSpin = (v, c) => setSpinState({ page: pageIndex, spin: clamp(v), cls: c });
   const nudge = (delta) =>
-    setSpinState((s) => ({ page: pageIndex, spin: clamp((s.page === pageIndex ? s.spin : 0) + delta), cls: 'fast' }));
+    setSpinState((s) => ({
+      page: pageIndex,
+      spin: clamp((s.page === pageIndex ? s.spin : 0) + delta),
+      cls: 'fast',
+    }));
 
   const go = (i) => {
     if (moved.current) {
@@ -79,7 +83,10 @@ export default function WheelMenu({ tabs, pageIndex, onGo, bell, me }) {
       onPointerCancel={onUp}
     >
       <nav aria-label="Main">
-        <div className={`nl-wheel ${cls}`} style={{ transform: `rotate(${pageIndex * STEP + spin}deg)` }}>
+        <div
+          className={`nl-wheel ${cls}`}
+          style={{ transform: `rotate(${pageIndex * STEP + spin}deg)` }}
+        >
           <div className="nl-wheel-rim" aria-hidden="true" />
           <div className="nl-wheel-rays1" aria-hidden="true" />
           <div className="nl-wheel-rays2" aria-hidden="true" />
@@ -92,7 +99,17 @@ export default function WheelMenu({ tabs, pageIndex, onGo, bell, me }) {
               aria-current={i === pageIndex ? 'page' : undefined}
               style={{ transform: `rotate(${-i * STEP}deg) translateY(2122px)` }}
             >
-              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                aria-hidden="true"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d={TAB_ICONS[t.name]} />
               </svg>
               <span>{t.label}</span>
@@ -101,11 +118,41 @@ export default function WheelMenu({ tabs, pageIndex, onGo, bell, me }) {
         </div>
       </nav>
       <span className="nl-wheel-pin" aria-hidden="true" />
-      <button type="button" className="nl-spin-btn nl-spin-l nl-hide-sm" onClick={() => nudge(-STEP * 2)} aria-label="Turn the menu left">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M15 5 8 12l7 7" /></svg>
+      <button
+        type="button"
+        className="nl-spin-btn nl-spin-l nl-hide-sm"
+        onClick={() => nudge(-STEP * 2)}
+        aria-label="Turn the menu left"
+      >
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
+          <path d="M15 5 8 12l7 7" />
+        </svg>
       </button>
-      <button type="button" className="nl-spin-btn nl-spin-r nl-hide-sm" onClick={() => nudge(STEP * 2)} aria-label="Turn the menu right">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m9 5 7 7-7 7" /></svg>
+      <button
+        type="button"
+        className="nl-spin-btn nl-spin-r nl-hide-sm"
+        onClick={() => nudge(STEP * 2)}
+        aria-label="Turn the menu right"
+      >
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        >
+          <path d="m9 5 7 7-7 7" />
+        </svg>
       </button>
       {bell}
       {me}

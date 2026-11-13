@@ -14,9 +14,10 @@ const { renderEmail } = require('../services/emailTemplates');
 const MAX_LETTER = 2000;
 
 const serializeMissive = (m) => {
-  const sender = m.senderId && typeof m.senderId === 'object' && m.senderId.username !== undefined
-    ? m.senderId
-    : null;
+  const sender =
+    m.senderId && typeof m.senderId === 'object' && m.senderId.username !== undefined
+      ? m.senderId
+      : null;
   return {
     _id: String(m._id),
     kind: m.kind || 'quote',
@@ -85,11 +86,16 @@ const sendLetter = async (req, res) => {
       heading: 'A Letter Has Arrived',
       paragraphs: [`${me.fullName} (@${me.username}) has sent you a letter on Nocturne Library.`],
       footer: 'Log in to Nocturne Library to read it.',
-    })
+    }),
   );
 
   const created = missive.toObject();
-  created.senderId = { _id: me._id, username: me.username, fullName: me.fullName, avatar: me.avatar };
+  created.senderId = {
+    _id: me._id,
+    username: me.username,
+    fullName: me.fullName,
+    avatar: me.avatar,
+  };
   return res.status(201).json(serializeMissive(created));
 };
 
@@ -100,7 +106,11 @@ const saveMissive = async (req, res) => {
   const notFound = () => res.status(404).json({ message: 'Missive not found' });
   if (!isObjectId(id)) return notFound();
 
-  const missive = await Missive.findOne({ _id: id, recipientId: req.user._id, kind: { $ne: 'letter' } });
+  const missive = await Missive.findOne({
+    _id: id,
+    recipientId: req.user._id,
+    kind: { $ne: 'letter' },
+  });
   if (!missive) return notFound();
 
   if (missive.savedQuoteId) {
@@ -121,14 +131,15 @@ const saveMissive = async (req, res) => {
   const claimed = await Missive.findOneAndUpdate(
     { _id: missive._id, savedQuoteId: missive.savedQuoteId || null },
     { $set: { savedQuoteId: quote._id } },
-    { returnDocument: 'after' }
+    { returnDocument: 'after' },
   );
   if (!claimed) {
     await Quote.deleteOne({ _id: quote._id });
     const fresh = await Missive.findById(missive._id).lean();
-    const winner = fresh && fresh.savedQuoteId
-      ? await Quote.findOne({ _id: fresh.savedQuoteId, ownerId: req.user._id })
-      : null;
+    const winner =
+      fresh && fresh.savedQuoteId
+        ? await Quote.findOne({ _id: fresh.savedQuoteId, ownerId: req.user._id })
+        : null;
     if (winner) return res.status(200).json(winner);
     return notFound();
   }

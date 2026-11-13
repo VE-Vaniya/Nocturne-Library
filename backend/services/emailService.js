@@ -7,8 +7,8 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Verify the SMTP connection at startup (skipped in tests / when email is
@@ -34,7 +34,7 @@ const sendNotificationEmail = async (to, subject, text, html) => {
     to,
     subject,
     text,
-    html
+    html,
   };
 
   try {

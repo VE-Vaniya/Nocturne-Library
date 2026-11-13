@@ -17,20 +17,47 @@ export default function Home() {
     const mine = (quotes || []).filter((q) => q?.text);
     if (mine.length) {
       const q = mine[Math.floor(seed * mine.length)];
-      return { text: q.text, by: [q.author || q.bookTitle, 'from your quotes'].filter(Boolean).join(' · ') };
+      return {
+        text: q.text,
+        by: [q.author || q.bookTitle, 'from your quotes'].filter(Boolean).join(' · '),
+      };
     }
     const q = PUBLIC_QUOTES[Math.floor(seed * PUBLIC_QUOTES.length)];
     return { text: q.text, by: q.author };
   }, [quotes, seed]);
 
   return (
-    <div style={{ maxWidth: 980, margin: '0 auto', padding: '30px 32px 20px', display: 'grid', gap: 36 }}>
-      <div className="nl-two" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 24, alignItems: 'start' }}>
+    <div
+      style={{
+        maxWidth: 980,
+        margin: '0 auto',
+        padding: '30px 32px 20px',
+        display: 'grid',
+        gap: 36,
+      }}
+    >
+      <div
+        className="nl-two"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0,1fr) auto',
+          gap: 24,
+          alignItems: 'start',
+        }}
+      >
         <div style={{ minWidth: 0 }}>
-          <h1 style={{ margin: 0, fontFamily: serif, fontWeight: 400, fontSize: 62, lineHeight: 1 }}>
+          <h1
+            style={{ margin: 0, fontFamily: serif, fontWeight: 400, fontSize: 62, lineHeight: 1 }}
+          >
             {greetingFor(hour)}, <i style={{ color: '#e9c779' }}>{firstName}</i>.
           </h1>
-          <blockquote style={{ margin: '18px 0 0', padding: '0 0 0 18px', borderLeft: '1px solid rgba(200,160,80,.5)' }}>
+          <blockquote
+            style={{
+              margin: '18px 0 0',
+              padding: '0 0 0 18px',
+              borderLeft: '1px solid rgba(200,160,80,.5)',
+            }}
+          >
             <p
               style={{
                 margin: 0,
@@ -71,13 +98,16 @@ export default function Home() {
               width: 16,
               height: 24,
               borderRadius: '50% 50% 50% 50%/60% 60% 40% 40%',
-              background: 'radial-gradient(circle at 50% 75%,#fff6d8 0 18%,#ffc65a 42%,#c8501e 75%,rgba(200,80,30,0) 76%)',
+              background:
+                'radial-gradient(circle at 50% 75%,#fff6d8 0 18%,#ffc65a 42%,#c8501e 75%,rgba(200,80,30,0) 76%)',
               boxShadow: '0 0 22px 4px rgba(255,170,70,.3)',
               opacity: streak ? 1 : 0.45,
             }}
           />
           <span aria-hidden="true">
-            <b style={{ fontFamily: serif, fontWeight: 400, fontSize: 30, lineHeight: 1 }}>{streak}</b>{' '}
+            <b style={{ fontFamily: serif, fontWeight: 400, fontSize: 30, lineHeight: 1 }}>
+              {streak}
+            </b>{' '}
             <span style={{ color: '#a89f88' }}>night streak</span>
           </span>
         </div>

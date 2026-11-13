@@ -20,7 +20,10 @@ const MAX_SUGGESTIONS = 12;
 const MAX_SEARCH_RESULTS = 20;
 const MAX_SESSION_SECONDS = 24 * 60 * 60;
 
-const normTitle = (t) => String(t || '').trim().toLowerCase();
+const normTitle = (t) =>
+  String(t || '')
+    .trim()
+    .toLowerCase();
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -69,7 +72,9 @@ const requestStatusFor = async (meId, userIds) => {
       { senderId: meId, recipientId: { $in: userIds } },
       { recipientId: meId, senderId: { $in: userIds } },
     ],
-  }).select('senderId recipientId').lean();
+  })
+    .select('senderId recipientId')
+    .lean();
   const map = new Map();
   for (const n of pending) {
     if (String(n.senderId) === String(meId)) map.set(String(n.recipientId), 'sent');
@@ -116,7 +121,9 @@ const updateMe = async (req, res) => {
   if (body.username !== undefined) {
     const username = typeof body.username === 'string' ? body.username.trim() : '';
     if (!USERNAME_RE.test(username)) {
-      return res.status(400).json({ message: 'Username must be 3-30 characters: lowercase letters, digits, _ or .' });
+      return res
+        .status(400)
+        .json({ message: 'Username must be 3-30 characters: lowercase letters, digits, _ or .' });
     }
     const taken = await User.exists({
       _id: { $ne: req.user._id },
@@ -141,7 +148,9 @@ const updateMe = async (req, res) => {
 
   if (body.sealColor !== undefined) {
     if (!SEAL_COLORS.includes(body.sealColor)) {
-      return res.status(400).json({ message: `sealColor must be one of ${SEAL_COLORS.join(', ')}` });
+      return res
+        .status(400)
+        .json({ message: `sealColor must be one of ${SEAL_COLORS.join(', ')}` });
     }
     updates.sealColor = body.sealColor;
   }
@@ -150,7 +159,7 @@ const updateMe = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user._id,
       { $set: updates },
-      { returnDocument: 'after', runValidators: true }
+      { returnDocument: 'after', runValidators: true },
     ).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
     return res.json(user);
@@ -200,16 +209,28 @@ const getStats = async (req, res) => {
 const updateReadingStats = async (req, res) => {
   const { elapsedSeconds, pagesRead, bookId, lastPageRead } = req.body || {};
 
-  if (typeof elapsedSeconds !== 'number' || !Number.isFinite(elapsedSeconds)
-    || elapsedSeconds < 0 || elapsedSeconds > MAX_SESSION_SECONDS) {
-    return res.status(400).json({ message: `elapsedSeconds must be a number between 0 and ${MAX_SESSION_SECONDS}` });
+  if (
+    typeof elapsedSeconds !== 'number' ||
+    !Number.isFinite(elapsedSeconds) ||
+    elapsedSeconds < 0 ||
+    elapsedSeconds > MAX_SESSION_SECONDS
+  ) {
+    return res
+      .status(400)
+      .json({ message: `elapsedSeconds must be a number between 0 and ${MAX_SESSION_SECONDS}` });
   }
-  if (pagesRead !== undefined && pagesRead !== null
-    && (typeof pagesRead !== 'number' || !Number.isFinite(pagesRead) || pagesRead < 0)) {
+  if (
+    pagesRead !== undefined &&
+    pagesRead !== null &&
+    (typeof pagesRead !== 'number' || !Number.isFinite(pagesRead) || pagesRead < 0)
+  ) {
     return res.status(400).json({ message: 'pagesRead must be a non-negative number' });
   }
-  if (lastPageRead !== undefined && lastPageRead !== null
-    && (typeof lastPageRead !== 'number' || !Number.isFinite(lastPageRead) || lastPageRead < 0)) {
+  if (
+    lastPageRead !== undefined &&
+    lastPageRead !== null &&
+    (typeof lastPageRead !== 'number' || !Number.isFinite(lastPageRead) || lastPageRead < 0)
+  ) {
     return res.status(400).json({ message: 'lastPageRead must be a non-negative number' });
   }
 
@@ -221,7 +242,7 @@ const updateReadingStats = async (req, res) => {
     if (typeof lastPageRead === 'number') bookUpdate.lastPageRead = Math.floor(lastPageRead);
     const book = await Book.findOneAndUpdate(
       { _id: bookId, userId: req.user._id },
-      { $set: bookUpdate }
+      { $set: bookUpdate },
     );
     if (!book) return res.status(404).json({ message: 'Book not found' });
   }
@@ -254,7 +275,9 @@ const updateReadingStats = async (req, res) => {
 // @desc    Get all users for explore page (legacy)
 // @route   GET /api/users
 const getUsers = async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.user._id } }).select(PUBLIC_USER_FIELDS).lean();
+  const users = await User.find({ _id: { $ne: req.user._id } })
+    .select(PUBLIC_USER_FIELDS)
+    .lean();
   res.json(users.map(toPublicUser));
 };
 
@@ -267,10 +290,12 @@ const getFriends = async (req, res) => {
     .sort({ fullName: 1 })
     .lean();
   const reading = await currentlyReadingFor(friends.map((f) => f._id));
-  res.json(friends.map((f) => ({
-    ...toPublicUser(f),
-    currentlyReading: reading.get(String(f._id)) || null,
-  })));
+  res.json(
+    friends.map((f) => ({
+      ...toPublicUser(f),
+      currentlyReading: reading.get(String(f._id)) || null,
+    })),
+  );
 };
 
 // @desc    People you may know, ranked by books in common
@@ -295,7 +320,9 @@ const getSuggestions = async (req, res) => {
   const commonMap = new Map(ranked.map((r) => [String(r._id), r.count]));
 
   const rankedUsers = ranked.length
-    ? await User.find({ _id: { $in: ranked.map((r) => r._id) } }).select(PUBLIC_USER_FIELDS).lean()
+    ? await User.find({ _id: { $in: ranked.map((r) => r._id) } })
+        .select(PUBLIC_USER_FIELDS)
+        .lean()
     : [];
   // Some ranked ids may belong to deleted users; keep ranking order.
   const byId = new Map(rankedUsers.map((u) => [String(u._id), u]));
@@ -332,7 +359,10 @@ const searchUsers = async (req, res) => {
     .lean();
 
   const myTitles = await myLowercasedTitles(req.user._id);
-  const commonMap = await booksInCommonFor(users.map((u) => u._id), myTitles);
+  const commonMap = await booksInCommonFor(
+    users.map((u) => u._id),
+    myTitles,
+  );
   const cards = await toPeopleCards(req.user, users, commonMap);
   cards.sort((a, b) => b.booksInCommon - a.booksInCommon);
   res.json(cards);
@@ -364,9 +394,10 @@ const sendConnectionRequest = async (req, res) => {
     ],
   }).lean();
   if (existing) {
-    const message = String(existing.senderId) === String(me._id)
-      ? 'Request already pending'
-      : 'This reader has already sent you a request';
+    const message =
+      String(existing.senderId) === String(me._id)
+        ? 'Request already pending'
+        : 'This reader has already sent you a request';
     return res.status(400).json({ message });
   }
 
@@ -384,9 +415,11 @@ const sendConnectionRequest = async (req, res) => {
     `${me.fullName} (@${me.username}) has sent you a friend request on Nocturne Library.`,
     renderEmail({
       heading: 'New Connection Request',
-      paragraphs: [`${me.fullName} (@${me.username}) has sent you a friend request on Nocturne Library.`],
+      paragraphs: [
+        `${me.fullName} (@${me.username}) has sent you a friend request on Nocturne Library.`,
+      ],
       footer: 'Log in to your sanctuary to respond.',
-    })
+    }),
   );
 
   return res.status(201).json({ message: 'Connection request sent' });
@@ -416,7 +449,11 @@ const cancelConnectionRequest = async (req, res) => {
     status: 'pending',
   });
 
-  res.json({ success: true, cancelled: result.deletedCount, message: 'Connection request cancelled' });
+  res.json({
+    success: true,
+    cancelled: result.deletedCount,
+    message: 'Connection request cancelled',
+  });
 };
 
 // @desc    Remove a connection

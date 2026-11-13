@@ -8,7 +8,10 @@ export function relTime(iso) {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   const d = new Date(t);
   const sameDay = d.toDateString() === now.toDateString();
-  if (sameDay) return now.getHours() >= 18 && d.getHours() >= 18 ? 'tonight' : `${Math.floor(diff / 3600)}h ago`;
+  if (sameDay)
+    return now.getHours() >= 18 && d.getHours() >= 18
+      ? 'tonight'
+      : `${Math.floor(diff / 3600)}h ago`;
   const y = new Date(now);
   y.setDate(now.getDate() - 1);
   if (d.toDateString() === y.toDateString()) return 'yesterday';

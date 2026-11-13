@@ -14,7 +14,7 @@
 services:
   mongo:
     # Only started if someone explicitly runs `--profile local-db`.
-    profiles: ["local-db"]
+    profiles: ['local-db']
 
   backend:
     image: ${ECR_REGISTRY:?set ECR_REGISTRY}/nocturne-backend:${IMAGE_TAG:?set IMAGE_TAG}
@@ -24,7 +24,7 @@ services:
     env_file: !reset []
     environment:
       NODE_ENV: production
-      PORT: "5000"
+      PORT: '5000'
       MONGODB_URI: ${MONGODB_URI:?set MONGODB_URI (Atlas connection string)}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
       CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS (public site origin)}
@@ -32,13 +32,13 @@ services:
       EMAIL_PASS: ${EMAIL_PASS:-}
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
     ports: !override
-      - "5000:5000"
+      - '5000:5000'
     depends_on: !reset {}
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: '10m'
+        max-file: '5'
 
   frontend:
     image: ${ECR_REGISTRY:?set ECR_REGISTRY}/nocturne-frontend:${IMAGE_TAG:?set IMAGE_TAG}
@@ -48,9 +48,9 @@ services:
     environment:
       BACKEND_URL: http://backend:5000
     ports: !override
-      - "8080:8080"
+      - '8080:8080'
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-size: '10m'
+        max-file: '5'

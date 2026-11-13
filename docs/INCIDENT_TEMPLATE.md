@@ -2,16 +2,16 @@
 
 > Copy to `docs/incidents/YYYY-MM-DD-<slug>.md`. Blameless: describe systems and decisions, not people. Keep it to one page; the findings report quotes it "in a few lines". Never paste secrets, connection strings or tokens.
 
-| Field | Value |
-|---|---|
-| Date (UTC) | YYYY-MM-DD |
-| Severity | SEV-1 (site down) / SEV-2 (feature broken) / SEV-3 (degraded) |
-| Status | Resolved / Monitoring |
-| Duration | detection → resolution: __ min (impact start → end: __ min) |
-| Detected by | alarm `nocturne-…` / smoke test / user report |
-| Deliberate exercise? | yes – scenario A (DB connectivity) / B (bad deploy) / no |
-| Author(s) | |
-| Image tag(s) involved | `image_tag` = … , `previous_image_tag` = … |
+| Field                 | Value                                                         |
+| --------------------- | ------------------------------------------------------------- |
+| Date (UTC)            | YYYY-MM-DD                                                    |
+| Severity              | SEV-1 (site down) / SEV-2 (feature broken) / SEV-3 (degraded) |
+| Status                | Resolved / Monitoring                                         |
+| Duration              | detection → resolution: __ min (impact start → end: __ min)   |
+| Detected by           | alarm `nocturne-…` / smoke test / user report                 |
+| Deliberate exercise?  | yes – scenario A (DB connectivity) / B (bad deploy) / no      |
+| Author(s)             |                                                               |
+| Image tag(s) involved | `image_tag` = … , `previous_image_tag` = …                    |
 
 ## Summary
 
@@ -20,19 +20,19 @@ Two or three sentences: what broke, who/what was affected, how it was fixed.
 ## Impact
 
 - User-visible effect (e.g. "login and book lists returned HTTP 500; static pages still loaded").
-- Requests affected: __ % 5xx peak (dashboard *Errors* widget), __ failed requests (ALB `HTTPCode_Target_5XX_Count` sum).
+- Requests affected: __ % 5xx peak (dashboard _Errors_ widget), __ failed requests (ALB `HTTPCode_Target_5XX_Count` sum).
 - Data loss: none / describe.
 
 ## Timeline (UTC)
 
-| Time | Event |
-|---|---|
-| hh:mm | Trigger (change / failure injected) |
+| Time  | Event                                 |
+| ----- | ------------------------------------- |
+| hh:mm | Trigger (change / failure injected)   |
 | hh:mm | Alarm `…` → ALARM, SNS email received |
-| hh:mm | Investigation started |
-| hh:mm | Root cause identified |
-| hh:mm | Fix applied (what, by which command) |
-| hh:mm | Smoke test green, alarms back to OK |
+| hh:mm | Investigation started                 |
+| hh:mm | Root cause identified                 |
+| hh:mm | Fix applied (what, by which command)  |
+| hh:mm | Smoke test green, alarms back to OK   |
 
 ## Detection
 
@@ -63,10 +63,10 @@ Exactly what was done, e.g. `scripts/rollback.sh sha-abc1234`, or "re-added NAT 
 
 ## Action items
 
-| # | Action | Type (prevent / detect / mitigate) | Owner | Due | Issue/PR |
-|---|---|---|---|---|---|
-| 1 | | | | | |
-| 2 | | | | | |
+| #   | Action | Type (prevent / detect / mitigate) | Owner | Due | Issue/PR |
+| --- | ------ | ---------------------------------- | ----- | --- | -------- |
+| 1   |        |                                    |       |     |          |
+| 2   |        |                                    |       |     |          |
 
 ## Evidence (for the submission)
 
