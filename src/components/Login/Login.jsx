@@ -5,7 +5,7 @@ import { IconEye } from '../common/Icons';
 import FormCard from '../common/FormCard';
 import FormInput from '../common/FormInput';
 
-const Login = ({ onToggle, onLoginSuccess, users = [] }) => {
+const Login = ({ onToggle, onLoginSuccess }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
