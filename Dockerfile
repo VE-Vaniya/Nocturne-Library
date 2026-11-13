@@ -17,7 +17,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # ---- runtime ---------------------------------------------------------------
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine3.24@sha256:e2a8fca8aa356d66159aaf8a877a9c126773635adf210503eefaaeaffeed6ad7 AS runtime
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e AS runtime
 # Upstream for /api/ (rendered into conf.d/default.conf by the image's
 # envsubst entrypoint from /etc/nginx/templates/*.template at start-up).
 ENV BACKEND_URL=http://backend:5000
