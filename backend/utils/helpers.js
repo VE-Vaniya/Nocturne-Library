@@ -6,13 +6,6 @@ const isObjectId = (value) =>
 
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Error with an HTTP status, rendered as {message} by the error middleware.
-const httpError = (status, message) => {
-  const err = new Error(message);
-  err.status = status;
-  return err;
-};
-
 // Public fields of another user. Never includes email or password.
 const PUBLIC_USER_FIELDS = '_id username fullName avatar';
 
@@ -39,7 +32,6 @@ const isFriend = (user, otherId) =>
 module.exports = {
   isObjectId,
   escapeRegex,
-  httpError,
   PUBLIC_USER_FIELDS,
   toPublicUser,
   sendEmailInBackground,
