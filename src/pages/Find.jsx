@@ -50,7 +50,7 @@ export default function Find({ active }) {
     if (!active) return
     const key = `${tab}:${dq}`
     fetchFor(tab, dq)
-      .then((r) => setData((d) => ({ ...d, [key]: Array.isArray(r.data) ? r.data : [] })))
+      .then((r) => setData((d) => ({ ...d, [key]: Array.isArray(r) ? r : [] })))
       .catch((e) => setData((d) => ({ ...d, [key]: { error: errMsg(e, 'The catalogue did not answer. Try again in a moment.') } })))
   }, [active, tab, dq])
 

@@ -105,7 +105,7 @@ export default function Timer({ active }) {
     let streak = stats?.streak ?? null
     try {
       const r = await api.updateReadingStats({ elapsedSeconds, bookId: book?._id })
-      if (r?.data?.streak != null) streak = r.data.streak
+      if (r?.streak != null) streak = r.streak
       refreshStats()
     } catch (e) {
       toast(e?.response?.data?.message || 'Your sitting could not be recorded')
