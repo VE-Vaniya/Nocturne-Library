@@ -1,0 +1,304 @@
+/* ═══ QUOTES — ported from design/redesign.dc.html (section 3 + quote / share overlays) ═══ */
+
+.qts {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 480px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+}
+.qts-head {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.qts-h1 {
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-weight: 400;
+  font-size: 54px;
+  line-height: 1;
+}
+.qts-count { color: #8f8775; }
+.qts > .qts-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Pinterest board: CSS columns, cards keep their frame-specific height */
+.qts-board {
+  columns: 3 260px;
+  column-gap: 22px;
+  /* room for the hover scale + glow inside the scroll area */
+  padding: 14px 14px 40px;
+}
+.qts-card {
+  display: block;
+  width: 100%;
+  break-inside: avoid;
+  margin: 0 0 22px;
+  border: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow: 0 18px 28px -16px rgba(0, 0, 0, 0.9);
+  font-family: Spectral, Georgia, serif;
+}
+.qts-card-text {
+  display: block;
+  font-family: 'IM Fell English', Georgia, serif;
+  line-height: 1.3;
+}
+.qts-card-meta {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.qts-empty {
+  flex: 1 1 auto;
+  margin-bottom: 24px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  border: 1px dashed rgba(200, 160, 80, 0.25);
+  border-radius: 10px;
+  padding: 40px 24px;
+}
+.qts-empty-title {
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 34px;
+}
+.qts-empty-sub { margin: 0 0 10px; color: #a89f88; max-width: 44ch; }
+
+/* ── pills ── */
+.qts-pill {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid rgba(200, 160, 80, 0.45);
+  border-radius: 999px;
+  background: none;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+.qts-solid { border: 0; background: #c8a050; color: #0d1210; }
+.qts-dim { background: rgba(13, 18, 16, 0.8); }
+.qts-del { border-color: rgba(168, 53, 60, 0.45); color: #c9a0a0; transition: border-color 0.25s, color 0.25s; }
+.qts-del:hover { border-color: #a8353c; color: #f0c0c0; }
+.qts-danger { border: 0; background: #8a252c; color: #fff3e0; transition: background 0.25s; }
+.qts-danger:hover { background: #a8353c; }
+.qts-pill:disabled { opacity: 0.6; cursor: progress; }
+
+/* ── quote held up to the light ── */
+.qts-held {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  pointer-events: auto;
+}
+.qts-pop {
+  position: relative;
+  width: min(460px, 86vw);
+  max-height: 70vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 1px rgba(233, 199, 121, 0.5), 0 0 70px rgba(233, 199, 121, 0.35), 0 40px 60px -20px rgba(0, 0, 0, 0.9);
+  scrollbar-width: thin;
+}
+.qts-pop-text {
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 30px;
+  line-height: 1.3;
+}
+.qts-pop-meta {
+  margin: 16px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.qts-actions {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.qts-confirm {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 12px 16px;
+  border: 1px solid rgba(168, 53, 60, 0.5);
+  border-radius: 14px;
+  background: rgba(20, 12, 12, 0.88);
+  color: #e8dcc0;
+  animation: nl-drop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── share sheet ── */
+.qts-sheet {
+  width: min(460px, 90vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  background: #141c18;
+  border: 1px solid rgba(200, 160, 80, 0.3);
+  border-radius: 16px;
+  padding: 22px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 16px;
+  box-shadow: 0 40px 70px -20px rgba(0, 0, 0, 0.95);
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  text-align: left;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 160, 80, 0.3) transparent;
+}
+.qts-sheet-head { display: flex; justify-content: space-between; align-items: center; }
+.qts-sheet-head b {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-weight: 400;
+  font-size: 26px;
+}
+.qts-back {
+  background: none;
+  border: 0;
+  color: #a89f88;
+  cursor: pointer;
+  font-family: Spectral, Georgia, serif;
+  font-size: 15px;
+  min-height: 36px;
+}
+.qts-back:hover { color: #e9c779; }
+.qts-sheet-quote {
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  color: #c9bd9f;
+  font-size: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.qts-sheet-none { display: grid; justify-items: start; gap: 10px; color: #a89f88; }
+.qts-sheet-none p { margin: 0; font-style: italic; }
+.qts-friends {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  max-height: 224px;
+  overflow-y: auto;
+  padding: 4px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 160, 80, 0.3) transparent;
+}
+.qts-friend {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #e8dcc0;
+  padding: 0;
+  font-family: Spectral, Georgia, serif;
+}
+.qts-av {
+  position: relative;
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 0.25s;
+}
+.qts-av.is-on { box-shadow: 0 0 0 2px #e9c779; }
+.qts-check {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #c8a050;
+  color: #0d1210;
+  font-size: 13px;
+  line-height: 22px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #141c18;
+  animation: nl-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.qts-first {
+  font-size: 13px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qts-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.qts-msg {
+  background: #0d1210;
+  border: 1px solid rgba(200, 160, 80, 0.25);
+  border-radius: 10px;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  font-size: 16px;
+  padding: 10px 12px;
+  resize: none;
+}
+.qts-msg:focus { outline: none; border-color: #e9c779; }
+.qts-send {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  color: #0d1210;
+  font-family: Spectral, Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.qts-send:disabled { cursor: not-allowed; }
+
+@media (max-width: 760px) {
+  .qts { height: auto; min-height: 100%; padding: 20px 16px 0; }
+  .qts-h1 { font-size: 40px; }
+  .qts > .qts-scroll { flex: none; }
+  .qts-board { columns: 2 150px; column-gap: 14px; padding: 8px 4px 32px; }
+  .qts-card { margin-bottom: 14px; }
+  .qts-pop-text { font-size: 24px; }
+  .qts-friends { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qts-av, .qts-del, .qts-danger { transition: none; }
+  .qts-check, .qts-confirm { animation: none; }
+}
