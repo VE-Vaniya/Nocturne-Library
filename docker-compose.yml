@@ -1,0 +1,63 @@
+# Local development stack: SPA (nginx) + API + MongoDB. No Atlas account needed.
+#   cp backend/.env.example backend/.env.local   # optional: email / Google Books keys
+#   docker compose up --build                     # -> http://localhost:8080
+# See docs/LOCAL_DEV.md. Production overrides: docker-compose.prod.yml.
+name: nocturne
+
+services:
+  mongo:
+    image: mongo:7.0.48@sha256:bd7798db3c260b1f88bc4a577e1abd538aef7ae30af0b1c6f3f8e2c00285b446
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./backend
+    image: nocturne-backend:local
+    init: true
+    restart: unless-stopped
+    # Later files override earlier ones. compose.env = committed non-secret
+    # defaults (points at the mongo service); .env.local = your values, optional.
+    env_file:
+      - path: ./backend/compose.env
+        required: true
+      - path: ./backend/.env.local
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+    expose:
+      - "5000"
+    ports:
+      # Direct API access for debugging (loopback only). Browser traffic goes
+      # through the frontend's /api proxy.
+      - "127.0.0.1:5000:5000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api
+    image: nocturne-frontend:local
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:5000
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
