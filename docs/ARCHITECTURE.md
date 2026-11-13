@@ -75,7 +75,7 @@ IAM OIDC provider `token.actions.githubusercontent.com`, audience `sts.amazonaws
 | Role | Trusted principal / condition | Permissions summary |
 |---|---|---|
 | `gha-ci` | OIDC; `sub` `StringLike` `repo:VE-Vaniya/Nocturne-Library:*` (PRs, any branch) | Nothing required: CI builds and scans images on the runner. If kept: `ecr:GetAuthorizationToken` + read-only (`BatchGetImage`, `GetDownloadUrlForLayer`, `DescribeImages`) on the two repos. **No push.** |
-| `gha-deploy` | OIDC; `sub` `StringEquals` `repo:VE-Vaniya/Nocturne-Library:ref:refs/heads/main` (below) | `ecr:GetAuthorizationToken` (`*`); push (`InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload`, `PutImage`, `BatchCheckLayerAvailability`, `BatchGetImage`, `DescribeImages`) on `nocturne/web` + `nocturne/api` only; `ssm:GetParameter`/`PutParameter` on `/nocturne/prod/image_tag*`; `autoscaling:StartInstanceRefresh` on the ASG ARN; `autoscaling:Describe*`, `elasticloadbalancing:DescribeTargetHealth`; optional `ssm:SendCommand` limited to `AWS-RunShellScript` and instances tagged `Project=nocturne` (`ssm:resourceTag/Project`). |
+| `gha-deploy` | OIDC; `sub` `StringEquals` `repo:VE-Vaniya/Nocturne-Library:environment:production` (below; the `production` environment only allows `main`) | `ecr:GetAuthorizationToken` (`*`); push (`InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload`, `PutImage`, `BatchCheckLayerAvailability`, `BatchGetImage`, `DescribeImages`) on `nocturne-frontend` + `nocturne-backend` only; `ssm:GetParameter`/`PutParameter` on `/nocturne/prod/image_tag*`; `autoscaling:StartInstanceRefresh` on the ASG ARN; `autoscaling:Describe*`, `elasticloadbalancing:DescribeTargetHealth`; optional `ssm:SendCommand` limited to `AWS-RunShellScript` and instances tagged `Project=nocturne` (`ssm:resourceTag/Project`). |
 | `nocturne-ec2` (instance profile) | Service `ec2.amazonaws.com` | `AmazonSSMManagedInstanceCore`; `CloudWatchAgentServerPolicy`; ECR pull (`GetAuthorizationToken` + `BatchGetImage`, `GetDownloadUrlForLayer`, `BatchCheckLayerAvailability` on the two repos); `ssm:GetParameter*` on `arn:aws:ssm:ap-south-1:<ACCOUNT_ID>:parameter/nocturne/prod/*`; `kms:Decrypt` only if a customer-managed key is used (default `aws/ssm` needs none). |
 | `nocturne-admin` / `nocturne-operator` (optional) | Team members via IAM Identity Center or MFA-enforced IAM users | Admin only for building infra; day-to-day read-only + Session Manager. |
 
@@ -91,14 +91,14 @@ IAM OIDC provider `token.actions.githubusercontent.com`, audience `sts.amazonaws
     "Condition": {
       "StringEquals": {
         "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-        "token.actions.githubusercontent.com:sub": "repo:VE-Vaniya/Nocturne-Library:ref:refs/heads/main"
+        "token.actions.githubusercontent.com:sub": "repo:VE-Vaniya/Nocturne-Library:environment:production"
       }
     }
   }]
 }
 ```
 
-If the deploy job declares a GitHub `environment:`, the token's `sub` becomes `repo:VE-Vaniya/Nocturne-Library:environment:<name>` instead; match whichever is used.
+The CD deploy job declares `environment: production`, so the token's `sub` is `repo:VE-Vaniya/Nocturne-Library:environment:production` (not `...:ref:refs/heads/main`). The `production` environment in GitHub restricts deployment branches to `main`, which keeps the "main only" guarantee. Rendered from `infra/policies/gha-deploy-trust.json` by `infra/20-iam.sh`.
 
 ## 6. Secrets
 
