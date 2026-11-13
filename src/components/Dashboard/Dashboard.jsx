@@ -30,7 +30,7 @@ import avatar5 from '../Images/Avatars/avatar5.png';
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
 /* ── Component ────────────────────────────────────── */
-const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, users, setUsers, connectionRequests, setConnectionRequests, fetchProfile }) => {
+const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receivedQuotes, setReceivedQuotes, connectionRequests, setConnectionRequests, fetchProfile }) => {
   const getSearchPlaceholder = () => {
     switch (activeNav) {
       case 'Quotes Gallery':
@@ -193,7 +193,7 @@ const Dashboard = ({ user, onLogout, books, setBooks, quotes, setQuotes, receive
             ) : activeNav === 'My Profile' ? (
               <MyProfile user={user} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />
             ) : activeNav === 'Explore' ? (
-              <Explore currentUser={user} users={users} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />
+              <Explore currentUser={user} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />
             ) : activeNav === 'Library' ? (
               <Library books={books} setBooks={setBooks} setActiveNav={setActiveNav} />
             ) : activeNav === 'Quotes Gallery' ? (

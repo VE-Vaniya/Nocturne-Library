@@ -9,64 +9,86 @@ import backgroundImage from './components/Images/Background.png';
 import DustMotes from './components/common/DustMotes';
 import SectionRule from './components/common/SectionRule';
 
-function App() {
-  const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem('nocturne_users');
-    return savedUsers ? JSON.parse(savedUsers) : [
-      { email: 'librarian@nocturne.lib', password: 'password123', username: 'HeadLibrarian', fullName: 'Alistair Vane' },
-      { email: 'scholar@nocturne.lib', password: 'password123', username: 'Scholar', fullName: 'Julian Vane' }
-    ];
-  });
+const SESSION_KEY = 'nocturne_logged_in_user';
 
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('nocturne_logged_in_user');
+// Older builds cached a demo user list (with plaintext passwords) here; drop it.
+try {
+  localStorage.removeItem('nocturne_users');
+} catch {
+  // storage unavailable; nothing to clean up
+}
+
+const loadSavedUser = () => {
+  try {
+    const saved = localStorage.getItem(SESSION_KEY);
     return saved ? JSON.parse(saved) : null;
-  });
+  } catch {
+    return null;
+  }
+};
+
+function App() {
+  const [user, setUser] = useState(loadSavedUser);
+
+  // Resume straight into the dashboard when a saved session (with a token) exists
+  const [view, setView] = useState(() => (loadSavedUser()?.token ? 'dashboard' : 'login'));
+
+  const [books, setBooks] = useState([]);
+  const [quotes, setQuotes] = useState([]);
+  const [receivedQuotes, setReceivedQuotes] = useState([]);
+  const [connectionRequests, setConnectionRequests] = useState([]);
+
+  const token = user?.token;
 
   const fetchProfile = useCallback(async () => {
-    if (user && user.token) {
-      try {
-        const response = await authService.getProfile();
-        setUser(prev => ({ ...prev, ...response.data }));
-      } catch (error) {
-        console.error("Session verification failed");
+    if (!token) return;
+    try {
+      const response = await authService.getProfile();
+      // The profile response carries no token; keep the one we already have,
+      // otherwise every later request would go out unauthenticated (401).
+      setUser(prev => (prev ? { ...prev, ...response.data, token: prev.token } : prev));
+    } catch (error) {
+      // Only an explicit 401 means the session is invalid; network errors or
+      // a temporarily unavailable API must not log the reader out.
+      if (error?.response?.status === 401) {
+        console.error('Session expired, logging out');
         setUser(null);
-        localStorage.removeItem('nocturne_logged_in_user');
+        setView('login');
+      } else {
+        console.error('Profile fetch failed, keeping session:', error?.message);
       }
     }
-  }, [user?.token]);
+  }, [token]);
 
   const fetchRequests = useCallback(async () => {
-    if (user && user.token) {
-      try {
-        const [incoming, outgoing] = await Promise.all([
-          notificationService.getNotifications(),
-          userService.getSentRequests()
-        ]);
-        // Combine both for the UI to know all pending states
-        setConnectionRequests([...incoming.data, ...outgoing.data]);
-      } catch (error) {
-        console.error("Failed to fetch requests");
-      }
+    if (!token) return;
+    try {
+      const [incoming, outgoing] = await Promise.all([
+        notificationService.getNotifications(),
+        userService.getSentRequests()
+      ]);
+      // Combine both for the UI to know all pending states
+      setConnectionRequests([...incoming.data, ...outgoing.data]);
+    } catch (error) {
+      console.error('Failed to fetch requests:', error?.message);
     }
-  }, [user?.token]);
+  }, [token]);
 
   const fetchData = useCallback(async () => {
-    if (user && user.token) {
-      try {
-        const [booksRes, quotesRes, missivesRes] = await Promise.all([
-          bookService.getBooks(),
-          quoteService.getQuotes(),
-          missiveService.getMissives()
-        ]);
-        setBooks(booksRes.data);
-        setQuotes(quotesRes.data);
-        setReceivedQuotes(missivesRes.data);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-      }
+    if (!token) return;
+    try {
+      const [booksRes, quotesRes, missivesRes] = await Promise.all([
+        bookService.getBooks(),
+        quoteService.getQuotes(),
+        missiveService.getMissives()
+      ]);
+      setBooks(booksRes.data);
+      setQuotes(quotesRes.data);
+      setReceivedQuotes(missivesRes.data);
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
     }
-  }, [user?.token]);
+  }, [token]);
 
   useEffect(() => {
     fetchProfile();
@@ -80,50 +102,23 @@ function App() {
       fetchData();
     }, 10000);
     return () => clearInterval(interval);
-  }, [fetchProfile, fetchRequests]);
+  }, [fetchProfile, fetchRequests, fetchData]);
 
-  const [books, setBooks] = useState([]);
-  const [quotes, setQuotes] = useState([]);
-  const [receivedQuotes, setReceivedQuotes] = useState([]);
-
-  const [connectionRequests, setConnectionRequests] = useState([]);
-
-  const [view, setView] = useState('login');
-
-  // Persist users and logged-in user to localStorage whenever they change
-  React.useEffect(() => {
-    localStorage.setItem('nocturne_users', JSON.stringify(users));
-  }, [users]);
-
-  React.useEffect(() => {
-    if (user) {
-      localStorage.setItem('nocturne_logged_in_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('nocturne_logged_in_user');
-    }
-  }, [user]);
-
-  // LocalStorage persistance logic is removed for books/quotes since backend handles it
-
-  // DEBUG: Track connection requests
+  // Persist the logged-in user (including the token) to localStorage
   useEffect(() => {
     if (user) {
-      console.log("Current User:", user.email);
-      console.log("Current Requests:", connectionRequests);
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(SESSION_KEY);
     }
-  }, [user, connectionRequests]);
-
-  // Dummy requests logic removed to rely entirely on backend
-
+  }, [user]);
 
   const handleLoginSuccess = (loggedInUser) => {
     setUser(loggedInUser);
     setView('dashboard');
   };
 
-  const handleSignupSuccess = (newUser) => {
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
+  const handleSignupSuccess = () => {
     // Redirect to login after successful signup instead of dashboard
     setView('login');
   };
@@ -134,7 +129,7 @@ function App() {
   };
 
   if (view === 'dashboard') {
-    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} users={users} setUsers={setUsers} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />;
+    return <Dashboard user={user} onLogout={handleLogout} books={books} setBooks={setBooks} quotes={quotes} setQuotes={setQuotes} receivedQuotes={receivedQuotes} setReceivedQuotes={setReceivedQuotes} connectionRequests={connectionRequests} setConnectionRequests={setConnectionRequests} fetchProfile={fetchProfile} />;
   }
 
   return (
@@ -163,7 +158,6 @@ function App() {
           <Login
             onToggle={() => setView('signup')}
             onLoginSuccess={handleLoginSuccess}
-            users={users}
           />
         ) : (
           <Signup
