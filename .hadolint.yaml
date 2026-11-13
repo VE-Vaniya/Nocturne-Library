@@ -1,0 +1,16 @@
+# Hadolint config (CI stage 5 "dockerfile-lint").
+#
+# failure-threshold: warning
+#   Both Dockerfiles currently follow hadolint's guidance (pinned digests,
+#   multi-stage, non-root USER, exec-form CMD/HEALTHCHECK), so we fail on
+#   warnings as well as errors. Warnings cover the security-relevant rules we
+#   care about (DL3002 last USER root, DL3007 :latest, DL3008/DL3018 unpinned
+#   OS packages, DL3020 ADD vs COPY). Only "info"/"style" findings are
+#   reported without failing the job.
+#
+# Do NOT add rules to `ignored:` to get a red build green. Fix the Dockerfile,
+# or add a scoped inline `# hadolint ignore=DLxxxx` with a comment AND an
+# entry in SECURITY.md "Accepted findings".
+failure-threshold: warning
+format: tty
+ignored: []

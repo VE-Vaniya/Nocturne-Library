@@ -1,0 +1,260 @@
+# =============================================================================
+# CD - DevSecOps stages 11-12, runs on every push (merge) to `main`.
+#
+#   ci        Re-runs stages 2-10 (ci.yml via workflow_call). Deploy only
+#             starts if every gate is green.
+#   deploy    11 Build both images, Trivy re-scan (HIGH/CRITICAL, fixable =>
+#                fail), push to ECR as `sha-<short>` and `v<major>.<minor>.<run>`
+#             12 Rolling deploy (scripts/deploy.sh -> ASG instance refresh),
+#                smoke test (scripts/smoke-test.sh) against the ALB; on any
+#                deploy/smoke failure automatically roll back to the tag that
+#                was live before (read from SSM first) and fail the job.
+#
+# AWS auth is OIDC only (no long-lived keys): role `gha-deploy`.
+# NOTE: because this job uses `environment: production`, GitHub's OIDC `sub`
+# claim is `repo:<owner>/<repo>:environment:production` (NOT
+# `ref:refs/heads/main`). The role's trust policy must match that value, and
+# the `production` environment must be restricted to the `main` branch
+# (Settings > Environments > Deployment branches) so only main can deploy.
+#
+# Required repository SECRETS
+#   SONAR_TOKEN          SonarCloud token (forwarded to ci.yml)
+#   SNYK_TOKEN           Snyk token (forwarded to ci.yml)
+# Required repository / `production` environment VARIABLES
+#   AWS_REGION           e.g. ap-south-1
+#   AWS_DEPLOY_ROLE_ARN  arn:aws:iam::<acct>:role/gha-deploy
+#   ECR_REGISTRY         <acct>.dkr.ecr.<region>.amazonaws.com
+#   ASG_NAME             Auto Scaling Group refreshed by scripts/deploy.sh
+#   APP_URL              Public ALB/domain base URL, e.g. https://nocturne.example.com
+#
+# Script interface (owned by scripts/**):
+#   scripts/deploy.sh <image_tag>     sets SSM /nocturne/prod/image_tag, rolls ASG
+#   scripts/rollback.sh <image_tag>   same, to a known-good tag
+#   scripts/smoke-test.sh <base_url>  non-zero exit on failure
+#   (env: AWS_REGION, ASG_NAME, ECR_REGISTRY)
+#
+# Semantic version: major.minor come from the VERSION file, patch is the
+# workflow run number (v1.0.57). ECR tag immutability is ON, so a re-run of
+# the same commit skips the push if the tags already exist.
+# =============================================================================
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+# Deny-all default; each job opts in to exactly what it needs.
+permissions: {}
+
+# Serialise production changes (shared with rollback.yml). Never cancel a
+# deploy half-way through an instance refresh.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  FRONTEND_REPO: nocturne-frontend # must match docker-compose.prod.yml
+  BACKEND_REPO: nocturne-backend
+  TRIVY_VERSION: 'v0.70.0'
+  SSM_IMAGE_TAG_PARAM: /nocturne/prod/image_tag
+
+jobs:
+  ci:
+    name: ci
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  deploy:
+    name: deploy
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    permissions:
+      contents: read
+      id-token: write # OIDC token for configure-aws-credentials
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ASG_NAME: ${{ vars.ASG_NAME }}
+      APP_URL: ${{ vars.APP_URL }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check required variables
+        env:
+          ROLE: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          REGISTRY: ${{ vars.ECR_REGISTRY }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for v in AWS_REGION ASG_NAME APP_URL ROLE REGISTRY; do
+            if [ -z "${!v:-}" ]; then echo "::error::repository variable for $v is not set"; missing=1; fi
+          done
+          exit "$missing"
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          set -euo pipefail
+          mm="$(tr -d '[:space:]' < VERSION)"
+          if ! [[ "$mm" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error file=VERSION::expected MAJOR.MINOR, got '$mm'"; exit 1
+          fi
+          sha_tag="sha-${GITHUB_SHA::7}"
+          semver="v${mm}.${GITHUB_RUN_NUMBER}"
+          echo "sha_tag=$sha_tag" >> "$GITHUB_OUTPUT"
+          echo "semver=$semver"   >> "$GITHUB_OUTPUT"
+          echo "Deploying $sha_tag ($semver)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-deploy-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # ---- stage 11: build -> scan -> push ----------------------------------
+      - name: Build frontend image (local, not pushed yet)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          push: false
+          provenance: false
+          tags: |
+            ${{ vars.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:${{ steps.tags.outputs.sha_tag }}
+            ${{ vars.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:${{ steps.tags.outputs.semver }}
+          cache-from: type=gha,scope=frontend
+
+      - name: Build backend image (local, not pushed yet)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: backend
+          file: backend/Dockerfile
+          load: true
+          push: false
+          provenance: false
+          tags: |
+            ${{ vars.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:${{ steps.tags.outputs.sha_tag }}
+            ${{ vars.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:${{ steps.tags.outputs.semver }}
+          cache-from: type=gha,scope=backend
+
+      - name: Trivy re-scan frontend before push
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          scan-type: image
+          image-ref: ${{ vars.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:${{ steps.tags.outputs.sha_tag }}
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+      - name: Trivy re-scan backend before push
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          skip-setup-trivy: true
+          scan-type: image
+          image-ref: ${{ vars.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:${{ steps.tags.outputs.sha_tag }}
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+
+      - name: Push images to ECR (immutable tags)
+        env:
+          REGISTRY: ${{ vars.ECR_REGISTRY }}
+          SHA_TAG: ${{ steps.tags.outputs.sha_tag }}
+          SEMVER: ${{ steps.tags.outputs.semver }}
+        run: |
+          set -euo pipefail
+          for repo in "$FRONTEND_REPO" "$BACKEND_REPO"; do
+            for tag in "$SHA_TAG" "$SEMVER"; do
+              if aws ecr describe-images --repository-name "$repo" \
+                   --image-ids imageTag="$tag" >/dev/null 2>&1; then
+                echo "::notice::$repo:$tag already in ECR (immutable) - skipping push"
+              else
+                docker push "$REGISTRY/$repo:$tag"
+              fi
+            done
+          done
+          {
+            echo "| Image | Tags |"
+            echo "|---|---|"
+            echo "| $REGISTRY/$FRONTEND_REPO | \`$SHA_TAG\`, \`$SEMVER\` |"
+            echo "| $REGISTRY/$BACKEND_REPO | \`$SHA_TAG\`, \`$SEMVER\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ---- stage 12: rolling deploy, smoke test, auto-rollback --------------
+      - name: Record currently deployed tag (rollback target)
+        id: prev
+        run: |
+          set -euo pipefail
+          prev="$(aws ssm get-parameter --name "$SSM_IMAGE_TAG_PARAM" \
+                    --query 'Parameter.Value' --output text 2>/dev/null || true)"
+          if [ -z "$prev" ] || [ "$prev" = "None" ]; then
+            echo "::warning::No previous image tag in SSM ($SSM_IMAGE_TAG_PARAM); automatic rollback unavailable for this deploy"
+            prev=""
+          fi
+          echo "tag=$prev" >> "$GITHUB_OUTPUT"
+          echo "Previous tag: \`${prev:-none}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Rolling deploy (ASG instance refresh)
+        id: deploy
+        env:
+          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ steps.tags.outputs.sha_tag }}
+        run: bash scripts/deploy.sh "$IMAGE_TAG"
+
+      - name: Smoke test against load balancer
+        id: smoke
+        run: bash scripts/smoke-test.sh "$APP_URL"
+
+      - name: Automatic rollback to previous image
+        id: rollback
+        if: >-
+          failure() && steps.prev.outputs.tag != '' &&
+          (steps.deploy.outcome == 'failure' || steps.smoke.outcome == 'failure')
+        env:
+          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+          PREV_TAG: ${{ steps.prev.outputs.tag }}
+          NEW_TAG: ${{ steps.tags.outputs.sha_tag }}
+        run: |
+          set -euo pipefail
+          echo "::error::Deploy of $NEW_TAG failed; rolling back to $PREV_TAG"
+          echo "### Rolled back to \`$PREV_TAG\`" >> "$GITHUB_STEP_SUMMARY"
+          bash scripts/rollback.sh "$PREV_TAG"
+
+      - name: Smoke test after rollback
+        if: failure() && steps.rollback.outcome == 'success'
+        run: bash scripts/smoke-test.sh "$APP_URL"
+
+      # The job is already failed at this point (deploy or smoke step failed);
+      # this step only makes the reason explicit in the log/summary.
+      - name: Mark deployment failed
+        if: failure()
+        env:
+          ROLLBACK_OUTCOME: ${{ steps.rollback.outcome }}
+        run: |
+          echo "::error::Deployment failed. Rollback step outcome: ${ROLLBACK_OUTCOME:-skipped}"
+          exit 1
