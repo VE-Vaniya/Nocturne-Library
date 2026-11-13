@@ -37,6 +37,16 @@ const signup = async (req, res) => {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
+    // Unique index violation (username or email already taken)
+    if (error && error.code === 11000) {
+      const field = Object.keys(error.keyPattern || error.keyValue || {})[0];
+      const message = field === 'username'
+        ? 'That username is already taken.'
+        : field === 'email'
+          ? 'An account with that email already exists.'
+          : 'That username or email is already in use.';
+      return res.status(400).json({ message });
+    }
     res.status(500).json({ message: error.message });
   }
 };

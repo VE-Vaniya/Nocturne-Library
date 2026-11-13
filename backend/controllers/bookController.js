@@ -1,5 +1,9 @@
 const Book = require('../models/Book');
 
+// Fields a client may change via PUT /api/books/:id. Anything else (userId,
+// _id, ...) is ignored so a book can't be reassigned to another user.
+const UPDATABLE_FIELDS = ['title', 'author', 'genre', 'status', 'progress', 'coverImage', 'moodTags', 'lastPageRead', 'lastRead'];
+
 // @desc    Get all books for a user
 // @route   GET /api/books
 const getBooks = async (req, res) => {
@@ -47,13 +51,20 @@ const updateBook = async (req, res) => {
 
     // Make sure the logged in user matches the book user
     if (book.userId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'User not authorized' });
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    const updates = {};
+    for (const field of UPDATABLE_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+        updates[field] = req.body[field];
+      }
     }
 
     const updatedBook = await Book.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      { $set: updates },
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.status(200).json(updatedBook);
@@ -74,10 +85,10 @@ const deleteBook = async (req, res) => {
 
     // Make sure the logged in user matches the book user
     if (book.userId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'User not authorized' });
+      return res.status(404).json({ message: 'Book not found' });
     }
 
-    await book.remove();
+    await book.deleteOne();
 
     res.status(200).json({ id: req.params.id });
   } catch (error) {
