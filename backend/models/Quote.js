@@ -8,7 +8,7 @@ const quoteSchema = new mongoose.Schema({
   page: { type: String }, // free-form: "p. 47", "Book I", ...
   bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' },
   sharedWith: { type: Array, default: [] }, // List of user IDs or 'none'
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Quote', quoteSchema);

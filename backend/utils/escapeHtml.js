@@ -7,7 +7,6 @@ const HTML_ESCAPES = {
   "'": '&#39;',
 };
 
-const escapeHtml = (value) =>
-  String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
 
 module.exports = escapeHtml;

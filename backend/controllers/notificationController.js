@@ -8,36 +8,42 @@ const {
 } = require('../utils/helpers');
 const { renderEmail } = require('../services/emailTemplates');
 
-const serializeMissive = (m) => (m && typeof m === 'object' && m._id ? {
-  _id: String(m._id),
-  kind: m.kind || 'quote',
-  text: m.text || '',
-  author: m.author || '',
-  bookTitle: m.bookTitle || '',
-  page: m.page || '',
-  message: m.message || '',
-  body: m.body || '',
-  saved: Boolean(m.savedQuoteId),
-} : null);
+const serializeMissive = (m) =>
+  m && typeof m === 'object' && m._id
+    ? {
+        _id: String(m._id),
+        kind: m.kind || 'quote',
+        text: m.text || '',
+        author: m.author || '',
+        bookTitle: m.bookTitle || '',
+        page: m.page || '',
+        message: m.message || '',
+        body: m.body || '',
+        saved: Boolean(m.savedQuoteId),
+      }
+    : null;
 
 const serializeNotification = (n) => ({
   _id: String(n._id),
   type: n.type,
   // Status only applies to connection requests ('seen' is legacy -> null)
-  status: n.type === 'connection_request' && ['pending', 'accepted', 'rejected'].includes(n.status)
-    ? n.status
-    : null,
+  status:
+    n.type === 'connection_request' && ['pending', 'accepted', 'rejected'].includes(n.status)
+      ? n.status
+      : null,
   read: Boolean(n.read),
   createdAt: n.createdAt,
-  from: n.senderId && typeof n.senderId === 'object' && n.senderId.username !== undefined
-    ? toPublicUser(n.senderId)
-    : null,
+  from:
+    n.senderId && typeof n.senderId === 'object' && n.senderId.username !== undefined
+      ? toPublicUser(n.senderId)
+      : null,
   missive: serializeMissive(n.missiveId),
 });
 
-const populated = (query) => query
-  .populate('senderId', PUBLIC_USER_FIELDS)
-  .populate('missiveId', 'kind text author bookTitle page message body savedQuoteId');
+const populated = (query) =>
+  query
+    .populate('senderId', PUBLIC_USER_FIELDS)
+    .populate('missiveId', 'kind text author bookTitle page message body savedQuoteId');
 
 // @desc    Get user notifications, newest first
 // @route   GET /api/notifications
@@ -45,7 +51,7 @@ const getNotifications = async (req, res) => {
   const notifications = await populated(
     Notification.find({ recipientId: req.user._id, type: { $ne: 'system_alert' } })
       .sort({ createdAt: -1, _id: -1 })
-      .limit(200)
+      .limit(200),
   ).lean();
   res.json(notifications.map(serializeNotification));
 };
@@ -53,12 +59,15 @@ const getNotifications = async (req, res) => {
 // @desc    Mark one notification as read
 // @route   PUT /api/notifications/:id/read
 const markRead = async (req, res) => {
-  if (!isObjectId(req.params.id)) return res.status(404).json({ message: 'Notification not found' });
-  const n = await populated(Notification.findOneAndUpdate(
-    { _id: req.params.id, recipientId: req.user._id },
-    { $set: { read: true } },
-    { returnDocument: 'after' }
-  )).lean();
+  if (!isObjectId(req.params.id))
+    return res.status(404).json({ message: 'Notification not found' });
+  const n = await populated(
+    Notification.findOneAndUpdate(
+      { _id: req.params.id, recipientId: req.user._id },
+      { $set: { read: true } },
+      { returnDocument: 'after' },
+    ),
+  ).lean();
   if (!n) return res.status(404).json({ message: 'Notification not found' });
   return res.json(serializeNotification(n));
 };
@@ -68,7 +77,7 @@ const markRead = async (req, res) => {
 const markAllRead = async (req, res) => {
   const result = await Notification.updateMany(
     { recipientId: req.user._id, read: { $ne: true } },
-    { $set: { read: true } }
+    { $set: { read: true } },
   );
   res.json({ updated: result.modifiedCount });
 };
@@ -95,7 +104,7 @@ const respondToRequest = async (req, res) => {
       status: 'pending',
     },
     { $set: { status, read: true } },
-    { returnDocument: 'after' }
+    { returnDocument: 'after' },
   );
   if (!notification) {
     return res.status(404).json({ message: 'Notification not found' });
@@ -121,9 +130,11 @@ const respondToRequest = async (req, res) => {
         `${req.user.fullName} (@${req.user.username}) has accepted your connection request on Nocturne Library.`,
         renderEmail({
           heading: 'Connection Request Accepted',
-          paragraphs: [`${req.user.fullName} (@${req.user.username}) has accepted your connection request on Nocturne Library.`],
+          paragraphs: [
+            `${req.user.fullName} (@${req.user.username}) has accepted your connection request on Nocturne Library.`,
+          ],
           footer: 'You are now connected in the sanctuary.',
-        })
+        }),
       );
     }
   }
@@ -132,4 +143,10 @@ const respondToRequest = async (req, res) => {
   return res.json({ message: `Request ${status}`, notification: serializeNotification(fresh) });
 };
 
-module.exports = { getNotifications, markRead, markAllRead, respondToRequest, serializeNotification };
+module.exports = {
+  getNotifications,
+  markRead,
+  markAllRead,
+  respondToRequest,
+  serializeNotification,
+};

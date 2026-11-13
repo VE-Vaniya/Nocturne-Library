@@ -2,10 +2,10 @@
 
 Two [k6](https://grafana.com/docs/k6/latest/) scripts run against the live ALB:
 
-| Script | Shape | Purpose |
-|---|---|---|
-| `k6-smoke.js` | 2 VUs, 30 s | Sanity check: `/`, `/health`, `/api/health` (DB connected), `/api/books` → 401, and two authenticated reads when a test account is given |
-| `k6-load.js` | 0 → 200 VUs over 5 min, hold 8 min, ramp down 2 min, 1 min idle | Drive the ASG target-tracking policy to **scale out**, then let it **scale in** |
+| Script        | Shape                                                           | Purpose                                                                                                                                  |
+| ------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `k6-smoke.js` | 2 VUs, 30 s                                                     | Sanity check: `/`, `/health`, `/api/health` (DB connected), `/api/books` → 401, and two authenticated reads when a test account is given |
+| `k6-load.js`  | 0 → 200 VUs over 5 min, hold 8 min, ramp down 2 min, 1 min idle | Drive the ASG target-tracking policy to **scale out**, then let it **scale in**                                                          |
 
 Thresholds (the run fails if they are breached): **p95 latency < 800 ms**, **error rate < 2 %** (load) / < 1 % (smoke).
 
@@ -36,16 +36,16 @@ Run the load test from a laptop or a CI runner **outside** AWS (traffic must go 
 
 - Target tracking (`infra/50-compute.sh`) defaults to **ASG average CPU 50 %** (alternative: `SCALING_METRIC=requests`, ALBRequestCountPerTarget 500/min). CloudWatch needs ~3 consecutive 1-minute datapoints above target before the scale-out alarm fires, then a new instance boots (~2–3 min) and warms up (120 s). An 8-minute hold gives time to see 2 → 3 (often 4) instances.
 - Scale-in is deliberately slow (target tracking waits ~15 minutes of low CPU), so keep collecting evidence for **~20 minutes after k6 ends**.
-- t3.micro instances use *standard* CPU credits (no surprise "unlimited" charges). Under sustained load they may throttle to baseline, which still pushes CPU % up and triggers scale-out; it can raise latency, so look at p95 per phase, not just the summary.
+- t3.micro instances use _standard_ CPU credits (no surprise "unlimited" charges). Under sustained load they may throttle to baseline, which still pushes CPU % up and triggers scale-out; it can raise latency, so look at p95 per phase, not just the summary.
 
 ## Capturing scale-out / scale-in evidence
 
 Screenshot each of these (the brief asks for "CloudWatch metrics and Auto Scaling activity history"):
 
-1. **Before the run** – EC2 → Auto Scaling groups → `nocturne-asg` → *Instance management*: 2 instances `InService`, one per AZ.
-2. **During the run** – CloudWatch dashboard `nocturne-prod`: *Request rate*, *Latency p95*, *CPU and memory*, *Auto Scaling group – instances* (desired / in-service climbing to 3–4).
+1. **Before the run** – EC2 → Auto Scaling groups → `nocturne-asg` → _Instance management_: 2 instances `InService`, one per AZ.
+2. **During the run** – CloudWatch dashboard `nocturne-prod`: _Request rate_, _Latency p95_, _CPU and memory_, _Auto Scaling group – instances_ (desired / in-service climbing to 3–4).
 3. **k6 terminal summary** – thresholds ✓/✗, `http_reqs` rate, p95.
-4. **Activity history** – `nocturne-asg` → *Activity* tab, or:
+4. **Activity history** – `nocturne-asg` → _Activity_ tab, or:
 
    ```bash
    aws autoscaling describe-scaling-activities --region ap-south-1 \
@@ -53,7 +53,8 @@ Screenshot each of these (the brief asks for "CloudWatch metrics and Auto Scalin
      --query 'Activities[].[StartTime,StatusCode,Description,Cause]' --output table
    ```
 
-   Look for *"Launching a new EC2 instance … changing the desired capacity from 2 to 3"* caused by the `TargetTracking-nocturne-asg-AlarmHigh-…` alarm, and later *"Terminating EC2 instance … from 3 to 2"* caused by `…-AlarmLow-…`.
+   Look for _"Launching a new EC2 instance … changing the desired capacity from 2 to 3"_ caused by the `TargetTracking-nocturne-asg-AlarmHigh-…` alarm, and later _"Terminating EC2 instance … from 3 to 2"_ caused by `…-AlarmLow-…`.
+
 5. **Target tracking alarms** – CloudWatch → Alarms → the two auto-created `TargetTracking-nocturne-asg-*` alarms going to `In alarm` (high during load, low afterwards).
 6. **After scale-in** – back to 2 instances; ALB target groups healthy throughout (no 5xx spike).
 

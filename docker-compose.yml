@@ -11,7 +11,7 @@ services:
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -32,13 +32,13 @@ services:
         required: false
     environment:
       NODE_ENV: production
-      PORT: "5000"
+      PORT: '5000'
     expose:
-      - "5000"
+      - '5000'
     ports:
       # Direct API access for debugging (loopback only). Browser traffic goes
       # through the frontend's /api proxy.
-      - "127.0.0.1:5000:5000"
+      - '127.0.0.1:5000:5000'
     depends_on:
       mongo:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
     environment:
       BACKEND_URL: http://backend:5000
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       backend:
         condition: service_healthy

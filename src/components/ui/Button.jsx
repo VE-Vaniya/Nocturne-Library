@@ -8,7 +8,16 @@
  *   type     defaults to 'button'.
  *   ...rest  any <button> props (onClick, disabled, aria-*, style, className).
  */
-export default function Button({ variant = 'solid', size = 'md', block = false, onVeil = false, className = '', type = 'button', children, ...rest }) {
+export default function Button({
+  variant = 'solid',
+  size = 'md',
+  block = false,
+  onVeil = false,
+  className = '',
+  type = 'button',
+  children,
+  ...rest
+}) {
   const cls = [
     'nl-b',
     `nl-b--${variant}`,

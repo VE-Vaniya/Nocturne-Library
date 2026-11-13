@@ -42,9 +42,13 @@ describe('errorHandler', () => {
   it('maps known errors', () => {
     expect(run({ type: 'entity.too.large' }).res.status).toHaveBeenCalledWith(413);
     expect(run({ name: 'CastError', path: 'x' }).res.status).toHaveBeenCalledWith(400);
-    expect(run({ name: 'ValidationError', errors: {} }).res.json).toHaveBeenCalledWith({ message: 'Invalid data' });
+    expect(run({ name: 'ValidationError', errors: {} }).res.json).toHaveBeenCalledWith({
+      message: 'Invalid data',
+    });
     expect(run({ code: 11000 }).res.status).toHaveBeenCalledWith(409);
-    expect(run({ status: 418, message: 'teapot' }).res.json).toHaveBeenCalledWith({ message: 'teapot' });
+    expect(run({ status: 418, message: 'teapot' }).res.json).toHaveBeenCalledWith({
+      message: 'teapot',
+    });
     expect(run(new Error('x')).res.status).toHaveBeenCalledWith(500);
     expect(run(new Error('x'), true).next).toHaveBeenCalled();
   });
@@ -52,7 +56,13 @@ describe('errorHandler', () => {
 
 describe('email templates', () => {
   it('escapes user content', () => {
-    const html = renderEmail({ heading: '<h>', paragraphs: ['<script>'], quote: '"q"', attribution: 'a&b', footer: 'f' });
+    const html = renderEmail({
+      heading: '<h>',
+      paragraphs: ['<script>'],
+      quote: '"q"',
+      attribution: 'a&b',
+      footer: 'f',
+    });
     expect(html).not.toContain('<script>');
     expect(html).toContain('&lt;script&gt;');
     expect(html).toContain('a&amp;b');

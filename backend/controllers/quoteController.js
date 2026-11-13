@@ -39,7 +39,8 @@ const shareQuote = async (req, res) => {
 
   let ids;
   if (Array.isArray(body.recipientIds)) ids = body.recipientIds;
-  else if (body.recipientId !== undefined) ids = [body.recipientId]; // legacy
+  else if (body.recipientId !== undefined)
+    ids = [body.recipientId]; // legacy
   else ids = [];
   ids = [...new Set(ids.map((id) => (typeof id === 'string' ? id : '')))];
 
@@ -65,7 +66,9 @@ const shareQuote = async (req, res) => {
     return res.status(403).json({ message: 'You can only share with your friends' });
   }
 
-  const recipients = await User.find({ _id: { $in: ids } }).select('email fullName').lean();
+  const recipients = await User.find({ _id: { $in: ids } })
+    .select('email fullName')
+    .lean();
   if (recipients.length !== ids.length) {
     return res.status(403).json({ message: 'You can only share with your friends' });
   }
@@ -94,12 +97,13 @@ const shareQuote = async (req, res) => {
       `${me.fullName} (@${me.username}) has sent you a quote on Nocturne Library: "${fields.text}"`,
       renderEmail({
         heading: 'New Quote Shared',
-        paragraphs: [`${me.fullName} (@${me.username}) has sent you a quote on Nocturne Library.`]
-          .concat(message ? [message] : []),
+        paragraphs: [
+          `${me.fullName} (@${me.username}) has sent you a quote on Nocturne Library.`,
+        ].concat(message ? [message] : []),
         quote: fields.text,
         attribution,
         footer: 'Log in to Nocturne Library to see your collected missives.',
-      })
+      }),
     );
   }
 
@@ -122,8 +126,10 @@ const addQuote = async (req, res) => {
 
   let bookId;
   if (body.bookId !== undefined && body.bookId !== null && body.bookId !== '') {
-    if (!isObjectId(body.bookId)
-      || !(await Book.exists({ _id: body.bookId, userId: req.user._id }))) {
+    if (
+      !isObjectId(body.bookId) ||
+      !(await Book.exists({ _id: body.bookId, userId: req.user._id }))
+    ) {
       return res.status(400).json({ message: 'bookId must reference one of your books' });
     }
     bookId = body.bookId;

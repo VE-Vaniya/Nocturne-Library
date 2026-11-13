@@ -10,7 +10,9 @@ const missiveSchema = new mongoose.Schema({
   // Quote fields (kind 'quote')
   text: {
     type: String,
-    required: function textRequired() { return this.kind !== 'letter'; },
+    required: function textRequired() {
+      return this.kind !== 'letter';
+    },
   },
   author: { type: String },
   bookTitle: { type: String },
@@ -21,7 +23,7 @@ const missiveSchema = new mongoose.Schema({
   // Set once the recipient saves a shared quote into their own collection
   savedQuoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote', default: null },
   isRead: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Missive', missiveSchema);

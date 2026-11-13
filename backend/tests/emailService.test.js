@@ -12,7 +12,9 @@ const loadService = (env) => {
   const saved = { ...process.env };
   Object.assign(process.env, env);
   let mod;
-  jest.isolateModules(() => { mod = jest.requireActual('../services/emailService'); });
+  jest.isolateModules(() => {
+    mod = jest.requireActual('../services/emailService');
+  });
   process.env = saved;
   return mod;
 };
@@ -35,12 +37,20 @@ describe('emailService', () => {
     const { sendNotificationEmail } = loadService({});
     process.env.EMAIL_USER = 'sender@example.com';
     mockSendMail.mockResolvedValueOnce({ messageId: 'id-1' });
-    await expect(sendNotificationEmail('a@example.com', 's', 't', 'h')).resolves.toEqual({ success: true, messageId: 'id-1' });
-    expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ to: 'a@example.com', subject: 's' }));
+    await expect(sendNotificationEmail('a@example.com', 's', 't', 'h')).resolves.toEqual({
+      success: true,
+      messageId: 'id-1',
+    });
+    expect(mockSendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'a@example.com', subject: 's' }),
+    );
 
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockSendMail.mockRejectedValueOnce(new Error('smtp down'));
-    await expect(sendNotificationEmail('a@example.com', 's', 't', 'h')).resolves.toEqual({ success: false, error: 'smtp down' });
+    await expect(sendNotificationEmail('a@example.com', 's', 't', 'h')).resolves.toEqual({
+      success: false,
+      error: 'smtp down',
+    });
     spy.mockRestore();
   });
 

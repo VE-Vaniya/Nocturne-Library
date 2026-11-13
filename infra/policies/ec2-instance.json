@@ -23,11 +23,7 @@
     {
       "Sid": "ReadAppParameters",
       "Effect": "Allow",
-      "Action": [
-        "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:GetParametersByPath"
-      ],
+      "Action": ["ssm:GetParameter", "ssm:GetParameters", "ssm:GetParametersByPath"],
       "Resource": [
         "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__",
         "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__/*"

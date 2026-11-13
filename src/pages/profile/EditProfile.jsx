@@ -67,7 +67,11 @@ export default function EditProfile() {
     try {
       if (Object.keys(changes).length) {
         const updated = await api.updateMe(changes);
-        setUser((u) => ({ ...u, ...changes, ...(updated && typeof updated === 'object' ? updated : {}) }));
+        setUser((u) => ({
+          ...u,
+          ...changes,
+          ...(updated && typeof updated === 'object' ? updated : {}),
+        }));
       }
       if (wantsPw) {
         try {
@@ -91,7 +95,13 @@ export default function EditProfile() {
   return (
     <Modal as="form" label="Edit profile" title="Edit profile" onSubmit={save} noValidate>
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <Avatar src={draft.avatar} name={draft.fullName || user?.fullName} seal={user?.sealColor} size={76} style={{ fontSize: 32 }} />
+        <Avatar
+          src={draft.avatar}
+          name={draft.fullName || user?.fullName}
+          seal={user?.sealColor}
+          size={76}
+          style={{ fontSize: 32 }}
+        />
         <div style={{ display: 'grid', gap: 6 }}>
           <span className="nl-file" style={{ position: 'relative' }}>
             <input
@@ -123,7 +133,16 @@ export default function EditProfile() {
             <button
               type="button"
               onClick={() => set('avatar', '')}
-              style={{ justifySelf: 'start', background: 'none', border: 0, color: '#a89f88', fontSize: 14, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+              style={{
+                justifySelf: 'start',
+                background: 'none',
+                border: 0,
+                color: '#a89f88',
+                fontSize: 14,
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                padding: 0,
+              }}
             >
               Remove photo
             </button>
@@ -132,41 +151,104 @@ export default function EditProfile() {
       </div>
 
       <div className="nl-field">
-        <label htmlFor={fid('name')} style={label}>Name</label>
-        <input id={fid('name')} className="nl-in nl-input" value={draft.fullName} onChange={(e) => set('fullName', e.target.value)} autoComplete="name" maxLength={80} data-autofocus />
+        <label htmlFor={fid('name')} style={label}>
+          Name
+        </label>
+        <input
+          id={fid('name')}
+          className="nl-in nl-input"
+          value={draft.fullName}
+          onChange={(e) => set('fullName', e.target.value)}
+          autoComplete="name"
+          maxLength={80}
+          data-autofocus
+        />
       </div>
       <div className="nl-field">
-        <label htmlFor={fid('handle')} style={label}>Username</label>
+        <label htmlFor={fid('handle')} style={label}>
+          Username
+        </label>
         <input
           id={fid('handle')}
           className="nl-in nl-input"
           value={draft.username}
-          onChange={(e) => set('username', e.target.value.replace(/[^a-z0-9_.]/gi, '').toLowerCase())}
+          onChange={(e) =>
+            set('username', e.target.value.replace(/[^a-z0-9_.]/gi, '').toLowerCase())
+          }
           autoComplete="username"
           maxLength={30}
         />
       </div>
       <div className="nl-field">
-        <label htmlFor={fid('bio')} style={label}>Bio</label>
-        <textarea id={fid('bio')} className="nl-in nl-input" rows={2} value={draft.bio} onChange={(e) => set('bio', e.target.value.slice(0, 140))} />
+        <label htmlFor={fid('bio')} style={label}>
+          Bio
+        </label>
+        <textarea
+          id={fid('bio')}
+          className="nl-in nl-input"
+          rows={2}
+          value={draft.bio}
+          onChange={(e) => set('bio', e.target.value.slice(0, 140))}
+        />
       </div>
 
-      <button type="button" className="nl-linkbtn" onClick={() => setPwOpen((o) => !o)} aria-expanded={pwOpen} aria-controls={fid('pw')}>
+      <button
+        type="button"
+        className="nl-linkbtn"
+        onClick={() => setPwOpen((o) => !o)}
+        aria-expanded={pwOpen}
+        aria-controls={fid('pw')}
+      >
         {pwOpen ? 'Keep my current password' : 'Change password'}
       </button>
-      <div id={fid('pw')} className="nl-fold" style={{ gridTemplateRows: pwOpen ? '1fr' : '0fr', opacity: pwOpen ? 1 : 0 }} inert={!pwOpen}>
+      <div
+        id={fid('pw')}
+        className="nl-fold"
+        style={{ gridTemplateRows: pwOpen ? '1fr' : '0fr', opacity: pwOpen ? 1 : 0 }}
+        inert={!pwOpen}
+      >
         <div style={{ overflow: 'hidden', display: 'grid', gap: 12 }}>
           <div className="nl-field">
-            <label htmlFor={fid('pw0')} style={label}>Current password</label>
-            <input id={fid('pw0')} className="nl-in nl-input" type="password" autoComplete="current-password" value={pw.current} onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} style={{ fontSize: 17 }} />
+            <label htmlFor={fid('pw0')} style={label}>
+              Current password
+            </label>
+            <input
+              id={fid('pw0')}
+              className="nl-in nl-input"
+              type="password"
+              autoComplete="current-password"
+              value={pw.current}
+              onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))}
+              style={{ fontSize: 17 }}
+            />
           </div>
           <div className="nl-field">
-            <label htmlFor={fid('pw1')} style={label}>New password</label>
-            <input id={fid('pw1')} className="nl-in nl-input" type="password" autoComplete="new-password" value={pw.next} onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))} style={{ fontSize: 17 }} />
+            <label htmlFor={fid('pw1')} style={label}>
+              New password
+            </label>
+            <input
+              id={fid('pw1')}
+              className="nl-in nl-input"
+              type="password"
+              autoComplete="new-password"
+              value={pw.next}
+              onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))}
+              style={{ fontSize: 17 }}
+            />
           </div>
           <div className="nl-field">
-            <label htmlFor={fid('pw2')} style={label}>Confirm new password</label>
-            <input id={fid('pw2')} className="nl-in nl-input" type="password" autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} style={{ fontSize: 17 }} />
+            <label htmlFor={fid('pw2')} style={label}>
+              Confirm new password
+            </label>
+            <input
+              id={fid('pw2')}
+              className="nl-in nl-input"
+              type="password"
+              autoComplete="new-password"
+              value={pw.confirm}
+              onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))}
+              style={{ fontSize: 17 }}
+            />
           </div>
         </div>
       </div>

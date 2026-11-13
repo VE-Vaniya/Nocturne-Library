@@ -27,7 +27,10 @@ export default function FriendsModal() {
       if (!ids.length) return;
       Promise.allSettled(ids.map((id) => api.removeFriend(id))).then((res) => {
         const failed = res.filter((r) => r.status === 'rejected').length;
-        if (failed) toast(failed === 1 ? 'Could not remove one friend' : `Could not remove ${failed} friends`);
+        if (failed)
+          toast(
+            failed === 1 ? 'Could not remove one friend' : `Could not remove ${failed} friends`,
+          );
         refreshFriends();
         refreshStats();
       });
@@ -36,10 +39,13 @@ export default function FriendsModal() {
   );
 
   const qq = q.trim().toLowerCase();
-  const rows = friends.filter((f) => !qq || `${f.fullName || ''} ${f.username || ''}`.toLowerCase().includes(qq));
+  const rows = friends.filter(
+    (f) => !qq || `${f.fullName || ''} ${f.username || ''}`.toLowerCase().includes(qq),
+  );
   const count = friends.filter((f) => !removed.includes(f._id)).length;
 
-  const toggle = (id) => setRemoved((r) => (r.includes(id) ? r.filter((x) => x !== id) : r.concat(id)));
+  const toggle = (id) =>
+    setRemoved((r) => (r.includes(id) ? r.filter((x) => x !== id) : r.concat(id)));
 
   const reading = (f) => {
     const c = f.currentlyReading;
@@ -71,8 +77,18 @@ export default function FriendsModal() {
       </div>
       <ScrollArea style={{ padding: '0 8px 12px' }}>
         {friends.length === 0 ? (
-          <div style={{ padding: '18px 10px 10px', textAlign: 'center', display: 'grid', gap: 12, justifyItems: 'center' }}>
-            <p style={{ margin: 0, color: '#a89f88', fontStyle: 'italic' }}>No reading friends yet.</p>
+          <div
+            style={{
+              padding: '18px 10px 10px',
+              textAlign: 'center',
+              display: 'grid',
+              gap: 12,
+              justifyItems: 'center',
+            }}
+          >
+            <p style={{ margin: 0, color: '#a89f88', fontStyle: 'italic' }}>
+              No reading friends yet.
+            </p>
             <Button
               size="sm"
               onClick={() => {
@@ -85,7 +101,9 @@ export default function FriendsModal() {
           </div>
         ) : null}
         {friends.length > 0 && rows.length === 0 ? (
-          <p style={{ margin: 0, padding: '14px 10px', color: '#8f8775', fontStyle: 'italic' }}>No friend by that name.</p>
+          <p style={{ margin: 0, padding: '14px 10px', color: '#8f8775', fontStyle: 'italic' }}>
+            No friend by that name.
+          </p>
         ) : null}
         {rows.map((f) => {
           const gone = removed.includes(f._id);
@@ -94,13 +112,28 @@ export default function FriendsModal() {
             <div
               key={f._id}
               className="nl-row"
-              style={{ display: 'grid', gridTemplateColumns: '48px minmax(0,1fr) auto', gap: 12, alignItems: 'center', padding: 10, borderRadius: 10 }}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '48px minmax(0,1fr) auto',
+                gap: 12,
+                alignItems: 'center',
+                padding: 10,
+                borderRadius: 10,
+              }}
             >
-              <Avatar src={f.avatar} name={name} size={48} ring={gone ? 'transparent' : 'rgba(200,160,80,.5)'} style={{ opacity: gone ? 0.5 : 1 }} />
+              <Avatar
+                src={f.avatar}
+                name={name}
+                size={48}
+                ring={gone ? 'transparent' : 'rgba(200,160,80,.5)'}
+                style={{ opacity: gone ? 0.5 : 1 }}
+              />
               <span style={{ minWidth: 0, textAlign: 'left' }}>
                 <b style={{ fontWeight: 500, overflowWrap: 'anywhere' }}>{name}</b>
                 <br />
-                <span style={{ color: '#a89f88', fontSize: 14 }}>{gone ? 'removed from friends' : reading(f)}</span>
+                <span style={{ color: '#a89f88', fontSize: 14 }}>
+                  {gone ? 'removed from friends' : reading(f)}
+                </span>
               </span>
               <span style={{ display: 'flex', gap: 6 }}>
                 <button
@@ -127,7 +160,16 @@ export default function FriendsModal() {
                   type="button"
                   onClick={() => toggle(f._id)}
                   aria-label={gone ? `Undo removing ${name}` : `Remove ${name}`}
-                  style={{ minHeight: 34, padding: '0 10px', border: 0, borderRadius: 8, background: '#1e2924', color: '#a89f88', fontSize: 14, cursor: 'pointer' }}
+                  style={{
+                    minHeight: 34,
+                    padding: '0 10px',
+                    border: 0,
+                    borderRadius: 8,
+                    background: '#1e2924',
+                    color: '#a89f88',
+                    fontSize: 14,
+                    cursor: 'pointer',
+                  }}
                 >
                   {gone ? 'Undo' : 'Remove'}
                 </button>

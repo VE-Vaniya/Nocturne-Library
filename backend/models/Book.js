@@ -10,14 +10,14 @@ const bookSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: BOOK_STATUSES,
-    default: 'wishlist'
+    default: 'wishlist',
   },
   progress: { type: String }, // e.g., "351 / 551"
   coverImage: { type: String }, // data URL or URL for the book cover
   totalPages: { type: Number, min: 0 },
   lastRead: { type: Date, default: Date.now },
   moodTags: [{ type: String }],
-  lastPageRead: { type: Number, default: 0, min: 0 }
+  lastPageRead: { type: Number, default: 0, min: 0 },
 });
 
 module.exports = mongoose.model('Book', bookSchema);

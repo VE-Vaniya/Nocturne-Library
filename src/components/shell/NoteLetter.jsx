@@ -3,7 +3,7 @@ import { useApp } from '../../context/AppContext.jsx';
 import * as api from '../../services/api.js';
 import Letter from './Letter.jsx';
 
-const first = (p) => ((p?.fullName || p?.username || 'A friend').trim().split(/\s+/)[0]);
+const first = (p) => (p?.fullName || p?.username || 'A friend').trim().split(/\s+/)[0];
 
 /** Modal body for a letter / shared-quote notification. */
 export default function NoteLetter({ n }) {
@@ -28,7 +28,10 @@ export default function NoteLetter({ n }) {
       setBusy(false);
     }
   };
-  const source = isQuote ? [m.author, m.bookTitle].filter(Boolean).join(', ') + (m.page ? ` · ${String(m.page).match(/^\d+$/) ? `p. ${m.page}` : m.page}` : '') : '';
+  const source = isQuote
+    ? [m.author, m.bookTitle].filter(Boolean).join(', ') +
+      (m.page ? ` · ${String(m.page).match(/^\d+$/) ? `p. ${m.page}` : m.page}` : '')
+    : '';
   return (
     <Letter
       from={n.from?.fullName || n.from?.username || 'a friend'}

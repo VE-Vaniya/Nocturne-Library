@@ -20,17 +20,20 @@ app.use(require('./routes/healthRoutes'));
 // CORS: only allow origins listed in CORS_ORIGINS (comma-separated).
 // Defaults to the Vite dev server outside production. Requests without an
 // Origin header (same-origin, curl, health checks) are always allowed.
-const corsOrigins = (process.env.CORS_ORIGINS ||
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5173'))
+const corsOrigins = (
+  process.env.CORS_ORIGINS || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5173')
+)
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    callback(null, !origin || corsOrigins.includes(origin));
-  },
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, !origin || corsOrigins.includes(origin));
+    },
+  }),
+);
 
 // Book covers are uploaded as base64 data URLs inside the JSON body, so the
 // limit must leave room for an image (~7.5 MB raw at 10 MB). Override with

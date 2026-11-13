@@ -38,10 +38,7 @@
     {
       "Sid": "InstanceRefreshOnProjectAsg",
       "Effect": "Allow",
-      "Action": [
-        "autoscaling:StartInstanceRefresh",
-        "autoscaling:CancelInstanceRefresh"
-      ],
+      "Action": ["autoscaling:StartInstanceRefresh", "autoscaling:CancelInstanceRefresh"],
       "Resource": "arn:aws:autoscaling:__AWS_REGION__:__ACCOUNT_ID__:autoScalingGroup:*:autoScalingGroupName/__ASG_NAME__"
     },
     {

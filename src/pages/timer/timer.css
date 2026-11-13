@@ -22,7 +22,10 @@
 }
 
 /* "Reading <i>title</i>" — the italic title is a quiet select */
-.tmr-reading { margin: 0; color: #a89f88; }
+.tmr-reading {
+  margin: 0;
+  color: #a89f88;
+}
 .tmr-picker {
   position: relative;
   display: inline-flex;
@@ -45,9 +48,20 @@
   text-overflow: ellipsis;
   cursor: pointer;
 }
-.tmr-picker select:hover { border-bottom-color: #e9c779; }
-.tmr-picker select option { background: #141c18; color: #e8dcc0; font-style: normal; }
-.tmr-picker svg { position: absolute; right: 2px; pointer-events: none; color: #c8a050; }
+.tmr-picker select:hover {
+  border-bottom-color: #e9c779;
+}
+.tmr-picker select option {
+  background: #141c18;
+  color: #e8dcc0;
+  font-style: normal;
+}
+.tmr-picker svg {
+  position: absolute;
+  right: 2px;
+  pointer-events: none;
+  color: #c8a050;
+}
 
 /* ── pocket watch ── */
 .tmr-watch {
@@ -63,7 +77,13 @@
   transform-origin: 50% 0;
   margin: 0 auto;
 }
-.tmr-chain { position: absolute; left: 0; top: 0; width: 340px; height: 80px; }
+.tmr-chain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 340px;
+  height: 80px;
+}
 .tmr-bow {
   position: absolute;
   left: 156px;
@@ -91,7 +111,10 @@
   height: 340px;
   border-radius: 50%;
   background: radial-gradient(circle at 32% 28%, #f6dc95, #c8a050 38%, #7a5a22 72%, #3e2c10);
-  box-shadow: 0 30px 50px -18px rgba(0, 0, 0, 0.9), inset 0 0 0 3px rgba(255, 236, 180, 0.35), inset 0 -8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 30px 50px -18px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 3px rgba(255, 236, 180, 0.35),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.4);
 }
 .tmr-dial {
   position: absolute;
@@ -178,17 +201,24 @@
   height: 100%;
   transform: rotate(-90deg);
 }
-.tmr-ring .nl-sand { transition: stroke-dashoffset 1s linear; }
+.tmr-ring .nl-sand {
+  transition: stroke-dashoffset 1s linear;
+}
 
 /* ── readout & controls ── */
-.tmr-readout { margin-top: -6px; }
+.tmr-readout {
+  margin-top: -6px;
+}
 .tmr-clock {
   font-family: 'IM Fell English', Georgia, serif;
   font-size: 64px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.tmr-note { margin: 2px 0 0; color: #a89f88; }
+.tmr-note {
+  margin: 2px 0 0;
+  color: #a89f88;
+}
 .tmr-mins {
   display: flex;
   gap: 10px;
@@ -205,10 +235,18 @@
   color: #e8dcc0;
   font-size: 20px;
   cursor: pointer;
-  transition: border-color 0.25s, color 0.25s;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
 }
-.tmr-round:hover:not(:disabled) { border-color: #e9c779; color: #e9c779; }
-.tmr-round:disabled { opacity: 0.4; cursor: default; }
+.tmr-round:hover:not(:disabled) {
+  border-color: #e9c779;
+  color: #e9c779;
+}
+.tmr-round:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
 .tmr-mins-in {
   width: 70px;
   background: transparent;
@@ -223,7 +261,10 @@
   appearance: textfield;
 }
 .tmr-mins-in::-webkit-outer-spin-button,
-.tmr-mins-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.tmr-mins-in::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .tmr-actions {
   display: flex;
   gap: 12px;
@@ -252,7 +293,11 @@
   font-size: 17px;
   cursor: pointer;
 }
-.tmr-run:disabled, .tmr-ghost:disabled { opacity: 0.6; cursor: progress; }
+.tmr-run:disabled,
+.tmr-ghost:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
 
 /* ── log a quote (paper slip) ── */
 .tmr-log {
@@ -276,7 +321,10 @@
   font-weight: 400;
   font-size: 26px;
 }
-.tmr-log-label { font-size: 14px; color: #5b4f40; }
+.tmr-log-label {
+  font-size: 14px;
+  color: #5b4f40;
+}
 .tmr-log-text {
   background: transparent;
   border: 0;
@@ -287,7 +335,12 @@
   color: #2a221a;
   resize: vertical;
 }
-.tmr-log-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tmr-log-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 .tmr-log-in {
   width: 80px;
   background: transparent;
@@ -298,10 +351,24 @@
   color: #2a221a;
   padding: 4px 0;
 }
-.tmr-log-wide { width: auto; flex: 1 1 140px; min-width: 0; }
-.tmr-log-text:focus, .tmr-log-in:focus { outline: none; border-bottom: 1px solid #2a221a; }
-.tmr-log :focus-visible { outline-color: #8a252c; }
-.tmr-log-foot { display: flex; gap: 10px; justify-content: flex-end; }
+.tmr-log-wide {
+  width: auto;
+  flex: 1 1 140px;
+  min-width: 0;
+}
+.tmr-log-text:focus,
+.tmr-log-in:focus {
+  outline: none;
+  border-bottom: 1px solid #2a221a;
+}
+.tmr-log :focus-visible {
+  outline-color: #8a252c;
+}
+.tmr-log-foot {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
 .tmr-log-cancel,
 .tmr-log-save {
   min-height: 42px;
@@ -311,11 +378,30 @@
   font-size: 15px;
   cursor: pointer;
 }
-.tmr-log-cancel { border: 1px solid rgba(42, 34, 26, 0.4); background: none; color: #2a221a; }
-.tmr-log-save { padding: 0 20px; border: 0; background: #2a221a; color: #e9e0c9; transition: background 0.25s; }
-.tmr-log-save:hover { background: #4a3a2a; }
-.tmr-log-save:disabled { opacity: 0.6; cursor: progress; }
-.tmr-log-note { margin: 0; font-size: 13px; color: #5b4f40; }
+.tmr-log-cancel {
+  border: 1px solid rgba(42, 34, 26, 0.4);
+  background: none;
+  color: #2a221a;
+}
+.tmr-log-save {
+  padding: 0 20px;
+  border: 0;
+  background: #2a221a;
+  color: #e9e0c9;
+  transition: background 0.25s;
+}
+.tmr-log-save:hover {
+  background: #4a3a2a;
+}
+.tmr-log-save:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.tmr-log-note {
+  margin: 0;
+  font-size: 13px;
+  color: #5b4f40;
+}
 
 /* ── celebration ── */
 .tmr-done {
@@ -337,9 +423,27 @@
   margin: -650px 0 0 -650px;
   border-radius: 50%;
   pointer-events: none;
-  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 140, 0) 0deg, rgba(255, 214, 140, 0.34) 1.4deg, rgba(255, 214, 140, 0) 3deg, rgba(255, 214, 140, 0) 9deg);
-  -webkit-mask-image: radial-gradient(circle, transparent 6%, #000 18%, rgba(0, 0, 0, 0.35) 40%, transparent 60%);
-  mask-image: radial-gradient(circle, transparent 6%, #000 18%, rgba(0, 0, 0, 0.35) 40%, transparent 60%);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 214, 140, 0) 0deg,
+    rgba(255, 214, 140, 0.34) 1.4deg,
+    rgba(255, 214, 140, 0) 3deg,
+    rgba(255, 214, 140, 0) 9deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle,
+    transparent 6%,
+    #000 18%,
+    rgba(0, 0, 0, 0.35) 40%,
+    transparent 60%
+  );
+  mask-image: radial-gradient(
+    circle,
+    transparent 6%,
+    #000 18%,
+    rgba(0, 0, 0, 0.35) 40%,
+    transparent 60%
+  );
   animation: nl-spin 80s linear infinite;
 }
 .tmr-ember {
@@ -355,7 +459,13 @@
   width: 34px;
   height: 52px;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: radial-gradient(circle at 50% 75%, #fff6d8 0 18%, #ffc65a 42%, #c8501e 75%, rgba(200, 80, 30, 0) 76%);
+  background: radial-gradient(
+    circle at 50% 75%,
+    #fff6d8 0 18%,
+    #ffc65a 42%,
+    #c8501e 75%,
+    rgba(200, 80, 30, 0) 76%
+  );
   box-shadow: 0 0 50px 14px rgba(255, 170, 70, 0.35);
 }
 .tmr-done-h {
@@ -366,8 +476,17 @@
   font-size: 64px;
   line-height: 1;
 }
-.tmr-done-sum { position: relative; margin: 0; font-size: 20px; color: #e8dcc0; }
-.tmr-done-streak { position: relative; margin: 0; color: #e9c779; }
+.tmr-done-sum {
+  position: relative;
+  margin: 0;
+  font-size: 20px;
+  color: #e8dcc0;
+}
+.tmr-done-streak {
+  position: relative;
+  margin: 0;
+  color: #e9c779;
+}
 .tmr-done-page {
   position: relative;
   display: flex;
@@ -392,7 +511,10 @@
   appearance: textfield;
 }
 .tmr-done-in::-webkit-outer-spin-button,
-.tmr-done-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.tmr-done-in::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .tmr-done-mini {
   min-height: 34px;
   padding: 0 14px;
@@ -404,9 +526,22 @@
   font-size: 14px;
   cursor: pointer;
 }
-.tmr-done-mini:disabled { opacity: 0.5; cursor: default; }
-.tmr-done-saved { color: #e9c779; font-style: italic; }
-.tmr-done-actions { position: relative; display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.tmr-done-mini:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tmr-done-saved {
+  color: #e9c779;
+  font-style: italic;
+}
+.tmr-done-actions {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 .tmr-pill {
   min-height: 46px;
   padding: 0 24px;
@@ -418,30 +553,76 @@
   font-size: 16px;
   cursor: pointer;
 }
-.tmr-solid { border: 0; background: #c8a050; color: #0d1210; }
-.tmr-dim { background: rgba(13, 18, 16, 0.8); }
+.tmr-solid {
+  border: 0;
+  background: #c8a050;
+  color: #0d1210;
+}
+.tmr-dim {
+  background: rgba(13, 18, 16, 0.8);
+}
 
 /* Fit the whole sitting below the 150px header on ~800px-tall screens */
 @media (max-height: 880px) and (min-width: 761px) {
-  .tmr { gap: 12px; padding-top: 12px; }
-  .tmr-watch { width: 300px; height: 288px; }
-  .tmr-watch-inner { transform: scale(0.72); margin-left: -20px; }
-  .tmr-ring { width: 260px; }
-  .tmr-clock { font-size: 56px; }
+  .tmr {
+    gap: 12px;
+    padding-top: 12px;
+  }
+  .tmr-watch {
+    width: 300px;
+    height: 288px;
+  }
+  .tmr-watch-inner {
+    transform: scale(0.72);
+    margin-left: -20px;
+  }
+  .tmr-ring {
+    width: 260px;
+  }
+  .tmr-clock {
+    font-size: 56px;
+  }
 }
 
 @media (max-width: 760px) {
-  .tmr { padding: 14px 16px 28px; }
-  .tmr-watch { width: 290px; height: 280px; }
-  .tmr-watch-inner { transform: scale(0.7); margin-left: -25px; }
-  .tmr-ring { width: 240px; }
-  .tmr-clock { font-size: 52px; }
-  .tmr-done-h { font-size: 48px; }
-  .tmr-done-sum { font-size: 18px; }
+  .tmr {
+    padding: 14px 16px 28px;
+  }
+  .tmr-watch {
+    width: 290px;
+    height: 280px;
+  }
+  .tmr-watch-inner {
+    transform: scale(0.7);
+    margin-left: -25px;
+  }
+  .tmr-ring {
+    width: 240px;
+  }
+  .tmr-clock {
+    font-size: 52px;
+  }
+  .tmr-done-h {
+    font-size: 48px;
+  }
+  .tmr-done-sum {
+    font-size: 18px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tmr-hand-min, .tmr-hand-sec, .tmr-ring .nl-sand, .tmr-round, .tmr-log-save { transition: none; }
-  .tmr-done-rays, .tmr-ember { animation: none; }
-  .tmr-ember { display: none; }
+  .tmr-hand-min,
+  .tmr-hand-sec,
+  .tmr-ring .nl-sand,
+  .tmr-round,
+  .tmr-log-save {
+    transition: none;
+  }
+  .tmr-done-rays,
+  .tmr-ember {
+    animation: none;
+  }
+  .tmr-ember {
+    display: none;
+  }
 }

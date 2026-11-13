@@ -1,4 +1,3 @@
-/* global __ENV */
 // Shared helpers for the k6 scripts. Plain k6 JavaScript (no npm deps).
 import http from 'k6/http';
 import { check, fail } from 'k6';

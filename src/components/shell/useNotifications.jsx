@@ -15,7 +15,8 @@ const WHAT = {
 
 /** Hook: returns { bell, panel } — the bell button (goes in the header) and the dropdown (sibling of the header). */
 export default function useNotifications() {
-  const { notifications, refreshNotifications, refreshFriends, refreshStats, openModal, toast } = useApp();
+  const { notifications, refreshNotifications, refreshFriends, refreshStats, openModal, toast } =
+    useApp();
   const [open, setOpen] = useState(false);
   const [readIds, setReadIds] = useState(() => new Set());
   const [answers, setAnswers] = useState({});
@@ -93,7 +94,15 @@ export default function useNotifications() {
       aria-expanded={open}
       aria-haspopup="dialog"
     >
-      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        aria-hidden="true"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" />
       </svg>
       {unread > 0 ? <span className="nl-badge">{unread > 99 ? '99+' : unread}</span> : null}
@@ -102,7 +111,13 @@ export default function useNotifications() {
 
   const panel = open ? (
     <>
-      <button type="button" className="nl-notif-scrim" aria-label="Close notifications" tabIndex={-1} onClick={close} />
+      <button
+        type="button"
+        className="nl-notif-scrim"
+        aria-label="Close notifications"
+        tabIndex={-1}
+        onClick={close}
+      />
       <div
         ref={panelRef}
         className="nl-drop nl-notif"
@@ -122,31 +137,49 @@ export default function useNotifications() {
             Mark all read
           </button>
         </div>
-        {notifications.length === 0 ? <p className="nl-notif__empty">No letters tonight. All is quiet.</p> : null}
+        {notifications.length === 0 ? (
+          <p className="nl-notif__empty">No letters tonight. All is quiet.</p>
+        ) : null}
         {notifications.map((n) => {
           const read = isRead(n);
           const isReq = n.type === 'connection_request';
-          const st = answers[n._id] || (n.status === 'accepted' || n.status === 'rejected' ? n.status : null);
+          const st =
+            answers[n._id] ||
+            (n.status === 'accepted' || n.status === 'rejected' ? n.status : null);
           const name = n.from?.fullName || n.from?.username || 'Someone';
           return (
             <div key={n._id} className="nl-notif__item">
               <button type="button" className="nl-row nl-notif__row" onClick={() => openNote(n)}>
                 <Avatar src={n.from?.avatar} name={name} size={40} />
                 <span style={{ minWidth: 0 }}>
-                  <b style={{ fontWeight: read ? 400 : 600 }}>{name}</b> <span className="nl-notif__what">{WHAT[n.type] || 'sent you something'}</span>
+                  <b style={{ fontWeight: read ? 400 : 600 }}>{name}</b>{' '}
+                  <span className="nl-notif__what">{WHAT[n.type] || 'sent you something'}</span>
                   <br />
                   <span className="nl-notif__when">{relTime(n.createdAt)}</span>
                 </span>
-                <span className="nl-notif__dot" style={{ background: read ? 'transparent' : '#e9c779' }} aria-label={read ? undefined : 'unread'} />
+                <span
+                  className="nl-notif__dot"
+                  style={{ background: read ? 'transparent' : '#e9c779' }}
+                  aria-label={read ? undefined : 'unread'}
+                />
               </button>
               {isReq ? (
                 <div className="nl-notif__actions">
                   {!st ? (
                     <>
-                      <Button size="sm" onClick={() => answer(n, 'accepted')} style={{ fontWeight: 400 }}>
+                      <Button
+                        size="sm"
+                        onClick={() => answer(n, 'accepted')}
+                        style={{ fontWeight: 400 }}
+                      >
                         Accept
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => answer(n, 'rejected')} style={{ borderColor: 'rgba(200,160,80,.4)' }}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => answer(n, 'rejected')}
+                        style={{ borderColor: 'rgba(200,160,80,.4)' }}
+                      >
                         Decline
                       </Button>
                     </>

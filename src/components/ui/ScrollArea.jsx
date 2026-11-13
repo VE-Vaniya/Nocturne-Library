@@ -6,10 +6,21 @@
  *   as         tag, default 'div'
  *   className / style / ...rest (role, aria-label, tabIndex…)
  */
-export default function ScrollArea({ maxHeight, as = 'div', className = '', style, children, ...rest }) {
+export default function ScrollArea({
+  maxHeight,
+  as = 'div',
+  className = '',
+  style,
+  children,
+  ...rest
+}) {
   const Tag = as;
   return (
-    <Tag className={`nl-scroll ${className}`} style={{ maxHeight, minHeight: 0, ...style }} {...rest}>
+    <Tag
+      className={`nl-scroll ${className}`}
+      style={{ maxHeight, minHeight: 0, ...style }}
+      {...rest}
+    >
       {children}
     </Tag>
   );

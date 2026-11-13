@@ -17,7 +17,15 @@
  * }
  * Every refreshX() returns a promise resolving to the fresh data (or the previous value on error).
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import * as api from '../services/api.js';
 
 export const PAGES = ['home', 'shelves', 'find', 'quotes', 'timer', 'profile'];
@@ -63,17 +71,19 @@ export function AppProvider({ children }) {
 
   // ── data loaders ──
   const loaders = useMemo(() => {
-    const make = (fn, set, map = (x) => x) => async () => {
-      if (!api.loadSession()) return undefined;
-      try {
-        const v = map(await fn());
-        set(v);
-        return v;
-      } catch (err) {
-        if (import.meta.env.DEV) console.warn('[nocturne] load failed:', err?.message);
-        return undefined;
-      }
-    };
+    const make =
+      (fn, set, map = (x) => x) =>
+      async () => {
+        if (!api.loadSession()) return undefined;
+        try {
+          const v = map(await fn());
+          set(v);
+          return v;
+        } catch (err) {
+          if (import.meta.env.DEV) console.warn('[nocturne] load failed:', err?.message);
+          return undefined;
+        }
+      };
     return {
       stats: make(api.getStats, setStats, (s) => ({ ...EMPTY_STATS, ...(s || {}) })),
       books: make(api.getBooks, setBooks, asList),
@@ -107,7 +117,15 @@ export function AppProvider({ children }) {
       clearInterval(id);
       window.removeEventListener('focus', onFocus);
     };
-  }, [signedIn, refreshProfile, refreshStats, refreshBooks, refreshQuotes, refreshFriends, refreshNotifications]);
+  }, [
+    signedIn,
+    refreshProfile,
+    refreshStats,
+    refreshBooks,
+    refreshQuotes,
+    refreshFriends,
+    refreshNotifications,
+  ]);
 
   // ── navigation ──
   const go = useCallback((name) => {
@@ -159,19 +177,53 @@ export function AppProvider({ children }) {
 
   const value = useMemo(
     () => ({
-      user, setUser,
-      stats, refreshStats,
-      books, refreshBooks,
-      quotes, refreshQuotes,
-      friends, refreshFriends,
-      notifications, refreshNotifications,
-      go, toast, openModal, closeModal,
+      user,
+      setUser,
+      stats,
+      refreshStats,
+      books,
+      refreshBooks,
+      quotes,
+      refreshQuotes,
+      friends,
+      refreshFriends,
+      notifications,
+      refreshNotifications,
+      go,
+      toast,
+      openModal,
+      closeModal,
       currentBook,
-      page, signIn, signOut, modal, toastState,
+      page,
+      signIn,
+      signOut,
+      modal,
+      toastState,
     }),
-    [user, setUser, stats, refreshStats, books, refreshBooks, quotes, refreshQuotes, friends, refreshFriends,
-      notifications, refreshNotifications, go, toast, openModal, closeModal, currentBook, page, signIn, signOut,
-      modal, toastState],
+    [
+      user,
+      setUser,
+      stats,
+      refreshStats,
+      books,
+      refreshBooks,
+      quotes,
+      refreshQuotes,
+      friends,
+      refreshFriends,
+      notifications,
+      refreshNotifications,
+      go,
+      toast,
+      openModal,
+      closeModal,
+      currentBook,
+      page,
+      signIn,
+      signOut,
+      modal,
+      toastState,
+    ],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

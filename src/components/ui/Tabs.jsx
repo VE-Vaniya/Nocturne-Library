@@ -9,7 +9,17 @@
  *   idBase    optional prefix; tabs get id `${idBase}-${value}` and aria-controls `${idBase}-panel`
  * Arrow Left/Right moves between tabs.
  */
-export default function Tabs({ options: optionsProp, tabs, value, onChange, label: labelProp, ariaLabel, size = 'md', idBase, className = '' }) {
+export default function Tabs({
+  options: optionsProp,
+  tabs,
+  value,
+  onChange,
+  label: labelProp,
+  ariaLabel,
+  size = 'md',
+  idBase,
+  className = '',
+}) {
   const options = optionsProp ?? tabs ?? [];
   const label = labelProp ?? ariaLabel;
   const onKeyDown = (e) => {

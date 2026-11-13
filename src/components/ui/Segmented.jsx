@@ -7,7 +7,15 @@
  *   label     accessible group label (aria-label), required
  *   className / style  applied to the group
  */
-export default function Segmented({ options, value, onChange, label: labelProp, ariaLabel, className = '', style }) {
+export default function Segmented({
+  options,
+  value,
+  onChange,
+  label: labelProp,
+  ariaLabel,
+  className = '',
+  style,
+}) {
   const label = labelProp ?? ariaLabel;
   return (
     <div role="group" aria-label={label} className={`nl-seg ${className}`} style={style}>

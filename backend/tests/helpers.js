@@ -15,7 +15,8 @@ const createUser = async (overrides = {}) => {
     ...overrides,
   };
   const res = await request(app).post('/api/auth/signup').send(body);
-  if (res.status !== 201) throw new Error(`signup failed: ${res.status} ${JSON.stringify(res.body)}`);
+  if (res.status !== 201)
+    throw new Error(`signup failed: ${res.status} ${JSON.stringify(res.body)}`);
   return {
     user: res.body,
     id: res.body._id,

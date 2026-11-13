@@ -30,12 +30,22 @@ export default function Gate() {
     setError('');
     try {
       const res = register
-        ? await api.signup({ fullName: f.fullName.trim(), username: f.username, email, password: f.password })
+        ? await api.signup({
+            fullName: f.fullName.trim(),
+            username: f.username,
+            email,
+            password: f.password,
+          })
         : await api.login({ email, password: f.password });
       setF({ fullName: '', username: '', email: '', password: '' });
       signIn(res);
     } catch (err) {
-      setError(api.errorMessage(err, register ? 'Could not create your account.' : 'Could not sign you in.'));
+      setError(
+        api.errorMessage(
+          err,
+          register ? 'Could not create your account.' : 'Could not sign you in.',
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -59,21 +69,45 @@ export default function Gate() {
           <p className="nl-gate-sub">Your books, your quotes, your reading friends.</p>
         </div>
         <form aria-label={register ? 'Create account' : 'Sign in'} onSubmit={submit} noValidate>
-          <div className="nl-fold" style={{ gridTemplateRows: register ? '1fr' : '0fr', opacity: register ? 1 : 0 }} aria-hidden={!register} inert={!register}>
+          <div
+            className="nl-fold"
+            style={{ gridTemplateRows: register ? '1fr' : '0fr', opacity: register ? 1 : 0 }}
+            aria-hidden={!register}
+            inert={!register}
+          >
             <div style={{ overflow: 'hidden', display: 'grid', gap: 18 }}>
               <div className="nl-field">
                 <label htmlFor="nl-name">Name</label>
-                <input id="nl-name" className="nl-in nl-input" value={f.fullName} onChange={set('fullName')} autoComplete="name" />
+                <input
+                  id="nl-name"
+                  className="nl-in nl-input"
+                  value={f.fullName}
+                  onChange={set('fullName')}
+                  autoComplete="name"
+                />
               </div>
               <div className="nl-field">
                 <label htmlFor="nl-uname">Username</label>
-                <input id="nl-uname" className="nl-in nl-input" value={f.username} onChange={set('username')} autoComplete="username" />
+                <input
+                  id="nl-uname"
+                  className="nl-in nl-input"
+                  value={f.username}
+                  onChange={set('username')}
+                  autoComplete="username"
+                />
               </div>
             </div>
           </div>
           <div className="nl-field">
             <label htmlFor="nl-email">Email</label>
-            <input id="nl-email" className="nl-in nl-input" type="email" value={f.email} onChange={set('email')} autoComplete="email" />
+            <input
+              id="nl-email"
+              className="nl-in nl-input"
+              type="email"
+              value={f.email}
+              onChange={set('email')}
+              autoComplete="email"
+            />
           </div>
           <div className="nl-field">
             <label htmlFor="nl-pass">Password</label>

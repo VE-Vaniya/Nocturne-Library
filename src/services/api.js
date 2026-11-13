@@ -118,7 +118,8 @@ export const shareQuote = ({ text, author, bookTitle, page, recipientIds, messag
   data(api.post('/quotes/share', { text, author, bookTitle, page, recipientIds, message }));
 
 // ── missives (letters) ───────────────────────────────────────────
-export const sendLetter = ({ recipientId, body }) => data(api.post('/missives', { recipientId, body }));
+export const sendLetter = ({ recipientId, body }) =>
+  data(api.post('/missives', { recipientId, body }));
 /** Save a shared quote missive into my quotes. */
 export const saveMissive = (id) => data(api.post(`/missives/${id}/save`));
 

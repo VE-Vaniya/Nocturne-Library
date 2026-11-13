@@ -9,12 +9,15 @@ const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$
 // Public fields of another user. Never includes email or password.
 const PUBLIC_USER_FIELDS = '_id username fullName avatar';
 
-const toPublicUser = (u) => (u ? {
-  _id: String(u._id),
-  username: u.username,
-  fullName: u.fullName,
-  avatar: u.avatar || '',
-} : null);
+const toPublicUser = (u) =>
+  u
+    ? {
+        _id: String(u._id),
+        username: u.username,
+        fullName: u.fullName,
+        avatar: u.avatar || '',
+      }
+    : null;
 
 // Send an email without delaying or failing the request.
 const sendEmailInBackground = (to, subject, text, html) => {

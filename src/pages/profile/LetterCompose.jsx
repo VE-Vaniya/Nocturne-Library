@@ -58,18 +58,37 @@ export default function LetterCompose({ friend }) {
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="What are you reading tonight?"
-          style={{ resize: 'none', fontFamily: "'IM Fell English',Georgia,serif", fontSize: 19, lineHeight: 1.4 }}
+          style={{
+            resize: 'none',
+            fontFamily: "'IM Fell English',Georgia,serif",
+            fontSize: 19,
+            lineHeight: 1.4,
+          }}
           data-autofocus
         />
-        <span style={{ display: 'flex', justifyContent: 'space-between', color: '#8f8775', fontSize: 13 }}>
-          <span style={{ fontFamily: "'La Belle Aurore',cursive", fontSize: 20, color: '#c9bd9f' }}>{me}</span>
+        <span
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            color: '#8f8775',
+            fontSize: 13,
+          }}
+        >
+          <span style={{ fontFamily: "'La Belle Aurore',cursive", fontSize: 20, color: '#c9bd9f' }}>
+            {me}
+          </span>
           <span>
             {body.length}/{MAX}
           </span>
         </span>
       </div>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-        <Button variant="ghost" size="md" onClick={() => openModal(<FriendsModal />)} style={{ fontSize: 15, padding: '0 20px' }}>
+        <Button
+          variant="ghost"
+          size="md"
+          onClick={() => openModal(<FriendsModal />)}
+          style={{ fontSize: 15, padding: '0 20px' }}
+        >
           Back
         </Button>
         <Button type="submit" disabled={busy || !body.trim()} style={{ fontSize: 15 }}>
