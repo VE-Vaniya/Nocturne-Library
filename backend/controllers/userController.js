@@ -2,13 +2,14 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const mongoose = require('mongoose');
 const { sendNotificationEmail } = require('../services/emailService');
+const escapeHtml = require('../utils/escapeHtml');
 
 // @desc    Get all users for explore page
 // @route   GET /api/users
 const getUsers = async (req, res) => {
   try {
-    // Exclude the current user from the list
-    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password');
+    // Exclude the current user; expose only public profile fields (no emails)
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('_id username fullName avatar');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -51,7 +52,7 @@ const sendConnectionRequest = async (req, res) => {
         `<div style="font-family: 'Playfair Display', serif; padding: 20px; background-color: #f4f1ea; border: 1px solid #d1c5a9;">
           <h2 style="color: #4a3e35;">New Connection Request</h2>
           <p style="font-size: 16px; color: #5a4d41;">
-            <b>${req.user.fullName}</b> (${req.user.email}) has sent you a request on Nocturne library.
+            <b>${escapeHtml(req.user.fullName)}</b> (${escapeHtml(req.user.email)}) has sent you a request on Nocturne library.
           </p>
           <p style="font-size: 14px; color: #796e62; font-style: italic;">
             Log in to your sanctuary to respond.

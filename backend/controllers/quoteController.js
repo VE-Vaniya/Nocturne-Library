@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const Missive = require('../models/Missive');
 const { sendNotificationEmail } = require('../services/emailService');
+const escapeHtml = require('../utils/escapeHtml');
 
 // @desc    Share a quote with another user
 // @route   POST /api/quotes/share
@@ -43,12 +44,12 @@ const shareQuote = async (req, res) => {
         `<div style="font-family: 'Playfair Display', serif; padding: 20px; background-color: #f4f1ea; border: 1px solid #d1c5a9;">
           <h2 style="color: #4a3e35;">New Quote Shared</h2>
           <p style="font-size: 16px; color: #5a4d41;">
-            <b>${req.user.fullName}</b> (${req.user.email}) has sent you a request on Nocturne library (shared a quote).
+            <b>${escapeHtml(req.user.fullName)}</b> (${escapeHtml(req.user.email)}) has sent you a request on Nocturne library (shared a quote).
           </p>
           <blockquote style="font-style: italic; border-left: 4px solid #c4a572; padding-left: 15px; margin: 20px 0; color: #5a4d41;">
-            "${text}"
+            "${escapeHtml(text)}"
           </blockquote>
-          <p style="text-align: right; color: #796e62;">— ${author || 'Unknown'}, <i>${bookTitle || 'Untitled'}</i></p>
+          <p style="text-align: right; color: #796e62;">— ${escapeHtml(author || 'Unknown')}, <i>${escapeHtml(bookTitle || 'Untitled')}</i></p>
           <p style="font-size: 14px; color: #796e62; font-style: italic; margin-top: 30px;">
             Log in to Nocturne library to see your collected missives.
           </p>
@@ -99,9 +100,9 @@ const deleteQuote = async (req, res) => {
       return res.status(404).json({ message: 'Quote not found' });
     }
     if (quote.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'User not authorized' });
+      return res.status(404).json({ message: 'Quote not found' });
     }
-    await quote.remove();
+    await quote.deleteOne();
     res.status(200).json({ id: req.params.id });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -12,7 +12,7 @@ import avatar5 from '../Images/Avatars/avatar5.png';
 
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-// A consistent pseudo-random choice for avatar and card number based on email
+// A consistent pseudo-random choice for avatar and card number based on username
 const getHash = (str) => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -43,7 +43,7 @@ const Explore = ({ currentUser, connectionRequests, setConnectionRequests, fetch
   // Filter out the logged-in user and any that don't match the search
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
-      if (u.email === currentUser?.email) return false;
+      if (u._id === currentUser?._id) return false;
 
       const searchLower = searchQuery.toLowerCase();
       const nameMatch = u.fullName?.toLowerCase().includes(searchLower) || false;
@@ -129,10 +129,10 @@ const Explore = ({ currentUser, connectionRequests, setConnectionRequests, fetch
       <div className="explore-grid">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((profile) => {
-            const hash = getHash(profile.email);
+            const hash = getHash(profile.username || profile._id || '');
             const avatarIndex = profile.avatar ? parseInt(profile.avatar) : (hash % avatars.length);
             const cardNumber = 'NL-' + (hash % 90000 + 10000);
-            const rank = profile.email === 'librarian@nocturne.lib' ? 'Head Librarian' : 'Midnight Scholar';
+            const rank = profile.username === 'HeadLibrarian' ? 'Head Librarian' : 'Midnight Scholar';
             const requestSent = hasRequested(profile._id);
             const connected = isConnected(profile._id);
 
