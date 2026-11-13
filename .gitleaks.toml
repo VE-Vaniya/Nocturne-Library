@@ -1,0 +1,23 @@
+# Gitleaks config (CI stage 2 "secret-scan"; full git history is scanned).
+#
+# We extend the upstream default ruleset unchanged. There is deliberately NO
+# allowlist for real credentials: a finding fails the pipeline, and the fix is
+# to rotate the secret and purge it from history (see SECURITY.md).
+#
+# False positives only: add the finding's fingerprint to `.gitleaksignore`
+# (format `<commit>:<file>:<rule-id>:<line>`, printed by gitleaks) AND record
+# it in SECURITY.md "Accepted findings" with a justification and reviewer.
+
+title = "Nocturne Library gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Generated / vendored files that cannot contain our secrets"
+paths = [
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)coverage/''',
+  '''(^|/)dist/''',
+]
