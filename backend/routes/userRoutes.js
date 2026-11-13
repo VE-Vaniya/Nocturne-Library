@@ -1,14 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, sendConnectionRequest, getOutgoingRequests, cancelConnectionRequest, removeConnection, updateAvatar, updateReadingStats } = require('../controllers/userController');
+const {
+  updateMe,
+  updateAvatar,
+  getStats,
+  updateReadingStats,
+  getUsers,
+  getFriends,
+  getSuggestions,
+  searchUsers,
+  sendConnectionRequest,
+  getOutgoingRequests,
+  cancelConnectionRequest,
+  removeConnection,
+} = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.get('/', protect, getUsers);
-router.get('/requests/sent', protect, getOutgoingRequests);
-router.post('/connect/:id', protect, sendConnectionRequest);
-router.put('/avatar', protect, updateAvatar);
-router.put('/reading-stats', protect, updateReadingStats);
-router.delete('/connect/:id', protect, cancelConnectionRequest);
-router.delete('/disconnect/:id', protect, removeConnection);
+router.use(protect);
+
+router.get('/', getUsers);
+router.put('/me', updateMe);
+router.get('/stats', getStats);
+router.put('/reading-stats', updateReadingStats);
+router.get('/friends', getFriends);
+router.get('/suggestions', getSuggestions);
+router.get('/search', searchUsers);
+router.get('/requests/sent', getOutgoingRequests);
+router.put('/avatar', updateAvatar);
+router.post('/connect/:id', sendConnectionRequest);
+router.delete('/connect/:id', cancelConnectionRequest);
+router.delete('/disconnect/:id', removeConnection);
 
 module.exports = router;

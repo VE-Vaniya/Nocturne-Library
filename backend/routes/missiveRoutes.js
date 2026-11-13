@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getMissives } = require('../controllers/missiveController');
+const { getMissives, sendLetter, saveMissive } = require('../controllers/missiveController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.route('/').get(protect, getMissives);
+router.use(protect);
+router.route('/').get(getMissives).post(sendLetter);
+router.post('/:id/save', saveMissive);
 
 module.exports = router;
