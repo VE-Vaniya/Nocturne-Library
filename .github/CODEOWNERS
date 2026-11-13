@@ -1,0 +1,35 @@
+# CODEOWNERS – https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# The @OWNER_* entries below are PLACEHOLDERS, not real accounts.
+# Replace each one with real GitHub usernames (e.g. @alice) or a team
+# (e.g. @org/team-name) before enabling "Require review from Code Owners":
+#   @OWNER_APP       – application code (frontend + backend)
+#   @OWNER_CI        – CI pipelines and security scanning
+#   @OWNER_DELIVERY  – containers, nginx, delivery scripts
+#   @OWNER_INFRA     – infrastructure as code and architecture docs
+#   @OWNER_MONITOR   – monitoring / operational scripts
+#
+# Later rules take precedence over earlier ones, so the default is first.
+
+# Default owner for anything not matched below
+*                       @VE-Vaniya
+
+# Application
+/src/                   @OWNER_APP
+/index.html             @OWNER_APP
+/backend/               @OWNER_APP
+
+# CI / security
+/.github/workflows/     @OWNER_CI
+
+# Containers / delivery
+Dockerfile*             @OWNER_DELIVERY
+docker-compose*         @OWNER_DELIVERY
+/nginx/                 @OWNER_DELIVERY
+
+# Infrastructure
+/infra/                 @OWNER_INFRA
+/docs/ARCHITECTURE.md   @OWNER_INFRA
+
+# Delivery + monitoring scripts
+/scripts/               @OWNER_DELIVERY @OWNER_MONITOR
