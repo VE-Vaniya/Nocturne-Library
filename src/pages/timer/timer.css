@@ -1,0 +1,447 @@
+/* ═══ TIMER — ported from design/redesign.dc.html (section 4 + log / celebration overlays) ═══ */
+
+.tmr {
+  box-sizing: border-box;
+  max-width: 980px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 16px 32px 20px;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  align-content: start;
+  text-align: center;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+}
+.tmr-toggles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* "Reading <i>title</i>" — the italic title is a quiet select */
+.tmr-reading { margin: 0; color: #a89f88; }
+.tmr-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: #e8dcc0;
+}
+.tmr-picker select {
+  max-width: min(60vw, 460px);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dotted rgba(200, 160, 80, 0.45);
+  border-radius: 0;
+  padding: 0 18px 1px 0;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.tmr-picker select:hover { border-bottom-color: #e9c779; }
+.tmr-picker select option { background: #141c18; color: #e8dcc0; font-style: normal; }
+.tmr-picker svg { position: absolute; right: 2px; pointer-events: none; color: #c8a050; }
+
+/* ── pocket watch ── */
+.tmr-watch {
+  width: 340px;
+  height: 330px;
+  max-width: 100%;
+}
+.tmr-watch-inner {
+  position: relative;
+  width: 340px;
+  height: 400px;
+  transform: scale(0.82);
+  transform-origin: 50% 0;
+  margin: 0 auto;
+}
+.tmr-chain { position: absolute; left: 0; top: 0; width: 340px; height: 80px; }
+.tmr-bow {
+  position: absolute;
+  left: 156px;
+  top: 34px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 4px solid #c8a050;
+  box-sizing: border-box;
+}
+.tmr-crown {
+  position: absolute;
+  left: 160px;
+  top: 56px;
+  width: 20px;
+  height: 16px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg, #e9c779 0 2px, #8a6a2a 2px 4px);
+}
+.tmr-case {
+  position: absolute;
+  left: 0;
+  top: 66px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #f6dc95, #c8a050 38%, #7a5a22 72%, #3e2c10);
+  box-shadow: 0 30px 50px -18px rgba(0, 0, 0, 0.9), inset 0 0 0 3px rgba(255, 236, 180, 0.35), inset 0 -8px 16px rgba(0, 0, 0, 0.4);
+}
+.tmr-dial {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #f5ead0, #e8d7ad 70%, #cdb17a);
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.tmr-ticks {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(#3a2a16 0 0.6deg, transparent 0.6deg 6deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 88%, #000 89%);
+  mask-image: radial-gradient(circle, transparent 88%, #000 89%);
+}
+.tmr-numeral {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 24px;
+  margin: -12px 0 0 -20px;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 19px;
+  color: #2a1d10;
+  text-align: center;
+  line-height: 24px;
+}
+.tmr-maker {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  transform: translateX(-50%);
+  font-family: 'IM Fell English SC', Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #6b5330;
+}
+.tmr-hand-min,
+.tmr-hand-sec {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform-origin: 50% 100%;
+  transition: transform 0.9s cubic-bezier(0.4, 1.6, 0.6, 1);
+}
+.tmr-hand-min {
+  width: 6px;
+  height: 84px;
+  margin-left: -3px;
+  border-radius: 3px 3px 1px 1px;
+  background: #1d140a;
+}
+.tmr-hand-sec {
+  width: 2px;
+  height: 116px;
+  margin-left: -1px;
+  background: #8a252c;
+}
+.tmr-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: #1d140a;
+  box-shadow: 0 0 0 3px #c8a050;
+}
+
+/* ── simple ring ── */
+.tmr-ring {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+  aspect-ratio: 1;
+}
+.tmr-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.tmr-ring .nl-sand { transition: stroke-dashoffset 1s linear; }
+
+/* ── readout & controls ── */
+.tmr-readout { margin-top: -6px; }
+.tmr-clock {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 64px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tmr-note { margin: 2px 0 0; color: #a89f88; }
+.tmr-mins {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  color: #a89f88;
+}
+.tmr-round {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 160, 80, 0.4);
+  background: none;
+  color: #e8dcc0;
+  font-size: 20px;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+.tmr-round:hover:not(:disabled) { border-color: #e9c779; color: #e9c779; }
+.tmr-round:disabled { opacity: 0.4; cursor: default; }
+.tmr-mins-in {
+  width: 70px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(200, 160, 80, 0.45);
+  color: #e8dcc0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 26px;
+  text-align: center;
+  padding: 2px 0;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.tmr-mins-in::-webkit-outer-spin-button,
+.tmr-mins-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.tmr-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tmr-run {
+  min-height: 50px;
+  min-width: 140px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 999px;
+  background: #c8a050;
+  color: #0d1210;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.tmr-ghost {
+  min-height: 50px;
+  padding: 0 22px;
+  border: 1px solid rgba(200, 160, 80, 0.45);
+  border-radius: 999px;
+  background: none;
+  color: #e8dcc0;
+  font-size: 17px;
+  cursor: pointer;
+}
+.tmr-run:disabled, .tmr-ghost:disabled { opacity: 0.6; cursor: progress; }
+
+/* ── log a quote (paper slip) ── */
+.tmr-log {
+  width: min(480px, 90vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  background: #e9e0c9;
+  color: #2a221a;
+  border-radius: 4px;
+  padding: 26px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 40px 70px -20px rgba(0, 0, 0, 0.95);
+  text-align: left;
+  font-family: Spectral, Georgia, serif;
+}
+.tmr-log-title {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-weight: 400;
+  font-size: 26px;
+}
+.tmr-log-label { font-size: 14px; color: #5b4f40; }
+.tmr-log-text {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed rgba(42, 34, 26, 0.5);
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 21px;
+  line-height: 1.35;
+  color: #2a221a;
+  resize: vertical;
+}
+.tmr-log-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tmr-log-in {
+  width: 80px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed rgba(42, 34, 26, 0.5);
+  font-family: Spectral, Georgia, serif;
+  font-size: 17px;
+  color: #2a221a;
+  padding: 4px 0;
+}
+.tmr-log-wide { width: auto; flex: 1 1 140px; min-width: 0; }
+.tmr-log-text:focus, .tmr-log-in:focus { outline: none; border-bottom: 1px solid #2a221a; }
+.tmr-log :focus-visible { outline-color: #8a252c; }
+.tmr-log-foot { display: flex; gap: 10px; justify-content: flex-end; }
+.tmr-log-cancel,
+.tmr-log-save {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: Spectral, Georgia, serif;
+  font-size: 15px;
+  cursor: pointer;
+}
+.tmr-log-cancel { border: 1px solid rgba(42, 34, 26, 0.4); background: none; color: #2a221a; }
+.tmr-log-save { padding: 0 20px; border: 0; background: #2a221a; color: #e9e0c9; transition: background 0.25s; }
+.tmr-log-save:hover { background: #4a3a2a; }
+.tmr-log-save:disabled { opacity: 0.6; cursor: progress; }
+.tmr-log-note { margin: 0; font-size: 13px; color: #5b4f40; }
+
+/* ── celebration ── */
+.tmr-done {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+  pointer-events: auto;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+}
+.tmr-done-rays {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 1300px;
+  height: 1300px;
+  margin: -650px 0 0 -650px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 214, 140, 0) 0deg, rgba(255, 214, 140, 0.34) 1.4deg, rgba(255, 214, 140, 0) 3deg, rgba(255, 214, 140, 0) 9deg);
+  -webkit-mask-image: radial-gradient(circle, transparent 6%, #000 18%, rgba(0, 0, 0, 0.35) 40%, transparent 60%);
+  mask-image: radial-gradient(circle, transparent 6%, #000 18%, rgba(0, 0, 0, 0.35) 40%, transparent 60%);
+  animation: nl-spin 80s linear infinite;
+}
+.tmr-ember {
+  position: absolute;
+  top: 70vh;
+  border-radius: 50%;
+  background: #ffc65a;
+  box-shadow: 0 0 10px 2px rgba(255, 170, 70, 0.6);
+  pointer-events: none;
+}
+.tmr-done-flame {
+  position: relative;
+  width: 34px;
+  height: 52px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 75%, #fff6d8 0 18%, #ffc65a 42%, #c8501e 75%, rgba(200, 80, 30, 0) 76%);
+  box-shadow: 0 0 50px 14px rgba(255, 170, 70, 0.35);
+}
+.tmr-done-h {
+  position: relative;
+  margin: 0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1;
+}
+.tmr-done-sum { position: relative; margin: 0; font-size: 20px; color: #e8dcc0; }
+.tmr-done-streak { position: relative; margin: 0; color: #e9c779; }
+.tmr-done-page {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  color: #a89f88;
+  min-height: 40px;
+}
+.tmr-done-in {
+  width: 70px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(200, 160, 80, 0.45);
+  color: #e8dcc0;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 22px;
+  text-align: center;
+  padding: 2px 0;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.tmr-done-in::-webkit-outer-spin-button,
+.tmr-done-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.tmr-done-mini {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(200, 160, 80, 0.45);
+  border-radius: 999px;
+  background: rgba(13, 18, 16, 0.8);
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tmr-done-mini:disabled { opacity: 0.5; cursor: default; }
+.tmr-done-saved { color: #e9c779; font-style: italic; }
+.tmr-done-actions { position: relative; display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+.tmr-pill {
+  min-height: 46px;
+  padding: 0 24px;
+  border: 1px solid rgba(200, 160, 80, 0.45);
+  border-radius: 999px;
+  background: none;
+  color: #e8dcc0;
+  font-family: Spectral, Georgia, serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+.tmr-solid { border: 0; background: #c8a050; color: #0d1210; }
+.tmr-dim { background: rgba(13, 18, 16, 0.8); }
+
+/* Fit the whole sitting below the 150px header on ~800px-tall screens */
+@media (max-height: 880px) and (min-width: 761px) {
+  .tmr { gap: 12px; padding-top: 12px; }
+  .tmr-watch { width: 300px; height: 288px; }
+  .tmr-watch-inner { transform: scale(0.72); margin-left: -20px; }
+  .tmr-ring { width: 260px; }
+  .tmr-clock { font-size: 56px; }
+}
+
+@media (max-width: 760px) {
+  .tmr { padding: 14px 16px 28px; }
+  .tmr-watch { width: 290px; height: 280px; }
+  .tmr-watch-inner { transform: scale(0.7); margin-left: -25px; }
+  .tmr-ring { width: 240px; }
+  .tmr-clock { font-size: 52px; }
+  .tmr-done-h { font-size: 48px; }
+  .tmr-done-sum { font-size: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tmr-hand-min, .tmr-hand-sec, .tmr-ring .nl-sand, .tmr-round, .tmr-log-save { transition: none; }
+  .tmr-done-rays, .tmr-ember { animation: none; }
+  .tmr-ember { display: none; }
+}
