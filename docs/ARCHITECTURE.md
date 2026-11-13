@@ -51,12 +51,12 @@ Internet-facing ALB `nocturne-alb` in public-a/b, SG `sg-alb`.
 
 | Priority | Condition | Target group | Port | Health check |
 |---|---|---|---|---|
-| 10 | path `/api/*` | `tg-api` | 5000 HTTP | `GET /api/health`, success 200 |
+| 10 | path `/api/*` | `tg-api` | 5000 HTTP | `GET /health` (liveness, no DB), success 200 |
 | default | everything else | `tg-web` | 8080 HTTP | `GET /health`, success 200 |
 
 Target groups: type `instance`, interval 10 s, timeout 5 s, healthy threshold 2, unhealthy threshold 2 (≈20 s to flip either way). **Deregistration delay 30 s** (default 300 s makes rolling deploys slow; API calls are short). **No stickiness**: auth is a stateless JWT, so any instance can serve any request. The ASG is attached to both TGs, uses **ELB health checks**, grace period 120 s.
 
-Caveat: `/api/health` returns 503 when Atlas is unreachable, so an Atlas outage marks every API target unhealthy (ALB then fails open) and the ASG will replace healthy instances. Acceptable for the project (good "deliberate failure" scenario); see Open decisions.
+Health checks are split on purpose. The backend's `/health` is liveness only (200 whenever the process is up, never touches the DB), so the ALB and ASG only replace instances whose process is actually dead. `/api/health` is readiness (503 when Atlas is unreachable); it is used by the post-deploy smoke test and a CloudWatch synthetic/alarm, never by the target group. That way an Atlas outage raises an alarm instead of making the ASG churn healthy instances.
 
 ## 4. Security groups
 
@@ -176,6 +176,6 @@ Cost controls: AWS Budgets alerts (e.g. $30 and $60) → email; ECR lifecycle ru
 - One NAT vs one per AZ (or NAT-b only for the grading window)?
 - t3.micro vs t3.small (measure memory with both containers running).
 - Deploy mechanism: ASG instance refresh (recommended, immutable) vs SSM Run Command rolling.
-- `tg-api` health check: `/api/health` (DB-aware, can trigger replace loops on Atlas outage) vs `/health` (liveness) plus an alarm/smoke check on `/api/health`.
-- Does nginx also proxy `/api` to the api container, or is ALB path routing the only path (affects CORS)?
+- Decided: `tg-api` health-checks `/health` (liveness); `/api/health` (readiness) is for the smoke test and alarms.
+- Decided: nginx also proxies `/api/` to the API container (same-origin locally); in AWS the ALB's `/api/*` rule sends API traffic straight to `tg-api`, so the browser is same-origin there too and CORS stays closed.
 - Who owns the AWS account, Budgets alerts and IAM Identity Center setup?
