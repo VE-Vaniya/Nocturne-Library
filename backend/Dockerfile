@@ -2,20 +2,25 @@
 # Nocturne Library API (Express 5 + Mongoose 9)
 # Build context: ./backend   ->   docker build -t nocturne-backend ./backend
 
-ARG NODE_IMAGE=node:22.23.5-alpine3.24@sha256:12f54cafa58d0e96554ae05871e29663ff7241836377dc9a7916449b8adb062c
 
 # ---- deps: production dependencies only ------------------------------------
-FROM ${NODE_IMAGE} AS deps
+FROM node:22.23.5-alpine3.24@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund \
  && npm cache clean --force
 
 # ---- runtime ---------------------------------------------------------------
-FROM ${NODE_IMAGE} AS runtime
+FROM node:22.23.5-alpine3.24@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a AS runtime
 ENV NODE_ENV=production \
     PORT=5000
 WORKDIR /app
+
+# The server never runs npm, and npm's own bundled dependencies are the only
+# HIGH/CRITICAL findings Trivy reports for this image, so drop npm, npx and
+# corepack from the runtime stage.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 
 # Dependencies and source are owned by root and only readable by the runtime
 # user, so a compromised process cannot rewrite the app. .dockerignore keeps

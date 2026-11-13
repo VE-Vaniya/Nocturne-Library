@@ -84,11 +84,18 @@ export function AppProvider({ children }) {
           return undefined;
         }
       };
+    const stats = make(api.getStats, setStats, (s) => ({ ...EMPTY_STATS, ...(s || {}) }));
+    // Books, quotes and friends feed the profile counters, so refreshing one
+    // of them also refreshes the stats.
+    const withStats = (load) => async () => {
+      const [v] = await Promise.all([load(), stats()]);
+      return v;
+    };
     return {
-      stats: make(api.getStats, setStats, (s) => ({ ...EMPTY_STATS, ...(s || {}) })),
-      books: make(api.getBooks, setBooks, asList),
-      quotes: make(api.getQuotes, setQuotes, asList),
-      friends: make(api.getFriends, setFriends, asList),
+      stats,
+      books: withStats(make(api.getBooks, setBooks, asList)),
+      quotes: withStats(make(api.getQuotes, setQuotes, asList)),
+      friends: withStats(make(api.getFriends, setFriends, asList)),
       notifications: make(api.getNotifications, setNotifications, asList),
       profile: make(api.getProfile, setUser),
     };

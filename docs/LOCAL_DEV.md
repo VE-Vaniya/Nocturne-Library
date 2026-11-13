@@ -108,3 +108,13 @@ Required: `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGINS`. Optional: `EMAIL_USER`,
 docker build -t $ECR_REGISTRY/nocturne-backend:$IMAGE_TAG ./backend
 docker build -t $ECR_REGISTRY/nocturne-frontend:$IMAGE_TAG --build-arg VITE_API_URL=/api .
 ```
+
+## Local test account
+
+The local `mongo` container (not Atlas) has one throwaway account, created for UI testing:
+
+| Email               | Password            |
+| ------------------- | ------------------- |
+| `ada@nocturne.test` | `local-test-pass-1` |
+
+It only exists in your local Docker volume. `docker compose down -v` deletes it.
