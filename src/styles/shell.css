@@ -2,7 +2,7 @@
    Geometry and colours copied from design/redesign.dc.html. */
 
 .nl-root {
-  position: relative; height: 100vh; height: 100dvh; min-height: 560px; overflow: hidden;
+  position: relative; height: 100vh; height: 100dvh; min-height: 560px; overflow: hidden; overflow: clip;
   background: var(--nl-bg); color: var(--nl-ink); font-family: var(--nl-body);
 }
 .nl-root-glow {
@@ -13,7 +13,7 @@
 
 /* ── header / wheel ── */
 .nl-header {
-  position: absolute; left: 0; right: 0; top: 0; height: 150px; z-index: 10; overflow: hidden;
+  position: absolute; left: 0; right: 0; top: 0; height: 150px; z-index: 10; overflow: hidden; overflow: clip; /* clip: focus/scrollIntoView can't scroll the 4400px wheel sideways */
   touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none;
 }
 .nl-header.is-drag { cursor: grabbing; }
@@ -117,7 +117,7 @@
 .nl-overlay__close { position: absolute; inset: 0; z-index: 1; background: transparent; border: 0; cursor: default; }
 .nl-overlay__stage {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
-  padding: 24px; pointer-events: none; overflow: hidden;
+  padding: 24px; pointer-events: none; overflow: hidden; overflow: clip;
 }
 .nl-overlay__stage > * { pointer-events: auto; }
 

@@ -38,7 +38,6 @@ export default function NoteLetter({ n }) {
       sign={first(n.from)}
       onSave={isQuote ? save : undefined}
       saveLabel={saved ? 'Saved ✓' : 'Save to my quotes'}
-      saveDisabled={busy}
       onClose={closeModal}
     />
   );

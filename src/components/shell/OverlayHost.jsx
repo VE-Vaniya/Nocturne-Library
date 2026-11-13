@@ -6,7 +6,7 @@ const FOCUSABLE =
 
 /**
  * Renders the node passed to openModal(): dim + blur veil, click-outside to close,
- * Escape to close (listener scoped to this overlay element), focus moved in on open,
+ * Escape to close (listener registered only while a modal is open), focus moved in on open,
  * Tab kept inside, focus restored on close.
  */
 export default function OverlayHost() {
@@ -41,14 +41,22 @@ export default function OverlayHost() {
     if (el && typeof el.focus === 'function' && document.contains(el)) el.focus({ preventScroll: true });
   }, [key]);
 
+  // Escape: listener lives exactly as long as the open modal (removed on close/unmount),
+  // so it still works when focus has fallen back to <body> (e.g. a button became disabled).
+  useEffect(() => {
+    if (!key) return undefined;
+    const onEsc = (e) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      e.preventDefault();
+      closeModal();
+    };
+    document.addEventListener('keydown', onEsc);
+    return () => document.removeEventListener('keydown', onEsc);
+  }, [key, closeModal]);
+
   if (!modal) return null;
 
   const onKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      closeModal();
-      return;
-    }
     if (e.key !== 'Tab') return;
     const stage = stageRef.current;
     if (!stage) return;
