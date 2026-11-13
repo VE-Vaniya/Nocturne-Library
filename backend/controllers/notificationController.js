@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const { sendNotificationEmail } = require('../services/emailService');
@@ -20,8 +21,23 @@ const getNotifications = async (req, res) => {
 const respondToRequest = async (req, res) => {
   const { status } = req.body; // 'accepted' or 'rejected'
 
+  if (!['accepted', 'rejected'].includes(status)) {
+    return res.status(400).json({ message: "Status must be 'accepted' or 'rejected'" });
+  }
+
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(404).json({ message: 'Notification not found' });
+  }
+
   try {
-    const notification = await Notification.findById(req.params.id);
+    // Only the recipient may respond. A notification belonging to someone else
+    // is reported as "not found" so its existence is not leaked.
+    const notification = await Notification.findOne({
+      _id: req.params.id,
+      recipientId: req.user._id,
+      type: 'connection_request',
+      status: 'pending',
+    });
 
     if (!notification) {
       return res.status(404).json({ message: 'Notification not found' });
@@ -55,7 +71,7 @@ const respondToRequest = async (req, res) => {
 
       res.json({ message: `Request ${status}` });
     } else {
-      await Notification.findByIdAndDelete(req.params.id);
+      await Notification.deleteOne({ _id: notification._id });
       res.json({ message: 'Request rejected and removed.' });
     }
   } catch (error) {
