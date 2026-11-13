@@ -1,0 +1,98 @@
+# =============================================================================
+# Manual rollback - redeploy any image tag that already exists in ECR.
+#
+# Actions > Rollback > Run workflow (branch: main) > image_tag = sha-abc1234
+# or v1.0.42. The tag must exist in BOTH ECR repositories. Runs
+# scripts/rollback.sh <tag> (ASG instance refresh) then scripts/smoke-test.sh.
+#
+# Uses the same OIDC role, `production` environment (and its reviewers, if
+# configured) and concurrency group as cd.yml, so it can never race a deploy.
+#
+# Required VARIABLES: AWS_REGION, AWS_DEPLOY_ROLE_ARN, ECR_REGISTRY, ASG_NAME,
+# APP_URL (see cd.yml). No secrets.
+# =============================================================================
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to roll back to (sha-<7..40 hex> or vMAJOR.MINOR.PATCH)'
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  FRONTEND_REPO: nocturne-frontend
+  BACKEND_REPO: nocturne-backend
+
+jobs:
+  rollback:
+    name: rollback
+    # The OIDC trust policy only accepts the production environment, which is
+    # restricted to main; fail fast with a clear message on other refs.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ASG_NAME: ${{ vars.ASG_NAME }}
+      APP_URL: ${{ vars.APP_URL }}
+      ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
+      # Passed via env, never interpolated into the script (injection-safe).
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Validate tag format
+        run: |
+          set -euo pipefail
+          if ! [[ "$IMAGE_TAG" =~ ^(sha-[0-9a-f]{7,40}|v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::invalid image_tag '$IMAGE_TAG' (expected sha-<hex> or vX.Y.Z)"
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-rollback-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Verify tag exists in ECR
+        run: |
+          set -euo pipefail
+          for repo in "$FRONTEND_REPO" "$BACKEND_REPO"; do
+            if ! aws ecr describe-images --repository-name "$repo" \
+                   --image-ids imageTag="$IMAGE_TAG" >/dev/null; then
+              echo "::error::$repo:$IMAGE_TAG not found in ECR"
+              exit 1
+            fi
+            echo "found $repo:$IMAGE_TAG"
+          done
+
+      - name: Roll back (ASG instance refresh)
+        run: bash scripts/rollback.sh "$IMAGE_TAG"
+
+      - name: Smoke test
+        run: bash scripts/smoke-test.sh "$APP_URL"
+
+      - name: Summary
+        if: always()
+        env:
+          OUTCOME: ${{ job.status }}
+        run: |
+          echo "Rollback to \`$IMAGE_TAG\`: **$OUTCOME**" >> "$GITHUB_STEP_SUMMARY"
