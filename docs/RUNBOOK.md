@@ -4,7 +4,7 @@ Operational procedures and the three demonstrations the brief requires: **failur
 
 ```bash
 export AWS_REGION=ap-south-1 ASG_NAME=nocturne-asg
-export BASE_URL=http://<alb-dns>            # infra/40-alb.sh output / GitHub var APP_BASE_URL
+export BASE_URL=http://<alb-dns>            # infra/40-alb.sh output / GitHub var APP_URL
 ```
 
 ## 0. Where to look

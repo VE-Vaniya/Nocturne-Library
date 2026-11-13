@@ -57,7 +57,7 @@ Confirm the **SNS subscription email** ("AWS Notification – Subscription Confi
 | `ECR_REGISTRY` | `<acct>.dkr.ecr.ap-south-1.amazonaws.com` |
 | `ASG_NAME` | `nocturne-asg` |
 | `CONFIG_BUCKET` | `nocturne-config-<acct>-ap-south-1` (deploy re-uploads compose files) |
-| `APP_BASE_URL` | `http://<alb-dns>` (`40-alb.sh`; used by the smoke test) |
+| `APP_URL` | `http://<alb-dns>` (`40-alb.sh`; used by the smoke test) |
 
 If the workflow files use different names, match them – the scripts' env contract is `AWS_REGION`, `ASG_NAME`, `CONFIG_BUCKET`, SSM `/nocturne/prod/image_tag` and `/nocturne/prod/previous_image_tag`.
 
@@ -89,7 +89,7 @@ Copy the printed values into the GitHub variables (step 4). Screenshot IAM → R
 ./infra/40-alb.sh       # prints Live URL http://nocturne-alb-….ap-south-1.elb.amazonaws.com
 ```
 
-`40-alb.sh` stores that origin in `/nocturne/prod/CORS_ORIGINS`. Set `APP_BASE_URL` in GitHub. With a domain + ACM certificate: `ACM_CERT_ARN=arn:aws:acm:ap-south-1:… ./infra/40-alb.sh --set-cors`.
+`40-alb.sh` stores that origin in `/nocturne/prod/CORS_ORIGINS`. Set `APP_URL` in GitHub. With a domain + ACM certificate: `ACM_CERT_ARN=arn:aws:acm:ap-south-1:… ./infra/40-alb.sh --set-cors`.
 
 ## 8. First image push (one time, manual)
 
@@ -144,7 +144,7 @@ On every merge to `main`, the CD workflow (pipeline stages 11–12, owned in `.g
 
 1. assumes `gha-deploy` via OIDC (`environment: production`), builds + Trivy-scans both images, pushes `sha-<short>` and `vX.Y.Z` to ECR;
 2. runs `scripts/deploy.sh sha-<short>` → `previous_image_tag ← image_tag`, `image_tag ← new`, compose files re-uploaded, **ASG instance refresh** (Rolling, MinHealthyPercentage 50, InstanceWarmup 120) and waits; the ALB keeps ≥ 1 healthy instance serving throughout (rolling, no downtime);
-3. runs `scripts/smoke-test.sh "$APP_BASE_URL"`; on failure runs `scripts/rollback.sh` (→ `previous_image_tag`) and fails the job.
+3. runs `scripts/smoke-test.sh "$APP_URL"`; on failure runs `scripts/rollback.sh` (→ `previous_image_tag`) and fails the job.
 
 Manual operations (same scripts, admin or `gha-deploy` credentials):
 

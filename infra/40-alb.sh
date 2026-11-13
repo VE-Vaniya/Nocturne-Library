@@ -183,7 +183,7 @@ main() {
   seed_cors "${origin}"
 
   ok "ALB ready: ${origin}"
-  printf '\n  Live URL: %s\n  Set GitHub repo variable APP_BASE_URL=%s\n\n' "${origin}" "${origin}"
+  printf '\n  Live URL: %s\n  Set GitHub repo variable APP_URL=%s\n\n' "${origin}" "${origin}"
   info "next: infra/50-compute.sh"
 }
 
