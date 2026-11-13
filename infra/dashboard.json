@@ -1,0 +1,129 @@
+{
+  "start": "-PT3H",
+  "periodOverride": "inherit",
+  "widgets": [
+    {
+      "type": "text", "x": 0, "y": 0, "width": 24, "height": 2,
+      "properties": {
+        "markdown": "## Nocturne Library - prod (__AWS_REGION__)\nALB `__ALB_NAME__` -> `/api/*` tg-api :5000, default tg-web :8080 | ASG `__ASG_NAME__` | logs `__LOG_GROUP_CONTAINERS__` | alarms -> SNS `__SNS_TOPIC_NAME__`"
+      }
+    },
+    {
+      "type": "metric", "x": 0, "y": 2, "width": 8, "height": 6,
+      "properties": {
+        "title": "Request rate (requests / min)",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60, "stat": "Sum",
+        "metrics": [
+          ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "__ALB_DIM__", { "label": "ALB total" }],
+          ["AWS/ApplicationELB", "RequestCount", "TargetGroup", "__TG_WEB_DIM__", "LoadBalancer", "__ALB_DIM__", { "label": "tg-web" }],
+          ["AWS/ApplicationELB", "RequestCount", "TargetGroup", "__TG_API_DIM__", "LoadBalancer", "__ALB_DIM__", { "label": "tg-api" }]
+        ]
+      }
+    },
+    {
+      "type": "metric", "x": 8, "y": 2, "width": 8, "height": 6,
+      "properties": {
+        "title": "Errors (count / min) and 5xx rate %",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60,
+        "metrics": [
+          ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "__ALB_DIM__", { "id": "t5", "stat": "Sum", "label": "target 5xx" }],
+          ["AWS/ApplicationELB", "HTTPCode_ELB_5XX_Count", "LoadBalancer", "__ALB_DIM__", { "id": "e5", "stat": "Sum", "label": "ALB 5xx" }],
+          ["AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", "LoadBalancer", "__ALB_DIM__", { "id": "t4", "stat": "Sum", "label": "target 4xx" }],
+          ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "__ALB_DIM__", { "id": "rq", "stat": "Sum", "visible": false }],
+          [{ "expression": "IF(rq > 0, 100 * (FILL(t5, 0) + FILL(e5, 0)) / rq, 0)", "label": "5xx rate %", "id": "rate", "yAxis": "right" }]
+        ]
+      }
+    },
+    {
+      "type": "metric", "x": 16, "y": 2, "width": 8, "height": 6,
+      "properties": {
+        "title": "Latency - target response time (s)",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60,
+        "metrics": [
+          ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "__ALB_DIM__", { "stat": "p50", "label": "p50" }],
+          ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "__ALB_DIM__", { "stat": "p95", "label": "p95" }],
+          ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "__ALB_DIM__", { "stat": "p99", "label": "p99" }]
+        ],
+        "annotations": { "horizontal": [{ "label": "k6 p95 SLO 0.8s", "value": 0.8 }] }
+      }
+    },
+    {
+      "type": "metric", "x": 0, "y": 8, "width": 8, "height": 6,
+      "properties": {
+        "title": "Target health (healthy / unhealthy hosts)",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60,
+        "metrics": [
+          ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "__TG_WEB_DIM__", "LoadBalancer", "__ALB_DIM__", { "stat": "Minimum", "label": "web healthy" }],
+          ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "__TG_API_DIM__", "LoadBalancer", "__ALB_DIM__", { "stat": "Minimum", "label": "api healthy" }],
+          ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", "__TG_WEB_DIM__", "LoadBalancer", "__ALB_DIM__", { "stat": "Maximum", "label": "web unhealthy" }],
+          ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", "__TG_API_DIM__", "LoadBalancer", "__ALB_DIM__", { "stat": "Maximum", "label": "api unhealthy" }]
+        ]
+      }
+    },
+    {
+      "type": "metric", "x": 8, "y": 8, "width": 8, "height": 6,
+      "properties": {
+        "title": "Auto Scaling group - instances",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60, "stat": "Average",
+        "metrics": [
+          ["AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", "__ASG_NAME__", { "label": "in service" }],
+          ["AWS/AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", "__ASG_NAME__", { "label": "desired" }],
+          ["AWS/AutoScaling", "GroupPendingInstances", "AutoScalingGroupName", "__ASG_NAME__", { "label": "pending" }],
+          ["AWS/AutoScaling", "GroupMaxSize", "AutoScalingGroupName", "__ASG_NAME__", { "label": "max" }]
+        ]
+      }
+    },
+    {
+      "type": "metric", "x": 16, "y": 8, "width": 8, "height": 6,
+      "properties": {
+        "title": "CPU and memory (% , ASG average)",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60, "stat": "Average",
+        "metrics": [
+          ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "__ASG_NAME__", { "label": "CPU %" }],
+          ["CWAgent", "mem_used_percent", "AutoScalingGroupName", "__ASG_NAME__", { "label": "memory %" }]
+        ],
+        "yAxis": { "left": { "min": 0, "max": 100 } },
+        "annotations": { "horizontal": [{ "label": "CPU target (default 50%)", "value": 50 }] }
+      }
+    },
+    {
+      "type": "metric", "x": 0, "y": 14, "width": 8, "height": 6,
+      "properties": {
+        "title": "Database connection errors (from container logs)",
+        "region": "__AWS_REGION__", "view": "timeSeries", "stacked": false, "period": 60, "stat": "Sum",
+        "metrics": [
+          ["__CW_NAMESPACE_APP__", "DbConnectionErrors", { "label": "Mongo errors / min" }]
+        ]
+      }
+    },
+    {
+      "type": "alarm", "x": 8, "y": 14, "width": 16, "height": 6,
+      "properties": {
+        "title": "Alarms",
+        "alarms": [
+          "arn:aws:cloudwatch:__AWS_REGION__:__ACCOUNT_ID__:alarm:nocturne-alb-5xx-rate",
+          "arn:aws:cloudwatch:__AWS_REGION__:__ACCOUNT_ID__:alarm:nocturne-tg-web-unhealthy-hosts",
+          "arn:aws:cloudwatch:__AWS_REGION__:__ACCOUNT_ID__:alarm:nocturne-tg-api-unhealthy-hosts",
+          "arn:aws:cloudwatch:__AWS_REGION__:__ACCOUNT_ID__:alarm:nocturne-asg-high-cpu",
+          "arn:aws:cloudwatch:__AWS_REGION__:__ACCOUNT_ID__:alarm:nocturne-db-connection-errors"
+        ]
+      }
+    },
+    {
+      "type": "log", "x": 0, "y": 20, "width": 24, "height": 8,
+      "properties": {
+        "title": "Recent container logs (all services)",
+        "region": "__AWS_REGION__", "view": "table",
+        "query": "SOURCE '__LOG_GROUP_CONTAINERS__' | fields @timestamp, `attrs.com.docker.compose.service` as service, stream, log, @logStream as instance | sort @timestamp desc | limit 100"
+      }
+    },
+    {
+      "type": "log", "x": 0, "y": 28, "width": 24, "height": 6,
+      "properties": {
+        "title": "Errors by service (5 min bins)",
+        "region": "__AWS_REGION__", "view": "bar",
+        "query": "SOURCE '__LOG_GROUP_CONTAINERS__' | fields `attrs.com.docker.compose.service` as service | filter stream = 'stderr' or log like /(?i)error/ | stats count(*) as errors by service, bin(5m)"
+      }
+    }
+  ]
+}
