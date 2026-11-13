@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 // Resolves once connected; rejects if MongoDB can't be reached so the caller
 // can decide to exit (see server.js).
