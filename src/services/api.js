@@ -94,7 +94,7 @@ export const getStats = () => data(api.get('/users/stats'));
 export const updateReadingStats = (body) => data(api.put('/users/reading-stats', body));
 /** → [{ _id, username, fullName, avatar, currentlyReading }] */
 export const getFriends = () => data(api.get('/users/friends'));
-export const removeFriend = (id) => data(api.delete(`/users/friends/${id}`));
+export const removeFriend = (id) => data(api.delete(`/users/disconnect/${id}`));
 /** → [{ _id, username, fullName, avatar, booksInCommon, currentlyReading, requestStatus }] */
 export const getSuggestions = () => data(api.get('/users/suggestions'));
 export const searchPeople = (q) => data(api.get('/users/search', { params: { q } }));
@@ -118,7 +118,7 @@ export const shareQuote = ({ text, author, bookTitle, page, recipientIds, messag
   data(api.post('/quotes/share', { text, author, bookTitle, page, recipientIds, message }));
 
 // ── missives (letters) ───────────────────────────────────────────
-export const sendLetter = ({ recipientId, body }) => data(api.post('/missives/letters', { recipientId, body }));
+export const sendLetter = ({ recipientId, body }) => data(api.post('/missives', { recipientId, body }));
 /** Save a shared quote missive into my quotes. */
 export const saveMissive = (id) => data(api.post(`/missives/${id}/save`));
 

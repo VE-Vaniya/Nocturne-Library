@@ -34,7 +34,7 @@ export default function QuoteOverlay({ quoteId, index }) {
         recipientIds: picked,
         message: message.trim() || undefined,
       })
-      const sent = Number(r?.data?.sent) || picked.length
+      const sent = Number(r?.sent) || picked.length
       closeModal()
       toast(`Sent to ${plural(sent)}`)
     } catch (e) {
