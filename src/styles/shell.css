@@ -1,0 +1,176 @@
+/* Shell: root, wheel header, notifications, page stage, overlay host, toast, gate.
+   Geometry and colours copied from design/redesign.dc.html. */
+
+.nl-root {
+  position: relative; height: 100vh; height: 100dvh; min-height: 560px; overflow: hidden; overflow: clip;
+  background: var(--nl-bg); color: var(--nl-ink); font-family: var(--nl-body);
+}
+.nl-root-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(70vmax 50vmax at 50% -20%, rgba(200,140,60,.13), transparent 60%),
+    radial-gradient(40vmax 40vmax at 100% 110%, rgba(122,34,40,.16), transparent 60%);
+}
+
+/* ── header / wheel ── */
+.nl-header {
+  position: absolute; left: 0; right: 0; top: 0; height: 150px; z-index: 10; overflow: hidden; overflow: clip; /* clip: focus/scrollIntoView can't scroll the 4400px wheel sideways */
+  touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none;
+}
+.nl-header.is-drag { cursor: grabbing; }
+.nl-wheel {
+  position: absolute; left: 50%; top: -4264px; width: 4400px; height: 4400px; margin-left: -2200px; border-radius: 50%;
+  background: radial-gradient(circle, #0d1210 0 calc(50% - 90px), #111814 calc(50% - 30px), #151d19 calc(50% - 1px), rgba(233,199,121,.85) calc(50% - 1px) 50%, transparent 50%);
+}
+.nl-wheel-rim {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, transparent calc(50% - 70px), rgba(255,196,110,.14) calc(50% - 14px), rgba(255,214,140,.28) calc(50% - 2px), rgba(255,200,120,.16) 50%, rgba(255,190,100,.06) calc(50% + 8px), transparent calc(50% + 12px));
+}
+.nl-wheel-rays1 {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(255,222,150,0) 0deg, rgba(255,222,150,.85) .03deg, rgba(255,222,150,0) .07deg, rgba(255,222,150,0) .55deg);
+  -webkit-mask-image: radial-gradient(circle, transparent calc(50% - 62px), #000 calc(50% - 26px), #000 calc(50% - 10px), transparent calc(50% - 1px));
+  mask-image: radial-gradient(circle, transparent calc(50% - 62px), #000 calc(50% - 26px), #000 calc(50% - 10px), transparent calc(50% - 1px));
+}
+.nl-wheel-rays2 {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(from .27deg, rgba(255,214,140,0) 0deg, rgba(255,214,140,.55) .05deg, rgba(255,214,140,0) .1deg, rgba(255,214,140,0) 1.65deg);
+  -webkit-mask-image: radial-gradient(circle, transparent calc(50% - 120px), #000 calc(50% - 50px), transparent calc(50% - 2px));
+  mask-image: radial-gradient(circle, transparent calc(50% - 120px), #000 calc(50% - 50px), transparent calc(50% - 2px));
+}
+.nl-tab {
+  position: absolute; left: 50%; top: 50%; width: 150px; height: 56px; margin: -28px 0 0 -75px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: #8f8775;
+}
+.nl-tab[aria-current="page"] { color: #e9c779; text-shadow: 0 0 14px rgba(233,199,121,.55); }
+.nl-tab span { font-family: var(--nl-sc); font-size: 17px; letter-spacing: .03em; white-space: nowrap; }
+.nl-wheel-pin {
+  position: absolute; left: 50%; top: 126px; width: 7px; height: 7px; margin-left: -3.5px; transform: rotate(45deg);
+  background: #e9c779; box-shadow: 0 0 14px 2px rgba(233,199,121,.6); pointer-events: none;
+}
+.nl-spin-btn {
+  position: absolute; top: 58px; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid rgba(200,160,80,.25); background: rgba(13,18,16,.7); color: #c8a050; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 0;
+  transition: border-color .25s, color .25s;
+}
+.nl-spin-btn:hover { border-color: #e9c779; color: #e9c779; }
+.nl-spin-l { left: calc(50% - 420px); }
+.nl-spin-r { left: calc(50% + 384px); }
+
+.nl-bell {
+  position: absolute; left: 24px; top: 16px; width: 46px; height: 46px; border-radius: 50%;
+  border: 1px solid rgba(200,160,80,.35); background: #151d19; color: #e8dcc0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.nl-badge {
+  position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  background: #b8323a; color: #fff3e0; font-size: 12px; font-weight: 500; line-height: 20px; text-align: center;
+  box-shadow: 0 0 0 2px #0d1210;
+}
+.nl-me {
+  position: absolute; right: 24px; top: 16px; width: 46px; height: 46px; border-radius: 50%;
+  border: 1.5px solid #c8a050; cursor: pointer; color: #f3d9b8; font-family: var(--nl-serif); font-size: 19px;
+  overflow: hidden; padding: 0; display: flex; align-items: center; justify-content: center;
+}
+.nl-me img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+.nl-pool {
+  position: absolute; left: 0; right: 0; top: 120px; height: 110px; z-index: 9; pointer-events: none;
+  background: radial-gradient(ellipse 46% 60% at 50% 12%, rgba(255,196,110,.16), rgba(255,196,110,.05) 55%, transparent 75%);
+}
+
+/* ── notifications ── */
+.nl-notif-scrim { position: absolute; inset: 0; z-index: 28; background: transparent; border: 0; cursor: default; }
+.nl-notif {
+  position: absolute; left: 24px; top: 72px; z-index: 29; width: 380px; max-width: calc(100vw - 48px); max-height: 70vh;
+  overflow-y: auto; background: #141c18; border: 1px solid rgba(200,160,80,.3); border-radius: 10px;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,.9);
+}
+.nl-notif__head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px 10px; }
+.nl-notif__title { font-family: var(--nl-serif); font-weight: 400; font-size: 24px; }
+.nl-notif__all { background: none; border: 0; color: #e9c779; font-size: 14px; cursor: pointer; min-height: 36px; }
+.nl-notif__all:disabled { color: #6f6a5c; cursor: default; }
+.nl-notif__item { border-top: 1px solid rgba(200,160,80,.12); }
+.nl-notif__row {
+  width: 100%; display: grid; grid-template-columns: 40px minmax(0,1fr) 10px; gap: 12px; align-items: center;
+  padding: 12px 18px; background: none; border: 0; text-align: left; color: #e8dcc0; cursor: pointer; font-size: 15px;
+}
+.nl-notif__what { color: #a89f88; }
+.nl-notif__when { color: #8f8775; font-size: 13px; }
+.nl-notif__dot { width: 9px; height: 9px; border-radius: 50%; }
+.nl-notif__actions { display: flex; gap: 8px; padding: 0 18px 14px 70px; align-items: center; }
+.nl-notif__answer { color: #a89f88; font-size: 14px; font-style: italic; }
+.nl-notif__empty { margin: 0; padding: 18px 18px 22px; color: #8f8775; font-style: italic; border-top: 1px solid rgba(200,160,80,.12); }
+
+/* ── page stage ── */
+.nl-main { position: absolute; left: 0; right: 0; top: 150px; bottom: 0; }
+.nl-main > section { position: absolute; inset: 0; overflow-y: auto; transform-origin: 50% -2100px; }
+
+/* ── overlay host ── */
+.nl-overlay { position: absolute; inset: 0; z-index: 40; }
+.nl-overlay__veil {
+  position: absolute; inset: 0; background: rgba(5,8,7,.74);
+  backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+}
+.nl-overlay__close { position: absolute; inset: 0; z-index: 1; background: transparent; border: 0; cursor: default; }
+.nl-overlay__stage {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+  padding: 24px; pointer-events: none; overflow: hidden; overflow: clip;
+}
+.nl-overlay__stage > * { pointer-events: auto; }
+
+/* ── toast ── */
+.nl-toastbox {
+  position: absolute; left: 50%; bottom: 28px; z-index: 60; padding: 12px 20px; border-radius: 999px;
+  background: #e9e0c9; color: #2a221a; font-size: 15px; box-shadow: 0 20px 30px -12px rgba(0,0,0,.8);
+  white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── sign-in gate ── */
+.nl-gate {
+  position: absolute; inset: 0; z-index: 80; background: #0d1210; display: flex; align-items: center; justify-content: center;
+  padding: 32px; overflow-y: auto;
+}
+.nl-gate.is-open { transform: translateY(-104%); opacity: 0; pointer-events: none; }
+.nl-gate-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60vmax 50vmax at 50% 120%, rgba(200,140,60,.16), transparent 60%),
+    radial-gradient(40vmax 40vmax at 0% 0%, rgba(122,34,40,.18), transparent 60%);
+}
+.nl-gate-inner { position: relative; width: 100%; max-width: 420px; display: grid; gap: 30px; text-align: center; margin: auto; }
+.nl-gate-title { margin: 0; font-family: var(--nl-serif); font-weight: 400; font-size: 76px; line-height: .92; }
+.nl-gate-title i { color: #e9c779; }
+.nl-gate-sub { margin: 16px 0 0; color: #a89f88; font-size: 18px; }
+.nl-gate form { display: grid; gap: 18px; text-align: left; }
+.nl-gate .nl-field > label { font-size: 15px; }
+.nl-gate .nl-input { font-size: 19px; }
+.nl-gate-cta {
+  margin-top: 10px; min-height: 52px; border: 0; border-radius: 999px; background: #c8a050; color: #0d1210;
+  font-size: 18px; font-weight: 500; cursor: pointer;
+}
+.nl-gate-cta:disabled { opacity: .7; cursor: progress; }
+.nl-gate-switch {
+  justify-self: center; min-height: 44px; background: none; border: 0; color: #e9c779; font-size: 16px;
+  text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}
+.nl-gate-error { margin: 0; color: #e7a38a; font-size: 15px; text-align: center; }
+
+/* ── burnt-parchment letter ── */
+.nl-letter-wrap { display: grid; gap: 16px; justify-items: center; }
+.nl-letter { position: relative; width: min(500px, 88vw); height: min(620px, 70vh); perspective: 1800px; }
+.nl-letter-fold { position: absolute; inset: 0; backface-visibility: visible; }
+.nl-letter-fold > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.nl-letter-text { position: absolute; inset: 13% 15% 12%; display: flex; flex-direction: column; color: #241508; text-align: left; overflow: hidden; }
+.nl-letter-salute { margin: 0; font-family: var(--nl-serif); font-style: italic; font-size: 17px; opacity: .8; }
+.nl-letter-body { margin: 18px 0 0; font-family: var(--nl-serif); font-size: clamp(19px, 4.6vw, 25px); line-height: 1.4; overflow-wrap: anywhere; }
+.nl-letter-body.is-long { font-size: clamp(16px, 3.6vw, 19px); }
+.nl-letter-source { margin: 14px 0 0; font-family: var(--nl-serif); font-style: italic; font-size: 16px; opacity: .75; }
+.nl-letter-sign { margin: auto 0 0; font-family: var(--nl-hand); font-size: 30px; text-align: right; color: #33200e; }
+.nl-letter-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(25,12,4,.9), rgba(25,12,4,.75)); }
+.nl-letter-crease { position: absolute; left: 6%; right: 6%; height: 1px; background: linear-gradient(90deg, transparent, rgba(40,20,6,.35), transparent); }
+.nl-letter-actions { display: flex; gap: 10px; }
+
+/* placeholder for pages not merged yet */
+.nl-missing { max-width: 980px; margin: 0 auto; padding: 60px 32px; text-align: center; color: #8f8775; font-style: italic; }

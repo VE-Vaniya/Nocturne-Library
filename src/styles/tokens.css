@@ -1,0 +1,40 @@
+/* Nocturne Library design tokens — values lifted verbatim from design/redesign.dc.html */
+:root {
+  --nl-bg: #0d1210;
+  --nl-bg-2: #111814;
+  --nl-surface: #141c18;
+  --nl-surface-2: #151d19;
+  --nl-card: #121915;
+  --nl-track: #1e2924;
+
+  --nl-ink: #e8dcc0;
+  --nl-ink-soft: #d9cdb0;
+  --nl-ink-bio: #c9bd9f;
+  --nl-muted: #a89f88;
+  --nl-faint: #8f8775;
+  --nl-fainter: #6f6a5c;
+
+  --nl-brass: #c8a050;
+  --nl-gold: #e9c779;
+  --nl-gold-hi: #f3d9a0;
+  --nl-seal-ink: #f3d9b8;
+  --nl-red: #b8323a;
+
+  --nl-paper: #e9e0c9;
+  --nl-paper-ink: #2a221a;
+
+  --nl-line: rgba(200, 160, 80, 0.2);
+  --nl-line-soft: rgba(200, 160, 80, 0.13);
+  --nl-line-strong: rgba(200, 160, 80, 0.45);
+
+  --nl-serif: 'IM Fell English', Georgia, serif;
+  --nl-sc: 'IM Fell English SC', Georgia, serif;
+  --nl-hand: 'La Belle Aurore', cursive;
+  --nl-body: Spectral, Georgia, serif;
+
+  --nl-ease-swing: cubic-bezier(0.65, 0, 0.35, 1);
+  --nl-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --nl-header-h: 150px;
+  color-scheme: dark;
+}
