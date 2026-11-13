@@ -1,0 +1,27 @@
+# Secrets: never bake env files into an image (env is injected at runtime)
+.env
+.env.*
+*.env
+*.pem
+*.key
+
+# Dependencies / build output (deps are installed inside the image)
+node_modules
+npm-debug.log*
+logs
+*.log
+coverage
+.nyc_output
+
+# VCS, editor, docker metadata
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+Dockerfile
+.dockerignore
+*.md
+test
+tests
+__tests__
