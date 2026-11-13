@@ -109,7 +109,8 @@
   position: relative;
   flex: none;
   height: calc(var(--h) * var(--s));
-  width: calc(var(--w) * var(--s));
+  /* widths shrink less than heights so short rows keep readable spines */
+  width: calc(var(--w) * max(var(--s), 0.78px));
   min-width: 18px;
   border: 0;
   border-radius: 3px 3px 1px 1px;
