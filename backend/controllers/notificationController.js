@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const { sendNotificationEmail } = require('../services/emailService');
+const escapeHtml = require('../utils/escapeHtml');
 
 // @desc    Get user notifications
 // @route   GET /api/notifications
@@ -60,7 +61,7 @@ const respondToRequest = async (req, res) => {
           `<div style="font-family: 'Playfair Display', serif; padding: 20px; background-color: #f4f1ea; border: 1px solid #d1c5a9;">
             <h2 style="color: #4a3e35;">Connection Request Accepted</h2>
             <p style="font-size: 16px; color: #5a4d41;">
-              <b>${req.user.fullName}</b> (${req.user.email}) has accepted your connection request on Nocturne library.
+              <b>${escapeHtml(req.user.fullName)}</b> (${escapeHtml(req.user.email)}) has accepted your connection request on Nocturne library.
             </p>
             <p style="font-size: 14px; color: #796e62; font-style: italic;">
               You are now connected in the sanctuary.
