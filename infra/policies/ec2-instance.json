@@ -1,0 +1,59 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EcrAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcrPullProjectRepos",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer"
+      ],
+      "Resource": [
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_FRONTEND__",
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_BACKEND__"
+      ]
+    },
+    {
+      "Sid": "ReadAppParameters",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"
+      ],
+      "Resource": [
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__",
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__/*"
+      ]
+    },
+    {
+      "Sid": "ReadRuntimeConfig",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::__CONFIG_BUCKET__/compose/*",
+        "arn:aws:s3:::__CONFIG_BUCKET__/config/*"
+      ]
+    },
+    {
+      "Sid": "MongoBackupsReadWrite",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": "arn:aws:s3:::__BACKUP_BUCKET__/mongo/*"
+    },
+    {
+      "Sid": "MongoBackupsList",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::__BACKUP_BUCKET__",
+      "Condition": { "StringLike": { "s3:prefix": ["mongo/*"] } }
+    }
+  ]
+}

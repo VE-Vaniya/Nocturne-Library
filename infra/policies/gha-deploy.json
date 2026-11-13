@@ -1,0 +1,67 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "EcrAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcrPushPullProjectRepos",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:DescribeImages",
+        "ecr:DescribeImageScanFindings",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
+      ],
+      "Resource": [
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_FRONTEND__",
+        "arn:aws:ecr:__AWS_REGION__:__ACCOUNT_ID__:repository/__ECR_REPO_BACKEND__"
+      ]
+    },
+    {
+      "Sid": "ImageTagState",
+      "Effect": "Allow",
+      "Action": ["ssm:GetParameter", "ssm:PutParameter"],
+      "Resource": [
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_IMAGE_TAG_PARAM__",
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREVIOUS_TAG_PARAM__"
+      ]
+    },
+    {
+      "Sid": "InstanceRefreshOnProjectAsg",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:StartInstanceRefresh",
+        "autoscaling:CancelInstanceRefresh"
+      ],
+      "Resource": "arn:aws:autoscaling:__AWS_REGION__:__ACCOUNT_ID__:autoScalingGroup:*:autoScalingGroupName/__ASG_NAME__"
+    },
+    {
+      "Sid": "ReadOnlyDescribeNoResourceLevelSupport",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeInstanceRefreshes",
+        "autoscaling:DescribeScalingActivities",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:DescribeTargetHealth"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "PublishComposeFilesForNewInstances",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::__CONFIG_BUCKET__/compose/*"
+    }
+  ]
+}

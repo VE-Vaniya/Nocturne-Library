@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GitHubActionsAnyRefOfThisRepo",
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::__ACCOUNT_ID__:oidc-provider/__OIDC_HOST__"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "__OIDC_HOST__:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "__OIDC_HOST__:sub": "repo:__GITHUB_REPO__:*"
+        }
+      }
+    }
+  ]
+}
