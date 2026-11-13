@@ -3,10 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 const connectDB = require('./config/db');
 
-// Connect to Database
-connectDB();
-
 const app = express();
+
+// Health checks (no auth, before CORS/body parsing):
+// /health = liveness, /api/health = readiness (DB connected)
+app.use(require('./routes/healthRoutes'));
 
 // Middleware
 app.use(cors());
@@ -28,8 +29,24 @@ app.get('/', (req, res) => {
   res.send('Nocturne Library API is running...');
 });
 
-const PORT = process.env.PORT || 5000;
+// Connect to the database first, then start listening. Exit if the DB
+// can't be reached so the orchestrator restarts us.
+const startServer = async () => {
+  try {
+    await connectDB();
+  } catch (error) {
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
+  }
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
