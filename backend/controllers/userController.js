@@ -7,8 +7,8 @@ const { sendNotificationEmail } = require('../services/emailService');
 // @route   GET /api/users
 const getUsers = async (req, res) => {
   try {
-    // Exclude the current user from the list
-    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password');
+    // Exclude the current user; expose only public profile fields (no emails)
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('_id username fullName avatar');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
