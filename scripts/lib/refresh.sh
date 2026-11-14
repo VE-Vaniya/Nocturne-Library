@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
+set -euo pipefail
 # Image-tag state in SSM + ASG instance refresh helpers (deploy.sh, rollback.sh).
 # Sourced after lib/common.sh.
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
+set -euo pipefail
 # Shared helpers for scripts/*.sh (deploy, rollback, smoke test, ops).
 # Sourced, never executed. Only depends on bash, coreutils, curl and (for the
 # AWS scripts) AWS CLI v2 - works on GitHub-hosted runners and Amazon Linux.
