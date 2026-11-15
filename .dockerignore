@@ -30,7 +30,6 @@ npm-debug.log*
 .github
 .vscode
 .idea
-.claude
 .DS_Store
 docs
 design
