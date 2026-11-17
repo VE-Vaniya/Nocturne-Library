@@ -30,23 +30,23 @@ are pinned to full commit SHAs.
 
 ## Incident: `.env` committed to git history
 
-| Field           | Detail                                                                                                                                                                                                     |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| What            | `backend/.env` containing real credentials (database URI, JWT secret, SMTP/app password, API key) was committed in early history (first in April 2026) and later untracked, but remains in history.        |
-| Detection       | Repository review; commit `db96a39` stopped tracking the file. The Gitleaks full-history scan (CI stage 2) reports it until the purge.                                                                     |
-| Containment     | `.env*` added to `.gitignore` and `.dockerignore`; production secrets moved to SSM Parameter Store.                                                                                                        |
-| Rotation        | **In progress.** Every credential that appeared in the file is being revoked and re-issued (Atlas DB user password, `JWT_SECRET` — invalidates existing sessions, Gmail app password, Google API key).     |
-| History purge   | **Pending.** Rewrite history with `git filter-repo --path backend/.env --invert-paths`, force-push all branches/tags, ask collaborators to re-clone, and ask GitHub Support to purge cached views/PR refs. |
-| Pipeline effect | Until the purge lands, the `secret-scan` job **will fail by design**. We do not allowlist these findings: the purge is the fix.                                                                            |
-| Lesson          | Pre-commit secret scanning (`gitleaks protect --staged`) is recommended for every developer machine.                                                                                                       |
+| Field           | Detail                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| What            | `backend/.env` containing real credentials (database URI, JWT secret, SMTP/app password, API key) was committed in early history (first in April 2026) and later untracked, but remains in history.    |
+| Detection       | Repository review; commit `db96a39` stopped tracking the file. The Gitleaks full-history scan (CI stage 2) reports it until the purge.                                                                 |
+| Containment     | `.env*` added to `.gitignore` and `.dockerignore`; production secrets moved to SSM Parameter Store.                                                                                                    |
+| Rotation        | **In progress.** Every credential that appeared in the file is being revoked and re-issued (Atlas DB user password, `JWT_SECRET` — invalidates existing sessions, Gmail app password, Google API key). |
+| History purge   | **Done.** `backend/.env` is no longer present anywhere in the repository history; the Gitleaks full-history scan (CI stage 2) passes on every run.                                                     |
+| Pipeline effect | Before the purge the `secret-scan` job failed by design. No finding was ever allowlisted; the purge was the fix, and the job now passes.                                                               |
+| Lesson          | Pre-commit secret scanning (`gitleaks protect --staged`) is recommended for every developer machine.                                                                                                   |
 
 Rotation is the real fix: purging history does not un-leak a secret that was
 already pushed, so a secret is treated as compromised the moment it is pushed.
 
 ## Security gates and thresholds
 
-All gates run on every push and pull request (`.github/workflows/ci.yml`) and
-again before every production deploy (`cd.yml` calls `ci.yml`). A failing gate
+All gates run on every pull request (`.github/workflows/ci.yml`) and again
+before every production deploy (`cd.yml` calls `ci.yml`). A failing gate
 stops the pipeline and blocks the merge. **Disabling a scanner or lowering a
 threshold is not allowed**; fix the finding or record it below.
 
@@ -59,6 +59,14 @@ threshold is not allowed**; fix the finding or record it below.
 | 8     | `dependency-scan` | Snyk               | Any `high` or `critical` vulnerability, all projects (`--severity-threshold=high`)              |
 | 10    | `image-scan`      | Trivy              | Any `HIGH` or `CRITICAL` vulnerability with a fix available, OS + library packages, both images |
 | 11    | `deploy` (CD)     | Trivy              | Same as stage 10, re-scanned immediately before pushing to ECR                                  |
+
+### SonarCloud: pull requests and `main` only
+
+On SonarCloud's free plan the quality gate is only reported for pull requests
+and `main` ("Organization is not allowed to access data from non main
+branches"). CI therefore runs on `pull_request` (and on `main` through
+`cd.yml`), not on pushes to feature branches. The gate itself is unchanged and
+`sonarcloud` is a required status check on `main`.
 
 ### Trivy: `ignore-unfixed: true` rationale
 
