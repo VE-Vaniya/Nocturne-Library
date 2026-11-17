@@ -3,7 +3,7 @@
 # Build context: repo root   ->   docker build -t nocturne-frontend .
 
 # ---- build -----------------------------------------------------------------
-FROM node:22.23.5-alpine3.24@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a AS build
+FROM node:26.13.1-alpine3.24@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -17,7 +17,7 @@ ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 # ---- runtime ---------------------------------------------------------------
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine3.24@sha256:e2a8fca8aa356d66159aaf8a877a9c126773635adf210503eefaaeaffeed6ad7 AS runtime
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e AS runtime
 # Upstream for /api/ (rendered into conf.d/default.conf by the image's
 # envsubst entrypoint from /etc/nginx/templates/*.template at start-up).
 ENV BACKEND_URL=http://backend:5000
