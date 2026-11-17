@@ -101,10 +101,12 @@ kv_tags() {
 # ---- lookups (return empty string when missing) ------------------------------
 # ec2_id_by_name DESCRIBE_CMD QUERY_PATH NAME [extra filters...]
 ec2_id_by_name() {
-  local cmd=$1 query=$2 name=$3
+  local cmd=$1 query=$2 name=$3 flag=--filters
   shift 3
+  # describe-nat-gateways is the one EC2 describe call whose option is --filter.
+  [[ "${cmd}" == describe-nat-gateways ]] && flag=--filter
   nn "$(awsq ec2 "${cmd}" \
-    --filters "Name=tag:Name,Values=${name}" "Name=tag:Project,Values=${PROJECT}" "$@" \
+    "${flag}" "Name=tag:Name,Values=${name}" "Name=tag:Project,Values=${PROJECT}" "$@" \
     --query "${query}")"
 }
 
