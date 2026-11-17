@@ -140,8 +140,9 @@ ensure_association() {
   local rt=$1 subnet=$2 assoc current
   read -r assoc current < <(awsq ec2 describe-route-tables \
     --filters "Name=association.subnet-id,Values=${subnet}" \
-    --query "RouteTables[0].Associations[?SubnetId=='${subnet}'] | [0].[RouteTableAssociationId,RouteTableId]" \
-    | tr '\t' ' ')
+    --query "RouteTables[0].Associations[?SubnetId=='${subnet}'] | [0].[RouteTableAssociationId,RouteTableId]")
+  # (no `tr`: IFS is $'\n\t', so `read` splits the CLI's tab-separated output;
+  #  turning tabs into spaces made re-runs pass "assoc rtb" as one association id)
   assoc="$(nn "${assoc:-}")"
   current="$(nn "${current:-}")"
   if [[ "${current}" == "${rt}" ]]; then
