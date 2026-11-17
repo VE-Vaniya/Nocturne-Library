@@ -1,3 +1,7 @@
+# Keep LF everywhere so `prettier --check` (endOfLine: lf) gives the same
+# result on Windows checkouts as in CI.
+* text=auto eol=lf
+
 # Files consumed inside Linux containers must keep LF endings on Windows checkouts.
 Dockerfile        text eol=lf
 *.Dockerfile      text eol=lf
