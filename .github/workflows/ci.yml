@@ -15,9 +15,12 @@
 # failing stage stops the pipeline. Mark every job name below as a required
 # status check on `main` (Settings > Branches > Branch protection).
 #
-# Triggers: every push (except `main`, where cd.yml calls this workflow via
-# `workflow_call` before deploying, so nothing reaches AWS without passing
-# stages 2-10) and every pull request.
+# Triggers: every pull request, plus `workflow_call` from cd.yml on `main`, so
+# nothing reaches AWS without passing stages 2-10. There is deliberately no
+# `push` trigger for feature branches: SonarCloud's free plan only reports
+# quality gate data for pull requests and `main`, so a branch-push run always
+# failed at `sonarcloud` ("Organization is not allowed to access data from non
+# main branches") and duplicated the pull_request run.
 #
 # Required repository SECRETS (Settings > Secrets and variables > Actions; add
 # the same two under "Dependabot" secrets so Dependabot PRs can pass):
@@ -32,8 +35,6 @@
 name: CI
 
 on:
-  push:
-    branches-ignore: [main]
   pull_request:
   workflow_call:
     secrets:
