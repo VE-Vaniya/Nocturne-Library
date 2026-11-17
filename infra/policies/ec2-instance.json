@@ -30,6 +30,13 @@
       ]
     },
     {
+      "Sid": "ListHelperScripts",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::__CONFIG_BUCKET__",
+      "Condition": { "StringLike": { "s3:prefix": ["config/bin/*"] } }
+    },
+    {
       "Sid": "ReadRuntimeConfig",
       "Effect": "Allow",
       "Action": "s3:GetObject",
