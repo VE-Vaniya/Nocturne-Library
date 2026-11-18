@@ -30,6 +30,27 @@
       ]
     },
     {
+      "Sid": "DenyParametersOutsideThisApp",
+      "Effect": "Deny",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath",
+        "ssm:GetParameterHistory"
+      ],
+      "NotResource": [
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__",
+        "arn:aws:ssm:__AWS_REGION__:__ACCOUNT_ID__:parameter__SSM_PREFIX__/*"
+      ]
+    },
+    {
+      "Sid": "ListHelperScripts",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::__CONFIG_BUCKET__",
+      "Condition": { "StringLike": { "s3:prefix": ["config/bin/*"] } }
+    },
+    {
       "Sid": "ReadRuntimeConfig",
       "Effect": "Allow",
       "Action": "s3:GetObject",
