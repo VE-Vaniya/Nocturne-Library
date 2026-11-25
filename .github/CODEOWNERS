@@ -1,13 +1,7 @@
 # CODEOWNERS – https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 #
-# The @OWNER_* entries below are PLACEHOLDERS, not real accounts.
-# Replace each one with real GitHub usernames (e.g. @alice) or a team
-# (e.g. @org/team-name) before enabling "Require review from Code Owners":
-#   @OWNER_APP       – application code (frontend + backend)
-#   @OWNER_CI        – CI pipelines and security scanning
-#   @OWNER_DELIVERY  – containers, nginx, delivery scripts
-#   @OWNER_INFRA     – infrastructure as code and architecture docs
-#   @OWNER_MONITOR   – monitoring / operational scripts
+# Owners: VE-Vaniya = app, infra, default; aykaimran = CI/security;
+# maryamirshad04 = containers and delivery scripts.
 #
 # Later rules take precedence over earlier ones, so the default is first.
 
@@ -15,21 +9,21 @@
 *                       @VE-Vaniya
 
 # Application
-/src/                   @OWNER_APP
-/index.html             @OWNER_APP
-/backend/               @OWNER_APP
+/src/                   @VE-Vaniya
+/index.html             @VE-Vaniya
+/backend/               @VE-Vaniya
 
 # CI / security
-/.github/workflows/     @OWNER_CI
+/.github/workflows/     @aykaimran
 
 # Containers / delivery
-Dockerfile*             @OWNER_DELIVERY
-docker-compose*         @OWNER_DELIVERY
-/nginx/                 @OWNER_DELIVERY
+Dockerfile*             @maryamirshad04
+docker-compose*         @maryamirshad04
+/nginx/                 @maryamirshad04
 
 # Infrastructure
-/infra/                 @OWNER_INFRA
-/docs/ARCHITECTURE.md   @OWNER_INFRA
+/infra/                 @VE-Vaniya
+/docs/ARCHITECTURE.md   @VE-Vaniya
 
 # Delivery + monitoring scripts
-/scripts/               @OWNER_DELIVERY @OWNER_MONITOR
+/scripts/               @maryamirshad04 @VE-Vaniya
