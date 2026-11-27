@@ -31,6 +31,7 @@ services:
       EMAIL_USER: ${EMAIL_USER:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
       GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
+      APP_VERSION: ${IMAGE_TAG}
     ports: !override
       - '5000:5000'
     depends_on: !reset {}
