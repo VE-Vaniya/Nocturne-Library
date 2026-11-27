@@ -13,7 +13,7 @@
           "__OIDC_HOST__:aud": "sts.amazonaws.com"
         },
         "StringLike": {
-          "__OIDC_HOST__:sub": "repo:__GITHUB_REPO__:*"
+          "__OIDC_HOST__:sub": "repo:__GITHUB_OIDC_REPO__:*"
         }
       }
     }
