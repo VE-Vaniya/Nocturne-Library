@@ -26,6 +26,7 @@
 #   ECR_REGISTRY         <acct>.dkr.ecr.<region>.amazonaws.com
 #   ASG_NAME             Auto Scaling Group refreshed by scripts/deploy.sh
 #   APP_URL              Public ALB/domain base URL, e.g. https://nocturne.example.com
+#   CONFIG_BUCKET        S3 bucket scripts/deploy.sh uploads docker-compose*.yml to
 #
 # Script interface (owned by scripts/**):
 #   scripts/deploy.sh <image_tag>     sets SSM /nocturne/prod/image_tag, rolls ASG
@@ -83,6 +84,7 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION }}
       ASG_NAME: ${{ vars.ASG_NAME }}
       APP_URL: ${{ vars.APP_URL }}
+      CONFIG_BUCKET: ${{ vars.CONFIG_BUCKET }} # deploy.sh uploads compose files here
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
