@@ -27,7 +27,7 @@ ENV BACKEND_URL=http://backend:5000
 # packages at build time; the image still runs as the unprivileged user below.
 USER root
 # hadolint ignore=DL3017
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache libxml2 && apk upgrade --no-cache
 COPY nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
