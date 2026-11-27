@@ -6,21 +6,21 @@ The AWS account ID is not written here on purpose (this repo is public). It is i
 
 ## AWS
 
-| Thing                 | Name                                                     |
-| --------------------- | -------------------------------------------------------- |
-| Region                | `ap-south-1`                                             |
-| ECR repo (frontend)   | `nocturne-frontend` (tags immutable)                     |
-| ECR repo (backend)    | `nocturne-backend` (tags immutable)                      |
-| ECR registry          | `<acct>.dkr.ecr.ap-south-1.amazonaws.com`                |
-| Auto Scaling Group    | `nocturne-asg`                                           |
-| Launch template       | `nocturne-lt`                                            |
-| Load balancer         | `nocturne-alb`                                           |
-| Config bucket         | `nocturne-config-<acct>-ap-south-1`                      |
-| Deploy role (OIDC)    | `gha-deploy`                                             |
-| CI role (OIDC)        | `gha-ci`                                                 |
-| EC2 role and profile  | `nocturne-ec2`                                           |
-| OIDC provider         | `token.actions.githubusercontent.com`                    |
-| OIDC subject (deploy) | `repo:VE-Vaniya/Nocturne-Library:environment:production` |
+| Thing                 | Name                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| Region                | `ap-south-1`                                                                             |
+| ECR repo (frontend)   | `nocturne-frontend` (tags immutable)                                                     |
+| ECR repo (backend)    | `nocturne-backend` (tags immutable)                                                      |
+| ECR registry          | `<acct>.dkr.ecr.ap-south-1.amazonaws.com`                                                |
+| Auto Scaling Group    | `nocturne-asg`                                                                           |
+| Launch template       | `nocturne-lt`                                                                            |
+| Load balancer         | `nocturne-alb`                                                                           |
+| Config bucket         | `nocturne-config-<acct>-ap-south-1`                                                      |
+| Deploy role (OIDC)    | `gha-deploy`                                                                             |
+| CI role (OIDC)        | `gha-ci`                                                                                 |
+| EC2 role and profile  | `nocturne-ec2`                                                                           |
+| OIDC provider         | `token.actions.githubusercontent.com`                                                    |
+| OIDC subject (deploy) | `repo:Vania-s-Organization@357513584/Nocturne-Library@1179123000:environment:production` |
 
 ## Image tags
 
