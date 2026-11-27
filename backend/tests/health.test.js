@@ -13,6 +13,7 @@ describe('health endpoints', () => {
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(expect.objectContaining({ status: 'ok', db: 'connected' }));
+    expect(typeof res.body.version).toBe('string');
   });
 
   it('readiness returns 503 when the DB is disconnected', () => {
