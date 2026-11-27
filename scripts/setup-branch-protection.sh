@@ -23,7 +23,7 @@ if [[ "${1:-}" == "--show" ]]; then
   shift
 fi
 
-REPO="${1:-VE-Vaniya/Nocturne-Library}"
+REPO="${1:-Vania-s-Organization/Nocturne-Library}"
 BRANCH="${2:-main}"
 
 # Must match the `name:` of every job in .github/workflows/ci.yml.
