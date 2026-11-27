@@ -20,7 +20,7 @@ Time: ≈ 1 hour the first time (Atlas 10 min, scripts 15–20 min, first image 
 aws configure sso --profile nocturne-admin      # region ap-south-1
 export AWS_PROFILE=nocturne-admin AWS_REGION=ap-south-1
 aws sso login && aws sts get-caller-identity
-git clone https://github.com/VE-Vaniya/Nocturne-Library.git && cd Nocturne-Library
+git clone https://github.com/Vania-s-Organization/Nocturne-Library.git && cd Nocturne-Library
 ```
 
 ## 2. MongoDB Atlas M0 (free) in ap-south-1
@@ -45,7 +45,7 @@ Confirm the **SNS subscription email** ("AWS Notification – Subscription Confi
 
 ## 4. GitHub repository settings
 
-**Environment** – Settings → Environments → **New environment `production`** → _Deployment branches and tags_: **Selected branches → `main` only** (optionally add required reviewers). The CD deploy job declares `environment: production`, so its OIDC token subject is `repo:VE-Vaniya/Nocturne-Library:environment:production`, which is exactly what the `gha-deploy` trust policy accepts – a workflow on any other branch cannot assume the role.
+**Environment** – Settings → Environments → **New environment `production`** → _Deployment branches and tags_: **Selected branches → `main` only** (optionally add required reviewers). The CD deploy job declares `environment: production`, so its OIDC token subject is `repo:Vania-s-Organization@357513584/Nocturne-Library@1179123000:environment:production` (GitHub's immutable subject format: owner and repo IDs are appended for repositories created after 15 Jul 2026), which is exactly what the `gha-deploy` trust policy accepts – a workflow on any other branch cannot assume the role.
 
 **Variables** (Settings → Secrets and variables → Actions → _Variables_; values are printed by the scripts in steps 6–7). They are not secrets – role ARNs and names only:
 
