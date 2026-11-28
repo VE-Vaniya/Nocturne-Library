@@ -46,15 +46,15 @@ This web application primarily targets book lovers, students, and casual readers
 
 ## Team
 
-The project is developed by a team of 5. Fill in names, GitHub handles and roles.
+The project is developed by a team of 5.
 
-| Name  | GitHub | Role / area                        |
-| ----- | ------ | ---------------------------------- |
-| _TBD_ | @_TBD_ | _e.g. Frontend_                    |
-| _TBD_ | @_TBD_ | _e.g. Backend_                     |
-| _TBD_ | @_TBD_ | _e.g. CI / security_               |
-| _TBD_ | @_TBD_ | _e.g. Containers / delivery_       |
-| _TBD_ | @_TBD_ | _e.g. Infrastructure / monitoring_ |
+| Name          | GitHub          | Role / area                                                                          |
+| ------------- | --------------- | ------------------------------------------------------------------------------------ |
+| Vania Ejaz    | @VE-Vaniya      | App and backend, MongoDB Atlas, containers, secrets rotation, rollback, architecture |
+| Ayka Imran    | @aykaimran      | CI pipeline, SonarCloud, Snyk, Dependabot, security findings                         |
+| Walija Fatima | @Jee-core       | AWS network and IAM (OIDC), resilience, teardown                                     |
+| Maryam Irshad | @maryamirshad04 | Deploy workflow, smoke test, scaling, load and failure tests                         |
+| Zahra         | @ZahraAmjad145  | Monitoring, health-check script, ShellCheck, screenshots, final report               |
 
 ## Repository Layout
 
