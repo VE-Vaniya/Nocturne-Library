@@ -152,7 +152,15 @@ flowchart LR
   EC2A & EC2B -.->|params + sessions| SSM["SSM Parameter Store<br/>+ Session Manager"]
   EC2A & EC2B -.->|logs + metrics| CW[CloudWatch]
   CW -->|alarms| SNS[SNS email]
-  GHA[GitHub Actions] -->|"OIDC: gha-deploy"| ECR
+  subgraph PIPE["CI/CD pipeline (GitHub Actions, 12 stages)"]
+    direction LR
+    S1["1 commit / PR"] --> S2["2 Gitleaks"] --> S3["3 ESLint + ShellCheck"] --> S4["4 Prettier"] --> S5["5 Hadolint"] --> S6["6 Jest + coverage"] --> S7["7 SonarCloud"] --> S8["8 Snyk"] --> S9["9 image build"] --> S10["10 Trivy"] --> S11["11 push to ECR<br/>sha + version tags"] --> S12["12 rolling deploy<br/>+ smoke test"]
+  end
+  GHA[GitHub Actions] --- S1
+  S11 -->|"OIDC: gha-deploy"| ECR
+  S12 -->|instance refresh| ASG
+  SM["Secrets: SSM Parameter Store (SecureString)<br/>GitHub secrets: SONAR_TOKEN, SNYK_TOKEN only"] -.- GHA
+  GHA -->|"OIDC: gha-deploy"| ECR
   GHA -->|instance refresh| ASG[Auto Scaling Group]
   ASG -.->|manages| EC2A & EC2B
 ```
